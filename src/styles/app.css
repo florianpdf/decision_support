@@ -154,6 +154,23 @@ body {
     margin-bottom: 20px;
 }
 
+.form-group fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.form-group legend {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    padding: 0;
+    width: 100%;
+}
+
 .form-group label {
     display: block;
     margin-bottom: 8px;
