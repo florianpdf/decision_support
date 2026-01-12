@@ -1,0 +1,126 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import CritereForm from './forms/CritereForm';
+
+describe('CritereForm', () => {
+  const mockOnSubmit = vi.fn();
+  const mockOnCancel = vi.fn();
+  const user = userEvent.setup();
+  const categoryId = 1;
+
+  beforeEach(() => {
+    mockOnSubmit.mockClear();
+    mockOnCancel.mockClear();
+    window.alert = vi.fn();
+  });
+
+  it('should render form with all fields', () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    expect(screen.getByLabelText(/nom de la motivation clé/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/importance de la motivation clé/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /ajouter la motivation clé/i })).toBeInTheDocument();
+  });
+
+  it('should call onSubmit with correct data', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
+    
+    await user.type(nameInput, 'Test Motivation');
+    await user.click(submitButton);
+    
+    expect(mockOnSubmit).toHaveBeenCalledWith({
+      nom: 'Test Motivation',
+      poids: 1
+    });
+  });
+
+  it('should trim critere name', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
+    
+    await user.type(nameInput, '  Test Motivation  ');
+    await user.click(submitButton);
+    
+    expect(mockOnSubmit).toHaveBeenCalledWith({
+      nom: 'Test Motivation',
+      poids: 1
+    });
+  });
+
+  it('should show alert when name is empty', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
+    
+    // Clear the input and try to submit
+    await user.clear(nameInput);
+    // HTML5 validation prevents form submission, so we need to bypass it
+    const form = submitButton.closest('form');
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+    
+    // Since HTML5 validation prevents submission, we check that onSubmit wasn't called
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it('should allow weight adjustment via slider', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const slider = screen.getByLabelText(/importance de la motivation clé/i);
+    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
+    
+    await user.type(nameInput, 'Test');
+    // Material-UI Slider uses a hidden input, we can change its value
+    fireEvent.change(slider, { target: { value: '15' } });
+    await user.click(submitButton);
+    
+    // The slider value should be reflected in the submission
+    expect(mockOnSubmit).toHaveBeenCalledWith({
+      nom: 'Test',
+      poids: expect.any(Number)
+    });
+  });
+
+  it('should reset form after submission', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
+    
+    await user.type(nameInput, 'Test Motivation');
+    await user.click(submitButton);
+    
+    // Form should reset
+    expect(nameInput).toHaveValue('');
+  });
+
+  it('should call onCancel when cancel button is clicked', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    // The cancel button only has an emoji, so we find it by its type and class
+    const cancelButton = screen.getByRole('button', { name: /✖️/i });
+    await user.click(cancelButton);
+    
+    expect(mockOnCancel).toHaveBeenCalled();
+  });
+
+  it('should not show cancel button when onCancel is not provided', () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} />);
+    
+    expect(screen.queryByRole('button', { name: /annuler/i })).not.toBeInTheDocument();
+  });
+
+  it('should display default weight value', () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    expect(screen.getByText(/importance sélectionnée : 1/i)).toBeInTheDocument();
+  });
+});

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#5568d3" opacity="0.1"/>
+  
+  <!-- Grid of squares representing interests/professional categories -->
+  <!-- Top row -->
+  <rect x="12" y="12" width="12" height="12" rx="2" fill="#6BB6FF" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="26" y="12" width="12" height="12" rx="2" fill="#66D9A3" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="40" y="12" width="12" height="12" rx="2" fill="#FFB366" stroke="#FFFFFF" stroke-width="1.5"/>
+  
+  <!-- Middle row -->
+  <rect x="12" y="26" width="12" height="12" rx="2" fill="#FF7F9F" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="26" y="26" width="12" height="12" rx="2" fill="#B894FF" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="40" y="26" width="12" height="12" rx="2" fill="#5DD9E8" stroke="#FFFFFF" stroke-width="1.5"/>
+  
+  <!-- Bottom row -->
+  <rect x="12" y="40" width="12" height="12" rx="2" fill="#FF8CC8" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="26" y="40" width="12" height="12" rx="2" fill="#8B9AFF" stroke="#FFFFFF" stroke-width="1.5"/>
+  <rect x="40" y="40" width="12" height="12" rx="2" fill="#4DD9B8" stroke="#FFFFFF" stroke-width="1.5"/>
+  
+  <!-- Target icon in center to represent "bilan de compétences" -->
+  <circle cx="32" cy="32" r="8" fill="none" stroke="#5568d3" stroke-width="2"/>
+  <circle cx="32" cy="32" r="4" fill="#5568d3"/>
+</svg>
