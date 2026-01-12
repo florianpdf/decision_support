@@ -1,0 +1,7 @@
+# GitGuardian configuration
+# Ignore package-lock.json integrity hashes (these are not secrets, they're package integrity checks)
+paths-ignore:
+  - "package-lock.json"
+
+# Alternatively, you can be more specific and only ignore integrity hashes
+# But GitGuardian might not support this level of granularity

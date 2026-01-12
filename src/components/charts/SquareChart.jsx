@@ -293,7 +293,6 @@ function SquareChart({ categories }) {
                     borderRadius: '4px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}>
-                    <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>{data.name}</p>
                     <p style={{ color: '#666', fontSize: '0.9rem' }}>Importance: {data.poids || data.size || data.value}</p>
                 </div>
             );
