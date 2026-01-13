@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CritereForm from '../../components/forms/CritereForm';
 
@@ -135,5 +135,37 @@ describe('CritereForm', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
     expect(screen.getByText(/importance sélectionnée : 15/i)).toBeInTheDocument();
+  });
+
+  it('should open suggestions modal when icon is clicked', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const suggestionsButton = screen.getByRole('button', { name: /voir les suggestions/i });
+    await user.click(suggestionsButton);
+    
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /💡 suggestions de motivations clés/i })).toBeInTheDocument();
+    });
+  });
+
+  it('should fill name input when suggestion is selected', async () => {
+    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    
+    const suggestionsButton = screen.getByRole('button', { name: /voir les suggestions/i });
+    await user.click(suggestionsButton);
+    
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /💡 suggestions de motivations clés/i })).toBeInTheDocument();
+    });
+    
+    // Click on first suggestion
+    const firstSuggestion = screen.getByText('Autonomie');
+    await user.click(firstSuggestion);
+    
+    // Modal should close and input should be filled
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: /💡 suggestions de motivations clés/i })).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/nom de la motivation clé/i)).toHaveValue('Autonomie');
+    });
   });
 });

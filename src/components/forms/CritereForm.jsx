@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Tooltip from '../Tooltip';
 import CriterionWeightAndType from '../ui/CriterionWeightAndType';
 import { DEFAULT_CRITERION_TYPE } from '../../utils/constants';
+import CriterionSuggestionsModal from '../modals/CriterionSuggestionsModal';
+import IconButton from '../ui/IconButton';
 
 /**
  * Form component for adding a new key motivation to a professional interest
@@ -10,6 +12,9 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
     const [name, setName] = useState('');
     const [weight, setWeight] = useState(15);
     const [type, setType] = useState(DEFAULT_CRITERION_TYPE);
+    
+    // Modal state for suggestions
+    const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -32,6 +37,7 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
     };
 
     return (
+        <>
         <form onSubmit={handleSubmit} className="critere-form-inline">
             <div style={{ marginBottom: '20px', padding: '12px', background: '#f8f9fa', borderRadius: '10px', fontSize: '0.9rem', color: '#495057' }}>
                 💡 <strong>Astuce :</strong> L'importance détermine la taille du carré dans le graphique. Plus l'importance est élevée, plus le carré sera grand.
@@ -41,16 +47,27 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
                 <label htmlFor={`criterion-name-${categoryId}`}>
                     📝 Nom de la motivation clé <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                 </label>
-                <input
-                    type="text"
-                    id={`criterion-name-${categoryId}`}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Autonomie, Équipe, Innovation, Stabilité..."
-                    required
-                    aria-required="true"
-                    aria-describedby={`criterion-name-help-${categoryId}`}
-                />
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                        type="text"
+                        id={`criterion-name-${categoryId}`}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Ex: Autonomie, Équipe, Innovation, Stabilité..."
+                        required
+                        aria-required="true"
+                        aria-describedby={`criterion-name-help-${categoryId}`}
+                        style={{ flex: 1 }}
+                    />
+                    <IconButton
+                        icon="💡"
+                        onClick={() => setShowSuggestionsModal(true)}
+                        tooltip="Voir les suggestions de motivations clés"
+                        tooltipPosition="top"
+                        ariaLabel="Voir les suggestions"
+                        style={{ flexShrink: 0 }}
+                    />
+                </div>
                 <small id={`criterion-name-help-${categoryId}`} style={{ display: 'none' }}>
                     Nom de la motivation clé
                 </small>
@@ -88,6 +105,13 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
                 )}
             </div>
         </form>
+
+        <CriterionSuggestionsModal
+            isOpen={showSuggestionsModal}
+            onClose={() => setShowSuggestionsModal(false)}
+            onSelect={(suggestion) => setName(suggestion)}
+        />
+        </>
     );
 }
 
