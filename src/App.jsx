@@ -240,13 +240,12 @@ function App() {
     setRenameProfessionModal({ isOpen: true, professionId: null });
   };
 
-  const handleCreateProfession = async (professionData) => {
+  const handleCreateProfession = (professionData) => {
     try {
       const newProfession = handleAddProfession(professionData);
       
       // If template is requested, create template data
       if (professionData.useTemplate) {
-        const { generateProfessionTemplate } = await import('../utils/professionTemplate');
         const template = generateProfessionTemplate();
         
         // Create categories and criteria from template
