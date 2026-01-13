@@ -476,6 +476,8 @@ export const setCriterionWeight = (professionId, categoryId, criterionId, weight
  */
 export const setCriterionType = (professionId, categoryId, criterionId, type) => {
     const weights = loadCriterionWeights();
+    // Find by professionId AND criterionId (not by name)
+    // This ensures each criterion has its own independent weight/type
     const index = weights.findIndex(
         w => w.professionId === professionId && w.criterionId === criterionId
     );
@@ -539,6 +541,9 @@ export const getCategoriesForProfession = (professionId) => {
                 const criterion = criteria.find(c => c.id === criterionId);
                 if (!criterion) return null;
                 
+                // Find weight by professionId AND criterionId (not by name)
+                // This ensures each criterion has its own independent weight/type
+                // even if multiple criteria share the same name in different categories
                 const weight = weights.find(
                     w => w.professionId === professionId && w.criterionId === criterionId
                 );
