@@ -3,6 +3,7 @@
  */
 
 export const LIMITS = {
+  MAX_METIERS: 5,
   MAX_CATEGORIES: 10,
   MAX_CRITERES_PER_CATEGORY: 110,
   MIN_WEIGHT: 1,
