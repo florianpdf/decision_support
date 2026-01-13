@@ -41,13 +41,11 @@ jobs:
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info,./coverage/coverage-final.json
+          files: ./coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
           verbose: true
-          directory: ./coverage
-          slug: florianpdf/decision_support
 
       - name: Build
         env:

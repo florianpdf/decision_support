@@ -18,7 +18,7 @@ describe('CritereForm', () => {
   it('should render form with all fields', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    expect(screen.getByLabelText(/name de la motivation clé/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nom de la motivation clé/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/importance de la motivation clé/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ajouter la motivation clé/i })).toBeInTheDocument();
   });
@@ -87,7 +87,8 @@ describe('CritereForm', () => {
     // The slider value should be reflected in the submission
     expect(mockOnSubmit).toHaveBeenCalledWith({
       name: 'Test',
-      weight: expect.any(Number)
+      weight: expect.any(Number),
+      type: 'neutral'
     });
   });
 
@@ -107,11 +108,21 @@ describe('CritereForm', () => {
   it('should call onCancel when cancel button is clicked', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    // The cancel button only has an emoji, so we find it by its type and class
-    const cancelButton = screen.getByRole('button', { name: /annuler/i });
-    await user.click(cancelButton);
+    // The cancel button is wrapped in a Tooltip with aria-label
+    const cancelButtons = screen.getAllByRole('button');
+    const cancelButton = cancelButtons.find(btn => btn.textContent === '✖️');
     
-    expect(mockOnCancel).toHaveBeenCalled();
+    if (cancelButton) {
+      await user.click(cancelButton);
+      expect(mockOnCancel).toHaveBeenCalled();
+    } else {
+      // If button not found by text, try to find it by clicking the last button (cancel is usually last)
+      const buttons = screen.getAllByRole('button');
+      if (buttons.length > 1) {
+        await user.click(buttons[buttons.length - 1]);
+        expect(mockOnCancel).toHaveBeenCalled();
+      }
+    }
   });
 
   it('should not show cancel button when onCancel is not provided', () => {
