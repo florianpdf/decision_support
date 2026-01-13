@@ -1,5 +1,7 @@
 # Aide à la Décision - Bilan de Compétences
 
+[![codecov](https://codecov.io/gh/florianpdf/decision_support/branch/main/graph/badge.svg)](https://codecov.io/gh/florianpdf/decision_support)
+
 Application web React pour identifier et visualiser vos intérêts professionnels et motivations clés sous forme de graphique Treemap interactif.
 
 ## 🚀 Fonctionnalités
