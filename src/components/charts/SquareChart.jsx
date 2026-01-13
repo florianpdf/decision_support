@@ -403,135 +403,137 @@ function SquareChart({ categories, professionId }) {
     }
 
     return (
-        <div className="chart-wrapper" role="region" aria-label="Graphique de visualisation des intérêts professionnels">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-                    Graphique de visualisation
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <IconButton
-                        icon="🔍"
-                        onClick={() => setIsFullscreen(true)}
-                        tooltip="Voir en plein écran"
-                        tooltipPosition="top"
-                        ariaLabel="Voir en plein écran"
-                    />
-                    <span 
-                        style={{ 
-                            fontSize: '0.9rem', 
-                            color: colorMode === 'category' ? '#5568d3' : '#7f8c8d',
-                            fontWeight: colorMode === 'category' ? '600' : '400',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                            if (colorMode !== 'category') {
-                                handleColorModeChange({ target: { checked: false } });
-                            }
-                        }}
-                    >
-                        Couleurs par catégorie
-                    </span>
-                    <Switch
-                        checked={colorMode === 'type'}
-                        onChange={handleColorModeChange}
-                        color="primary"
-                    />
-                    <span 
-                        style={{ 
-                            fontSize: '0.9rem', 
-                            color: colorMode === 'type' ? '#5568d3' : '#7f8c8d',
-                            fontWeight: colorMode === 'type' ? '600' : '400',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                            if (colorMode !== 'type') {
-                                handleColorModeChange({ target: { checked: true } });
-                            }
-                        }}
-                    >
-                        Couleurs par type
-                    </span>
+        <>
+            <div className="chart-wrapper" role="region" aria-label="Graphique de visualisation des intérêts professionnels">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
+                        Graphique de visualisation
+                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconButton
+                            icon="🔍"
+                            onClick={() => setIsFullscreen(true)}
+                            tooltip="Voir en plein écran"
+                            tooltipPosition="top"
+                            ariaLabel="Voir en plein écran"
+                        />
+                        <span 
+                            style={{ 
+                                fontSize: '0.9rem', 
+                                color: colorMode === 'category' ? '#5568d3' : '#7f8c8d',
+                                fontWeight: colorMode === 'category' ? '600' : '400',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                                if (colorMode !== 'category') {
+                                    handleColorModeChange({ target: { checked: false } });
+                                }
+                            }}
+                        >
+                            Couleurs par catégorie
+                        </span>
+                        <Switch
+                            checked={colorMode === 'type'}
+                            onChange={handleColorModeChange}
+                            color="primary"
+                        />
+                        <span 
+                            style={{ 
+                                fontSize: '0.9rem', 
+                                color: colorMode === 'type' ? '#5568d3' : '#7f8c8d',
+                                fontWeight: colorMode === 'type' ? '600' : '400',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                                if (colorMode !== 'type') {
+                                    handleColorModeChange({ target: { checked: true } });
+                                }
+                            }}
+                        >
+                            Couleurs par type
+                        </span>
+                    </div>
                 </div>
+                <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés">
+                    <ResponsiveContainer width="100%" height={500}>
+                        <Treemap
+                            data={data}
+                            dataKey="size"
+                            stroke="#fff"
+                            fill="#8884d8"
+                            content={CustomizedContent}
+                            aria-label="Graphique de visualisation des intérêts professionnels"
+                        >
+                            <Tooltip content={CustomTooltip} />
+                        </Treemap>
+                    </ResponsiveContainer>
+                </div>
+                <Legend categories={categories} colorMode={colorMode} professionId={professionId} />
             </div>
-            <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés">
-                <ResponsiveContainer width="100%" height={500}>
-                    <Treemap
-                        data={data}
-                        dataKey="size"
-                        stroke="#fff"
-                        fill="#8884d8"
-                        content={CustomizedContent}
-                        aria-label="Graphique de visualisation des intérêts professionnels"
-                    >
-                        <Tooltip content={CustomTooltip} />
-                    </Treemap>
-                </ResponsiveContainer>
-            </div>
-            <Legend categories={categories} colorMode={colorMode} professionId={professionId} />
-        </div>
 
-        <FullscreenChartModal
-            isOpen={isFullscreen}
-            onClose={() => setIsFullscreen(false)}
-        >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-                    Graphique de visualisation
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span 
-                        style={{ 
-                            fontSize: '0.9rem', 
-                            color: colorMode === 'category' ? '#5568d3' : '#7f8c8d',
-                            fontWeight: colorMode === 'category' ? '600' : '400',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                            if (colorMode !== 'category') {
-                                handleColorModeChange({ target: { checked: false } });
-                            }
-                        }}
-                    >
-                        Couleurs par catégorie
-                    </span>
-                    <Switch
-                        checked={colorMode === 'type'}
-                        onChange={handleColorModeChange}
-                        color="primary"
-                    />
-                    <span 
-                        style={{ 
-                            fontSize: '0.9rem', 
-                            color: colorMode === 'type' ? '#5568d3' : '#7f8c8d',
-                            fontWeight: colorMode === 'type' ? '600' : '400',
-                            cursor: 'pointer'
-                        }}
-                        onClick={() => {
-                            if (colorMode !== 'type') {
-                                handleColorModeChange({ target: { checked: true } });
-                            }
-                        }}
-                    >
-                        Couleurs par type
-                    </span>
+            <FullscreenChartModal
+                isOpen={isFullscreen}
+                onClose={() => setIsFullscreen(false)}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
+                        Graphique de visualisation
+                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span 
+                            style={{ 
+                                fontSize: '0.9rem', 
+                                color: colorMode === 'category' ? '#5568d3' : '#7f8c8d',
+                                fontWeight: colorMode === 'category' ? '600' : '400',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                                if (colorMode !== 'category') {
+                                    handleColorModeChange({ target: { checked: false } });
+                                }
+                            }}
+                        >
+                            Couleurs par catégorie
+                        </span>
+                        <Switch
+                            checked={colorMode === 'type'}
+                            onChange={handleColorModeChange}
+                            color="primary"
+                        />
+                        <span 
+                            style={{ 
+                                fontSize: '0.9rem', 
+                                color: colorMode === 'type' ? '#5568d3' : '#7f8c8d',
+                                fontWeight: colorMode === 'type' ? '600' : '400',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                                if (colorMode !== 'type') {
+                                    handleColorModeChange({ target: { checked: true } });
+                                }
+                            }}
+                        >
+                            Couleurs par type
+                        </span>
+                    </div>
                 </div>
-            </div>
-            <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés">
-                <ResponsiveContainer width="100%" height="calc(100vh - 250px)">
-                    <Treemap
-                        data={data}
-                        dataKey="size"
-                        stroke="#fff"
-                        fill="#8884d8"
-                        content={CustomizedContent}
-                        aria-label="Graphique de visualisation des intérêts professionnels"
-                    >
-                        <Tooltip content={CustomTooltip} />
-                    </Treemap>
-                </ResponsiveContainer>
-            </div>
-            <Legend categories={categories} colorMode={colorMode} professionId={professionId} />
-        </FullscreenChartModal>
+                <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés">
+                    <ResponsiveContainer width="100%" height="calc(100vh - 250px)">
+                        <Treemap
+                            data={data}
+                            dataKey="size"
+                            stroke="#fff"
+                            fill="#8884d8"
+                            content={CustomizedContent}
+                            aria-label="Graphique de visualisation des intérêts professionnels"
+                        >
+                            <Tooltip content={CustomTooltip} />
+                        </Treemap>
+                    </ResponsiveContainer>
+                </div>
+                <Legend categories={categories} colorMode={colorMode} professionId={professionId} />
+            </FullscreenChartModal>
+        </>
     );
 }
 
