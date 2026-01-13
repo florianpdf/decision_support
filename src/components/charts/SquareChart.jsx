@@ -129,37 +129,34 @@ function SquareChart({ categories, professionId }) {
             // via root by finding the parent (depth 1) then the corresponding child
             let criterionData = null;
             
-            // Method 1: Use payload if available
-            if (payload) {
+            // Method 1: Use payload if available and has all required properties
+            // Check if payload has the properties we need (id, type, categoryColor)
+            // We need both type and categoryColor to be sure we have the correct data
+            if (payload && payload.id && payload.type !== undefined && payload.categoryColor !== undefined) {
                 criterionData = payload;
             } 
             // Method 2: Find via root by traversing groups and their children
+            // This is more reliable as it uses the index, not the name
             else if (root?.children) {
-                // For depth 2, index is relative to parent (depth 1)
-                let parentGroup = null;
-                let childIndexInParent = -1;
+                // For depth 2, we need to find the correct leaf by traversing all groups
+                // The index in Treemap for depth 2 is a global index across all leaves
                 let globalLeafIndex = 0;
                 
                 for (const group of root.children) {
                     if (group.children) {
                         for (let i = 0; i < group.children.length; i++) {
                             if (globalLeafIndex === index) {
-                                parentGroup = group;
-                                childIndexInParent = i;
+                                criterionData = group.children[i];
                                 break;
                             }
                             globalLeafIndex++;
                         }
-                        if (parentGroup) break;
+                        if (criterionData) break;
                     }
-                }
-                
-                if (parentGroup && parentGroup.children && childIndexInParent >= 0) {
-                    criterionData = parentGroup.children[childIndexInParent];
                 }
             }
             
-            // Method 3: Use index to find in data (via closure) - more reliable than name
+            // Method 3: Use index to find in data (via closure) - most reliable
             // The Treemap structure maintains order, so we can use the index
             // This ensures each criterion is found correctly even if names are duplicate
             if (!criterionData && data.length > 0) {
@@ -178,6 +175,21 @@ function SquareChart({ categories, professionId }) {
             
             if (!criterionData) {
                 return null;
+            }
+            
+            // Debug: Log criterion data to verify correct retrieval
+            // Remove this after debugging
+            if (criterionData.name && data.length > 0) {
+                const sameNameCount = data.reduce((count, group) => {
+                    return count + (group.children?.filter(c => c.name === criterionData.name).length || 0);
+                }, 0);
+                if (sameNameCount > 1) {
+                    console.log(`[SquareChart] Found criterion "${criterionData.name}" (ID: ${criterionData.id}, index: ${index})`, {
+                        type: criterionData.type,
+                        categoryColor: criterionData.categoryColor,
+                        fill: criterionData.fill
+                    });
+                }
             }
             
             // Use type color if in type mode, otherwise use category color
