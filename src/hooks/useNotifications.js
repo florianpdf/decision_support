@@ -2,7 +2,7 @@
  * Custom hook for managing notifications (messages and errors)
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { NOTIFICATION_DURATION } from '../utils/constants';
 
 /**
@@ -12,24 +12,60 @@ import { NOTIFICATION_DURATION } from '../utils/constants';
 export const useNotifications = () => {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [displayMessage, setDisplayMessage] = useState(null);
+  const [displayError, setDisplayError] = useState(null);
+  const messageTimeoutRef = useRef(null);
+  const errorTimeoutRef = useRef(null);
 
   /**
-   * Clear message after duration
+   * Clear message after duration with exit transition
    */
   useEffect(() => {
     if (message) {
-      const timer = setTimeout(() => setMessage(null), NOTIFICATION_DURATION);
-      return () => clearTimeout(timer);
+      setDisplayMessage(message);
+      // Clear previous timeout
+      if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
+      }
+      // Start exit transition before removing
+      messageTimeoutRef.current = setTimeout(() => {
+        setDisplayMessage(null);
+        // Small delay to allow exit animation
+        setTimeout(() => setMessage(null), 250);
+      }, NOTIFICATION_DURATION);
+      return () => {
+        if (messageTimeoutRef.current) {
+          clearTimeout(messageTimeoutRef.current);
+        }
+      };
+    } else {
+      setDisplayMessage(null);
     }
   }, [message]);
 
   /**
-   * Clear error after duration
+   * Clear error after duration with exit transition
    */
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(null), NOTIFICATION_DURATION);
-      return () => clearTimeout(timer);
+      setDisplayError(error);
+      // Clear previous timeout
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+      // Start exit transition before removing
+      errorTimeoutRef.current = setTimeout(() => {
+        setDisplayError(null);
+        // Small delay to allow exit animation
+        setTimeout(() => setError(null), 250);
+      }, NOTIFICATION_DURATION);
+      return () => {
+        if (errorTimeoutRef.current) {
+          clearTimeout(errorTimeoutRef.current);
+        }
+      };
+    } else {
+      setDisplayError(null);
     }
   }, [error]);
 
@@ -58,8 +94,8 @@ export const useNotifications = () => {
   }, []);
 
   return {
-    message,
-    error,
+    message: displayMessage,
+    error: displayError,
     showSuccess,
     showError,
     clearAll

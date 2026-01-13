@@ -987,6 +987,15 @@ body {
     padding-bottom: 16px;
 }
 
+.message-exiting {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
