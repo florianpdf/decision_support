@@ -502,31 +502,38 @@ export const setCriterionType = (professionId, categoryId, criterionId, type) =>
 };
 
 /**
- * Initialize weights for a new profession (copy from last created profession)
- * Each criterion (identified by criterionId) gets its own weight/type copy
+ * Initialize weights for a new profession
+ * Each criterion gets default values: type = 'neutral' (NSP), weight = 15
+ * Each criterion (identified by criterionId) gets its own independent weight/type
  * This ensures that even if multiple criteria share the same name, they remain independent
  */
 export const initializeProfessionWeights = (newProfessionId, sourceProfessionId) => {
-    const sourceWeights = loadCriterionWeights().filter(w => w.professionId === sourceProfessionId);
+    // Get all existing criteria to initialize weights for all of them
+    const criteria = loadCriteria();
+    const categories = loadCategories();
     const weights = loadCriterionWeights();
     
-    // Copy each weight entry by criterionId (not by name)
-    // This ensures each criterion has its own independent weight/type
-    sourceWeights.forEach(weight => {
-        // Check if weight already exists for this profession and criterion
-        const existingIndex = weights.findIndex(
-            w => w.professionId === newProfessionId && w.criterionId === weight.criterionId
-        );
+    // Initialize weights for all criteria with default values
+    criteria.forEach(criterion => {
+        // Find the category that contains this criterion
+        const category = categories.find(cat => cat.criterionIds && cat.criterionIds.includes(criterion.id));
         
-        if (existingIndex === -1) {
-            // Create new weight entry for this profession
-            weights.push({
-                professionId: newProfessionId,
-                categoryId: weight.categoryId,
-                criterionId: weight.criterionId, // Use criterionId, not name
-                weight: weight.weight,
-                type: weight.type || 'neutral', // Preserve type or default
-            });
+        if (category) {
+            // Check if weight already exists for this profession and criterion
+            const existingIndex = weights.findIndex(
+                w => w.professionId === newProfessionId && w.criterionId === criterion.id
+            );
+            
+            if (existingIndex === -1) {
+                // Create new weight entry with default values
+                weights.push({
+                    professionId: newProfessionId,
+                    categoryId: category.id,
+                    criterionId: criterion.id,
+                    weight: 15, // Default importance: 15
+                    type: 'neutral', // Default type: NSP (neutral)
+                });
+            }
         }
     });
     

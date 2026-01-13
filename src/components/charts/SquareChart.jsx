@@ -45,7 +45,9 @@ function SquareChart({ categories, professionId }) {
                 const totalValue = category.criteria.reduce((sum, criterion) => sum + (criterion.weight || 0), 0);
                 
                 // Create children (criteria) for this category
+                // Include criterionId to uniquely identify each criterion (even if names are duplicate)
                 const children = category.criteria.map((criterion) => ({
+                    id: criterion.id, // Unique identifier for each criterion
                     name: criterion.name,
                     size: criterion.weight,
                     value: criterion.weight,
@@ -157,15 +159,19 @@ function SquareChart({ categories, professionId }) {
                 }
             }
             
-            // Method 3: Use name to find in data (via closure)
-            if (!criterionData && name && data.length > 0) {
+            // Method 3: Use index to find in data (via closure) - more reliable than name
+            // The Treemap structure maintains order, so we can use the index
+            // This ensures each criterion is found correctly even if names are duplicate
+            if (!criterionData && data.length > 0) {
+                let globalLeafIndex = 0;
                 for (const group of data) {
                     if (group.children) {
-                        const found = group.children.find(child => child.name === name);
-                        if (found) {
-                            criterionData = found;
+                        if (globalLeafIndex <= index && index < globalLeafIndex + group.children.length) {
+                            const localIndex = index - globalLeafIndex;
+                            criterionData = group.children[localIndex];
                             break;
                         }
+                        globalLeafIndex += group.children.length;
                     }
                 }
             }
