@@ -9,51 +9,51 @@ function CategoryEditForm({ category, onSubmit, onCancel, existingCategories = [
     // Get colors already used by other categories (excluding current category)
     const usedColors = existingCategories
         .filter(cat => cat.id !== category.id)
-        .map(cat => cat.couleur);
+        .map(cat => cat.color);
     
     // Filter palette to show only available colors (excluding current category's color)
     const availableColors = COLOR_PALETTE.filter(color => 
-        color === category.couleur || !usedColors.includes(color)
+        color === category.color || !usedColors.includes(color)
     );
 
-    const [nom, setNom] = useState(category.nom);
-    const [couleur, setCouleur] = useState(category.couleur);
+    const [name, setName] = useState(category.name);
+    const [color, setColor] = useState(category.color);
 
     // Update color if it becomes unavailable
     useEffect(() => {
-        if (usedColors.includes(couleur) && availableColors.length > 0) {
-            setCouleur(availableColors[0]);
+        if (usedColors.includes(color) && availableColors.length > 0) {
+            setColor(availableColors[0]);
         }
-    }, [existingCategories, couleur, usedColors, availableColors]);
+    }, [existingCategories, color, usedColors, availableColors]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        if (!nom.trim()) {
+        if (!name.trim()) {
             alert('Veuillez saisir un nom pour l\'intérêt professionnel');
             return;
         }
         
-        onSubmit({ nom: nom.trim(), couleur: couleur });
+        onSubmit({ name: name.trim(), color: color });
     };
 
     return (
         <form onSubmit={handleSubmit} className="edit-form">
             <div className="form-group">
-                <label htmlFor={`edit-category-nom-${category.id}`}>
+                <label htmlFor={`edit-category-name-${category.id}`}>
                     📝 Nom de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                 </label>
                 <input
                     type="text"
-                    id={`edit-category-nom-${category.id}`}
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
+                    id={`edit-category-name-${category.id}`}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="Ex: Management, Innovation, Relationnel, Technique..."
                     required
                     aria-required="true"
-                    aria-describedby={`edit-category-nom-help-${category.id}`}
+                    aria-describedby={`edit-category-name-help-${category.id}`}
                 />
-                <small id={`edit-category-nom-help-${category.id}`} style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
+                <small id={`edit-category-name-help-${category.id}`} style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
                     Choisissez un nom qui décrit bien votre intérêt professionnel
                 </small>
             </div>
@@ -67,27 +67,27 @@ function CategoryEditForm({ category, onSubmit, onCancel, existingCategories = [
                         Cliquez sur une couleur ci-dessous pour la sélectionner
                     </div>
                     <div className="color-presets-only" role="radiogroup" aria-label="Sélection de la couleur">
-                        {availableColors.map((color, index) => {
-                            const isSelected = couleur === color;
+                        {availableColors.map((presetColor, index) => {
+                            const isSelected = color === presetColor;
                             return (
                                 <Tooltip 
                                     key={index} 
-                                    content={color} 
+                                    content={presetColor} 
                                     position="top"
                                 >
                                     <div
                                         className={`color-preset ${isSelected ? 'active' : ''}`}
-                                        style={{ backgroundColor: color }}
-                                        onClick={() => setCouleur(color)}
+                                        style={{ backgroundColor: presetColor }}
+                                        onClick={() => setColor(presetColor)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' || e.key === ' ') {
                                                 e.preventDefault();
-                                                setCouleur(color);
+                                                setColor(presetColor);
                                             }
                                         }}
                                         role="radio"
                                         aria-checked={isSelected}
-                                        aria-label={`Couleur ${color}${isSelected ? ', sélectionnée' : ''}`}
+                                        aria-label={`Couleur ${presetColor}${isSelected ? ', sélectionnée' : ''}`}
                                         tabIndex={0}
                                     />
                                 </Tooltip>
@@ -104,8 +104,8 @@ function CategoryEditForm({ category, onSubmit, onCancel, existingCategories = [
                     style={{ 
                         flex: 1, 
                         justifyContent: 'center',
-                        background: couleur,
-                        border: `2px solid ${couleur}`
+                        background: color,
+                        border: `2px solid ${color}`
                     }}
                 >
                     💾 Enregistrer

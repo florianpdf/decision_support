@@ -3,28 +3,28 @@ import Slider from '@mui/material/Slider';
 import Tooltip from '../Tooltip';
 
 /**
- * Composant formulaire pour ajouter une nouvelle motivation clé à un intérêt professionnel
+ * Form component for adding a new key motivation to a professional interest
  */
 function CritereForm({ categoryId, onSubmit, onCancel }) {
-    const [nom, setNom] = useState('');
-    const [poids, setPoids] = useState(1);
+    const [name, setName] = useState('');
+    const [weight, setWeight] = useState(1);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        if (!nom.trim()) {
+        if (!name.trim()) {
             alert('Veuillez saisir un nom pour la motivation clé');
             return;
         }
 
         onSubmit({
-            nom: nom.trim(),
-            poids: poids, // Le slider garantit déjà une valeur entre 1 et 30
+            name: name.trim(),
+            weight: weight, // Slider already guarantees a value between 1 and 30
         });
 
-        // Réinitialiser le formulaire
-        setNom('');
-        setPoids(1);
+        // Reset form
+        setName('');
+        setWeight(1);
     };
 
     return (
@@ -34,34 +34,34 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
             </div>
             
             <div className="form-group">
-                <label htmlFor={`critere-nom-${categoryId}`}>
+                <label htmlFor={`criterion-name-${categoryId}`}>
                     📝 Nom de la motivation clé <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                 </label>
                 <input
                     type="text"
-                    id={`critere-nom-${categoryId}`}
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
+                    id={`criterion-name-${categoryId}`}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="Ex: Autonomie, Équipe, Innovation, Stabilité..."
                     required
                     aria-required="true"
-                    aria-describedby={`critere-nom-help-${categoryId}`}
+                    aria-describedby={`criterion-name-help-${categoryId}`}
                 />
-                <small id={`critere-nom-help-${categoryId}`} style={{ display: 'none' }}>
+                <small id={`criterion-name-help-${categoryId}`} style={{ display: 'none' }}>
                     Nom de la motivation clé
                 </small>
             </div>
 
             <div className="form-group">
-                <label htmlFor={`critere-poids-${categoryId}`}>
+                <label htmlFor={`criterion-weight-${categoryId}`}>
                     ⚖️ Importance de la motivation clé (1-30) <span style={{ color: '#e74c3c' }}>*</span>
                 </label>
                 <div style={{ padding: '15px 0' }}>
                     <Slider
-                        id={`critere-poids-${categoryId}`}
-                        value={poids}
+                        id={`criterion-weight-${categoryId}`}
+                        value={weight}
                         onChange={(e, newValue) => {
-                            setPoids(newValue);
+                            setWeight(newValue);
                         }}
                         min={1}
                         max={30}
@@ -81,7 +81,7 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
                     fontWeight: '600',
                     color: '#1976d2'
                 }}>
-                    Importance sélectionnée : {poids}
+                    Importance sélectionnée : {weight}
                 </div>
             </div>
 

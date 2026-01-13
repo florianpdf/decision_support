@@ -3,64 +3,62 @@ import Slider from '@mui/material/Slider';
 import Tooltip from '../Tooltip';
 
 /**
- * Composant formulaire pour modifier une motivation clé existante
+ * Form component for editing an existing key motivation
  */
 function CritereEditForm({ critere, onSubmit, onCancel }) {
-    const [nom, setNom] = useState(critere.nom);
-    const [poids, setPoids] = useState(critere.poids);
+    const [name, setName] = useState(critere?.name || '');
+    const [weight, setWeight] = useState(critere?.weight || 15);
 
-    // Mettre à jour les valeurs si la motivation clé change
     useEffect(() => {
-        setNom(critere.nom);
-        setPoids(critere.poids);
+        setName(critere?.name || '');
+        setWeight(critere?.weight || 15);
     }, [critere]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        if (!nom.trim()) {
+        if (!name.trim()) {
             alert('Veuillez saisir un nom pour la motivation clé');
             return;
         }
 
         onSubmit({
-            id: critere.id,
-            nom: nom.trim(),
-            poids: poids, // Le slider garantit déjà une valeur entre 1 et 30
+            name: name.trim(),
+            weight: weight,
         });
     };
 
+    if (!critere) {
+        return null;
+    }
+
     return (
-        <form onSubmit={handleSubmit} className="edit-form">
+        <form onSubmit={handleSubmit} className="critere-edit-form">
             <div className="form-group">
-                <label htmlFor={`edit-nom-${critere.id}`}>
+                <label htmlFor={`edit-criterion-name-${critere.id}`}>
                     📝 Nom de la motivation clé <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                 </label>
                 <input
                     type="text"
-                    id={`edit-nom-${critere.id}`}
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
-                    placeholder="Ex: Autonomie, Équipe, Innovation..."
+                    id={`edit-criterion-name-${critere.id}`}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ex: Autonomie, Équipe, Innovation, Stabilité..."
                     required
                     aria-required="true"
-                    aria-describedby={`edit-nom-help-${critere.id}`}
                 />
-                <small id={`edit-nom-help-${critere.id}`} style={{ display: 'none' }}>
-                    Nom de la motivation clé
-                </small>
             </div>
 
             <div className="form-group">
-                <label htmlFor={`edit-poids-${critere.id}`}>
+                <label htmlFor={`edit-criterion-weight-${critere.id}`}>
                     ⚖️ Importance de la motivation clé (1-30) <span style={{ color: '#e74c3c' }}>*</span>
                 </label>
                 <div style={{ padding: '15px 0' }}>
                     <Slider
-                        id={`edit-poids-${critere.id}`}
-                        value={poids}
+                        id={`edit-criterion-weight-${critere.id}`}
+                        value={weight}
                         onChange={(e, newValue) => {
-                            setPoids(newValue);
+                            setWeight(newValue);
                         }}
                         min={1}
                         max={30}
@@ -80,7 +78,7 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                     fontWeight: '600',
                     color: '#1976d2'
                 }}>
-                    Importance sélectionnée : {poids}
+                    Importance sélectionnée : {weight}
                 </div>
             </div>
 
@@ -88,15 +86,13 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                 <button type="submit" className="btn btn-primary btn-small" style={{ flex: 1 }}>
                     💾 Enregistrer
                 </button>
-                <Tooltip content="Annuler">
-                    <button 
-                        type="button" 
-                        className="btn-icon btn-icon-secondary"
-                        onClick={onCancel}
-                    >
-                        ✖️
-                    </button>
-                </Tooltip>
+                {onCancel && (
+                    <Tooltip content="Annuler">
+                        <button type="button" className="btn-icon btn-icon-secondary" onClick={onCancel}>
+                            ✖️
+                        </button>
+                    </Tooltip>
+                )}
             </div>
         </form>
     );
