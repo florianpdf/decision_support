@@ -18,6 +18,7 @@ const IconButton = ({
 }) => {
   const button = (
     <button
+      type="button"
       className={`btn-icon ${className}`}
       onClick={onClick}
       style={style}
