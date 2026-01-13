@@ -161,7 +161,7 @@ describe('CategoryForm', () => {
     await user.click(suggestionsButton);
     
     await waitFor(() => {
-      expect(screen.getByText(/suggestions d'intérêts professionnels/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /💡 suggestions d'intérêts professionnels/i })).toBeInTheDocument();
     });
   });
 
@@ -172,7 +172,7 @@ describe('CategoryForm', () => {
     await user.click(suggestionsButton);
     
     await waitFor(() => {
-      expect(screen.getByText(/suggestions d'intérêts professionnels/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /💡 suggestions d'intérêts professionnels/i })).toBeInTheDocument();
     });
     
     // Click on first suggestion
@@ -181,7 +181,7 @@ describe('CategoryForm', () => {
     
     // Modal should close and input should be filled
     await waitFor(() => {
-      expect(screen.queryByText(/suggestions d'intérêts professionnels/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: /💡 suggestions d'intérêts professionnels/i })).not.toBeInTheDocument();
       expect(screen.getByLabelText(/nom de l'intérêt professionnel/i)).toHaveValue('Management');
     });
   });
