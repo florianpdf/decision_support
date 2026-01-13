@@ -16,6 +16,7 @@ import Message from './components/ui/Message';
 import EmptyState from './components/ui/EmptyState';
 import { LIMITS } from './utils/constants';
 import { loadCategories, loadCriteria, checkDataVersion, clearAllData, saveDataVersion } from './services/storage';
+import { generateProfessionTemplate } from './utils/professionTemplate';
 
 /**
  * Main application component
