@@ -13,30 +13,32 @@ function SquareChart({ categories }) {
             return [];
         }
         
-        // Filtrer les catégories qui ont au moins un critère
-        // et créer la structure hiérarchique : chaque catégorie est un parent avec ses critères comme children
+        // Filter categories that have at least one criterion
+        // and create hierarchical structure: each category is a parent with its criteria as children
         const result = categories
-            .filter(category => category.criteres && category.criteres.length > 0)
+            .filter(category => (category.criteria || category.criteres) && (category.criteria?.length > 0 || category.criteres?.length > 0))
             .map((category) => {
-                // Calculer le poids total de la catégorie (somme des poids de ses critères)
-                const totalValue = category.criteres.reduce((sum, critere) => sum + critere.poids, 0);
+                // Calculate total weight of category (sum of criterion weights)
+                const criteria = category.criteria || category.criteres || [];
+                const totalValue = criteria.reduce((sum, critere) => sum + (critere.weight || critere.poids || 0), 0);
                 
-                // Créer les enfants (critères) de cette catégorie
-                const children = category.criteres.map((critere) => ({
-                    name: critere.nom,
-                    size: critere.poids,
-                    value: critere.poids,
-                    fill: category.couleur,
-                    couleur: category.couleur,
-                    poids: critere.poids,
+                // Create children (criteria) for this category
+                const children = criteria.map((critere) => ({
+                    name: critere.name || critere.nom,
+                    size: critere.weight || critere.poids,
+                    value: critere.weight || critere.poids,
+                    fill: category.color || category.couleur,
+                    couleur: category.color || category.couleur,
+                    poids: critere.weight || critere.poids,
+                    weight: critere.weight || critere.poids,
                 }));
                 
                 return {
-                    name: category.nom,
+                    name: category.name || category.nom,
                     size: totalValue,
                     value: totalValue,
-                    fill: category.couleur,
-                    couleur: category.couleur,
+                    fill: category.color || category.couleur,
+                    couleur: category.color || category.couleur,
                     children: children,
                 };
             });
