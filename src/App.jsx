@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useMetiers } from './hooks/useMetiers';
+import { useProfessions } from './hooks/useProfessions';
 import { useCategories } from './hooks/useCategories';
 import { useNotifications } from './hooks/useNotifications';
-import MetierTabs from './components/MetierTabs';
-import MetierForm from './components/forms/MetierForm';
-import MetierRenameForm from './components/forms/MetierRenameForm';
+import ProfessionTabs from './components/ProfessionTabs';
+import ProfessionForm from './components/forms/ProfessionForm';
+import ProfessionRenameForm from './components/forms/ProfessionRenameForm';
 import CategoryForm from './components/forms/CategoryForm';
 import CategoriesList from './components/CategoriesList';
 import SquareChart from './components/charts/SquareChart';
@@ -17,23 +17,23 @@ import Message from './components/ui/Message';
 import EmptyState from './components/ui/EmptyState';
 import Stats from './components/ui/Stats';
 import { LIMITS } from './utils/constants';
-import { loadCategories, loadCriteres } from './services/storage';
+import { loadCategories, loadCriteria } from './services/storage';
 
 /**
  * Main application component
- * Manages metiers, categories and criteria with localStorage
+ * Manages professions, categories and criteria with localStorage
  */
 function App() {
   const {
-    metiers,
-    currentMetierId,
-    currentMetier,
-    loading: metiersLoading,
-    handleAddMetier,
-    handleUpdateMetier,
-    handleDeleteMetier,
-    setCurrentMetierId
-  } = useMetiers();
+    professions,
+    currentProfessionId,
+    currentProfession,
+    loading: professionsLoading,
+    handleAddProfession,
+    handleUpdateProfession,
+    handleDeleteProfession,
+    setCurrentProfessionId
+  } = useProfessions();
 
   const {
     categories,
@@ -41,25 +41,25 @@ function App() {
     handleAddCategory,
     handleUpdateCategory,
     handleDeleteCategory,
-    handleAddCritere,
-    handleUpdateCritere,
-    handleDeleteCritere
-  } = useCategories(currentMetierId);
+    handleAddCriterion,
+    handleUpdateCriterion,
+    handleDeleteCriterion
+  } = useCategories(currentProfessionId);
 
   const { message, error, showSuccess, showError } = useNotifications();
 
   // Modal states
   const [deleteCategoryModal, setDeleteCategoryModal] = useState({ isOpen: false, categoryId: null, categoryName: '' });
-  const [deleteCritereModal, setDeleteCritereModal] = useState({ isOpen: false, categoryId: null, critereId: null, critereName: '' });
+  const [deleteCriterionModal, setDeleteCriterionModal] = useState({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' });
   const [updateCategoryModal, setUpdateCategoryModal] = useState({ isOpen: false, categoryId: null });
-  const [deleteMetierModal, setDeleteMetierModal] = useState({ isOpen: false, metierId: null, metierName: '' });
-  const [renameMetierModal, setRenameMetierModal] = useState({ isOpen: false, metierId: null });
+  const [deleteProfessionModal, setDeleteProfessionModal] = useState({ isOpen: false, professionId: null, professionName: '' });
+  const [renameProfessionModal, setRenameProfessionModal] = useState({ isOpen: false, professionId: null });
 
   // Wrapper functions that handle notifications and confirmations
   const onAddCategory = (categoryData) => {
     try {
       handleAddCategory(categoryData);
-      showSuccess('Intérêt professionnel ajouté avec succès pour tous les métiers');
+      showSuccess('Professional interest added successfully for all professions');
     } catch (err) {
       showError(err.message);
     }
@@ -74,7 +74,7 @@ function App() {
     try {
       const { categoryId, updates } = updateCategoryModal;
       handleUpdateCategory(categoryId, updates);
-      showSuccess('Intérêt professionnel modifié avec succès pour tous les métiers');
+      showSuccess('Professional interest updated successfully for all professions');
       setUpdateCategoryModal({ isOpen: false, categoryId: null });
     } catch (err) {
       showError(err.message);
@@ -85,132 +85,133 @@ function App() {
     const allCategories = loadCategories();
     const category = allCategories.find(c => c.id === id);
     if (category) {
-      setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.nom });
+      setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.name || category.nom });
     }
   };
 
   const confirmDeleteCategory = () => {
     try {
       handleDeleteCategory(deleteCategoryModal.categoryId);
-      showSuccess('Intérêt professionnel supprimé avec succès pour tous les métiers');
+      showSuccess('Professional interest deleted successfully for all professions');
       setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' });
     } catch (err) {
       showError(err.message);
     }
   };
 
-  const onAddCritere = (categoryId, critereData) => {
+  const onAddCriterion = (categoryId, criterionData) => {
     try {
-      handleAddCritere(categoryId, critereData);
-      showSuccess('Motivation clé ajoutée avec succès pour tous les métiers');
+      handleAddCriterion(categoryId, criterionData);
+      showSuccess('Key motivation added successfully for all professions');
     } catch (err) {
       showError(err.message);
     }
   };
 
-  const onUpdateCritere = (categoryId, critereId, updates, silent = false) => {
+  const onUpdateCriterion = (categoryId, criterionId, updates, silent = false) => {
     try {
       // If updating name, show confirmation
-      if (updates.nom !== undefined && !silent) {
+      const name = updates.name !== undefined ? updates.name : updates.nom;
+      if (name !== undefined && !silent) {
         // For name updates, we need confirmation
         // For now, we'll show a notification
-        handleUpdateCritere(categoryId, critereId, updates, silent);
-        showSuccess('Nom de la motivation clé modifié pour tous les métiers. Le poids reste spécifique à ce métier.');
+        handleUpdateCriterion(categoryId, criterionId, updates, silent);
+        showSuccess('Key motivation name updated for all professions. Weight remains specific to this profession.');
       } else {
-        // Weight updates are silent and specific to current metier
-        handleUpdateCritere(categoryId, critereId, updates, true);
+        // Weight updates are silent and specific to current profession
+        handleUpdateCriterion(categoryId, criterionId, updates, true);
       }
     } catch (err) {
       showError(err.message);
     }
   };
 
-  const onDeleteCritere = (categoryId, critereId) => {
-    const allCriteres = loadCriteres();
-    const critere = allCriteres.find(c => c.id === critereId);
-    if (critere) {
-      setDeleteCritereModal({ isOpen: true, categoryId, critereId, critereName: critere.nom });
+  const onDeleteCriterion = (categoryId, criterionId) => {
+    const allCriteria = loadCriteria();
+    const criterion = allCriteria.find(c => c.id === criterionId);
+    if (criterion) {
+      setDeleteCriterionModal({ isOpen: true, categoryId, criterionId, criterionName: criterion.name || criterion.nom });
     }
   };
 
-  const confirmDeleteCritere = () => {
+  const confirmDeleteCriterion = () => {
     try {
-      handleDeleteCritere(deleteCritereModal.categoryId, deleteCritereModal.critereId);
-      showSuccess('Motivation clé supprimée avec succès pour tous les métiers');
-      setDeleteCritereModal({ isOpen: false, categoryId: null, critereId: null, critereName: '' });
+      handleDeleteCriterion(deleteCriterionModal.categoryId, deleteCriterionModal.criterionId);
+      showSuccess('Key motivation deleted successfully for all professions');
+      setDeleteCriterionModal({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' });
     } catch (err) {
       showError(err.message);
     }
   };
 
-  // Metier handlers
-  const onAddMetier = () => {
-    setRenameMetierModal({ isOpen: true, metierId: null });
+  // Profession handlers
+  const onAddProfession = () => {
+    setRenameProfessionModal({ isOpen: true, professionId: null });
   };
 
-  const handleCreateMetier = (metierData) => {
+  const handleCreateProfession = (professionData) => {
     try {
-      handleAddMetier(metierData);
-      showSuccess('Métier créé avec succès');
-      setRenameMetierModal({ isOpen: false, metierId: null });
+      handleAddProfession(professionData);
+      showSuccess('Profession created successfully');
+      setRenameProfessionModal({ isOpen: false, professionId: null });
     } catch (err) {
-      if (err.message.includes('CANT_DELETE_LAST_METIER')) {
-        showError('Impossible de supprimer le dernier métier');
+      if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
+        showError('Cannot delete the last profession');
       } else {
         showError(err.message);
       }
     }
   };
 
-  const onRenameMetier = (metierId) => {
-    setRenameMetierModal({ isOpen: true, metierId });
+  const onRenameProfession = (professionId) => {
+    setRenameProfessionModal({ isOpen: true, professionId });
   };
 
-  const handleRenameMetier = (nom) => {
+  const handleRenameProfession = (name) => {
     try {
-      if (renameMetierModal.metierId) {
-        handleUpdateMetier(renameMetierModal.metierId, { nom });
-        showSuccess('Métier renommé avec succès');
+      if (renameProfessionModal.professionId) {
+        handleUpdateProfession(renameProfessionModal.professionId, { name });
+        showSuccess('Profession renamed successfully');
       } else {
-        handleCreateMetier({ nom });
-        return; // Already handled in handleCreateMetier
+        handleCreateProfession({ name });
+        return; // Already handled in handleCreateProfession
       }
-      setRenameMetierModal({ isOpen: false, metierId: null });
+      setRenameProfessionModal({ isOpen: false, professionId: null });
     } catch (err) {
       showError(err.message);
     }
   };
 
-  const onDeleteMetier = (metierId) => {
-    const metier = metiers.find(m => m.id === metierId);
-    if (metier) {
-      if (metiers.length === 1) {
-        // Last metier - special confirmation
-        setDeleteMetierModal({ 
+  const onDeleteProfession = (professionId) => {
+    const profession = professions.find(p => p.id === professionId);
+    if (profession) {
+      if (professions.length === 1) {
+        // Last profession - special confirmation
+        setDeleteProfessionModal({ 
           isOpen: true, 
-          metierId, 
-          metierName: metier.nom,
+          professionId, 
+          professionName: profession.name,
           isLast: true 
         });
       } else {
-        setDeleteMetierModal({ 
+        setDeleteProfessionModal({ 
           isOpen: true, 
-          metierId, 
-          metierName: metier.nom,
+          professionId, 
+          professionName: profession.name,
           isLast: false 
         });
       }
     }
   };
 
-  const confirmDeleteMetier = () => {
+  const confirmDeleteProfession = () => {
     try {
-      handleDeleteMetier(deleteMetierModal.metierId);
-      showSuccess('Métier supprimé avec succès');
-      setDeleteMetierModal({ isOpen: false, metierId: null, metierName: '' });
+      handleDeleteProfession(deleteProfessionModal.professionId);
+      showSuccess('Profession deleted successfully');
+      setDeleteProfessionModal({ isOpen: false, professionId: null, professionName: '' });
     } catch (err) {
-      if (err.message.includes('CANT_DELETE_LAST_METIER')) {
-        showError('Impossible de supprimer le dernier métier. Cela supprimerait tous les intérêts professionnels et motivations clés.');
+      if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
+        showError('Cannot delete the last profession. This would delete all professional interests and key motivations.');
       } else {
         showError(err.message);
       }
@@ -218,13 +219,13 @@ function App() {
   };
 
   // Calculate statistics
-  const totalCriteres = categories.reduce(
-    (sum, cat) => sum + (cat.criteres ? cat.criteres.length : 0),
+  const totalCriteria = categories.reduce(
+    (sum, cat) => sum + (cat.criteria ? cat.criteria.length : 0),
     0
   );
 
-  const hasCategoriesWithCriteres = categories.some(
-    cat => cat.criteres && cat.criteres.length > 0
+  const hasCategoriesWithCriteria = categories.some(
+    cat => cat.criteria && cat.criteria.length > 0
   );
 
   // Track state of all categories (open/closed) for the toggle button
@@ -238,16 +239,16 @@ function App() {
         return;
       }
 
-      const categoriesWithCriteres = categories.filter(
-        cat => cat.criteres && cat.criteres.length > 0
+      const categoriesWithCriteria = categories.filter(
+        cat => cat.criteria && cat.criteria.length > 0
       );
 
-      if (categoriesWithCriteres.length === 0) {
+      if (categoriesWithCriteria.length === 0) {
         setAllCategoriesOpen(false);
         return;
       }
 
-      const allOpen = categoriesWithCriteres.every(
+      const allOpen = categoriesWithCriteria.every(
         cat => window.openCategoriesState[cat.id] === true
       );
       setAllCategoriesOpen(allOpen);
@@ -258,26 +259,26 @@ function App() {
     return () => clearInterval(interval);
   }, [categories]);
 
-  // If no metiers, show creation form
-  if (metiersLoading) {
+  // If no professions, show creation form
+  if (professionsLoading) {
     return (
       <div className="app-container">
-        <EmptyState title="Chargement..." />
+        <EmptyState title="Loading..." />
       </div>
     );
   }
 
-  if (metiers.length === 0) {
+  if (professions.length === 0) {
     return (
       <div className="app-container">
         <header className="app-header" role="banner">
-          <h1>📊 Aide à la Décision</h1>
-          <p>Créez votre premier métier pour commencer</p>
+          <h1>📊 Decision Support</h1>
+          <p>Create your first profession to get started</p>
         </header>
         {message && <Message type="success">{message}</Message>}
         {error && <Message type="error">{error}</Message>}
-        <Card title="➕ Créer votre premier métier">
-          <MetierForm onSubmit={handleCreateMetier} />
+        <Card title="➕ Create Your First Profession">
+          <ProfessionForm onSubmit={handleCreateProfession} />
         </Card>
       </div>
     );
@@ -288,32 +289,32 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header" role="banner">
-        <h1>📊 Aide à la Décision</h1>
-        <p>Identifiez vos intérêts professionnels et vos motivations clés pour visualiser vos priorités</p>
+        <h1>📊 Decision Support</h1>
+        <p>Identify your professional interests and key motivations to visualize your priorities</p>
       </header>
 
       {message && <Message type="success">{message}</Message>}
       {error && <Message type="error">{error}</Message>}
 
-      <MetierTabs
-        metiers={metiers}
-        currentMetierId={currentMetierId}
-        onSelectMetier={setCurrentMetierId}
-        onAddMetier={onAddMetier}
-        onDeleteMetier={onDeleteMetier}
-        onRenameMetier={onRenameMetier}
+      <ProfessionTabs
+        professions={professions}
+        currentProfessionId={currentProfessionId}
+        onSelectProfession={setCurrentProfessionId}
+        onAddProfession={onAddProfession}
+        onDeleteProfession={onDeleteProfession}
+        onRenameProfession={onRenameProfession}
       />
 
-      {currentMetier && (
+      {currentProfession && (
         <>
           <div className="app-content">
             <Card
-              title="➕ Créer un intérêt professionnel"
-              subtitle="Un intérêt professionnel regroupe plusieurs motivations clés. Choisissez un nom et une couleur pour l'identifier facilement."
+              title="➕ Create Professional Interest"
+              subtitle="A professional interest groups several key motivations. Choose a name and a color to identify it easily."
             >
               {allCategories.length >= LIMITS.MAX_CATEGORIES ? (
                 <Message type="error">
-                  Limite atteinte : vous ne pouvez pas ajouter plus de {LIMITS.MAX_CATEGORIES} intérêts professionnels
+                  Limit reached: you cannot add more than {LIMITS.MAX_CATEGORIES} professional interests
                 </Message>
               ) : (
                 <CategoryForm
@@ -323,7 +324,7 @@ function App() {
               )}
               <Stats
                 value={`${allCategories.length} / ${LIMITS.MAX_CATEGORIES}`}
-                label="intérêts professionnels créés"
+                label="professional interests created"
                 className="stats-inline"
               />
             </Card>
@@ -331,9 +332,9 @@ function App() {
             <Card
               title={
                 <div className="card-title-with-action">
-                  <span>📋 Mes intérêts professionnels</span>
-                  {categories.some(cat => cat.criteres && cat.criteres.length > 0) && (
-                    <Tooltip content={allCategoriesOpen ? 'Tout fermer' : 'Tout ouvrir'}>
+                  <span>📋 My Professional Interests</span>
+                  {categories.some(cat => cat.criteria && cat.criteria.length > 0) && (
+                    <Tooltip content={allCategoriesOpen ? 'Close all' : 'Open all'}>
                       <button
                         className="btn-icon toggle-all-categories"
                         onClick={() => {
@@ -341,7 +342,7 @@ function App() {
                             window.toggleAllCategoriesFn();
                           }
                         }}
-                        aria-label={allCategoriesOpen ? 'Tout fermer' : 'Tout ouvrir'}
+                        aria-label={allCategoriesOpen ? 'Close all' : 'Open all'}
                       >
                         <div className={`toggle-icon-wrapper ${allCategoriesOpen ? 'open' : 'closed'}`}>
                           {allCategoriesOpen ? (
@@ -357,21 +358,21 @@ function App() {
               }
             >
               {categoriesLoading ? (
-                <EmptyState title="Chargement..." />
+                <EmptyState title="Loading..." />
               ) : (
                 <CategoriesList
                   categories={categories}
                   onDeleteCategory={onDeleteCategory}
                   onUpdateCategory={onUpdateCategory}
-                  onAddCritere={onAddCritere}
-                  onDeleteCritere={onDeleteCritere}
-                  onUpdateCritere={onUpdateCritere}
+                  onAddCriterion={onAddCriterion}
+                  onDeleteCriterion={onDeleteCriterion}
+                  onUpdateCriterion={onUpdateCriterion}
                   existingCategories={allCategories}
                 />
               )}
               {categories.length > 0 && (
                 <Stats
-                  value={`${categories.length} intérêt${categories.length > 1 ? 's' : ''} professionnel${categories.length > 1 ? 's' : ''} • ${totalCriteres} motivation${totalCriteres > 1 ? 's' : ''} clé${totalCriteres > 1 ? 's' : ''} au total`}
+                  value={`${categories.length} professional interest${categories.length > 1 ? 's' : ''} • ${totalCriteria} key motivation${totalCriteria > 1 ? 's' : ''} total`}
                   className="stats-inline"
                 />
               )}
@@ -379,15 +380,15 @@ function App() {
           </div>
 
           <Card
-            title="📈 Visualisation"
-            subtitle="Le graphique ci-dessous représente vos intérêts professionnels et vos motivations clés pour ce métier. Plus une motivation a une importance élevée, plus son carré sera grand."
+            title="📈 Visualization"
+            subtitle="The chart below represents your professional interests and key motivations for this profession. The higher a motivation's importance, the larger its square will be."
           >
-            {hasCategoriesWithCriteres ? (
+            {hasCategoriesWithCriteria ? (
               <SquareChart categories={categories} />
             ) : (
               <EmptyState
-                title="Aucun intérêt professionnel avec motivations clés à afficher"
-                description="Créez un intérêt professionnel et ajoutez-y des motivations clés pour voir apparaître le graphique"
+                title="No professional interest with key motivations to display"
+                description="Create a professional interest and add key motivations to see the chart appear"
               />
             )}
           </Card>
@@ -399,25 +400,25 @@ function App() {
         isOpen={deleteCategoryModal.isOpen}
         onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })}
         onConfirm={confirmDeleteCategory}
-        title="Supprimer l'intérêt professionnel"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera cet intérêt professionnel et toutes ses motivations clés pour TOUS les métiers.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title="Delete Professional Interest"
+        message={`Are you sure you want to delete "${deleteCategoryModal.categoryName}"? This action will delete this professional interest and all its key motivations for ALL professions.`}
+        confirmText="Delete"
+        cancelText="Cancel"
         requireCheckbox={true}
-        checkboxLabel={`Je comprends que cela supprimera "${deleteCategoryModal.categoryName}" dans tous les métiers`}
+        checkboxLabel={`I understand that this will delete "${deleteCategoryModal.categoryName}" in all professions`}
         type="danger"
       />
 
       <ConfirmModal
-        isOpen={deleteCritereModal.isOpen}
-        onClose={() => setDeleteCritereModal({ isOpen: false, categoryId: null, critereId: null, critereName: '' })}
-        onConfirm={confirmDeleteCritere}
-        title="Supprimer la motivation clé"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteCritereModal.critereName}" ? Cette action supprimera cette motivation clé pour TOUS les métiers.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        isOpen={deleteCriterionModal.isOpen}
+        onClose={() => setDeleteCriterionModal({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' })}
+        onConfirm={confirmDeleteCriterion}
+        title="Delete Key Motivation"
+        message={`Are you sure you want to delete "${deleteCriterionModal.criterionName}"? This action will delete this key motivation for ALL professions.`}
+        confirmText="Delete"
+        cancelText="Cancel"
         requireCheckbox={true}
-        checkboxLabel={`Je comprends que cela supprimera "${deleteCritereModal.critereName}" dans tous les métiers`}
+        checkboxLabel={`I understand that this will delete "${deleteCriterionModal.criterionName}" in all professions`}
         type="danger"
       />
 
@@ -425,35 +426,35 @@ function App() {
         isOpen={updateCategoryModal.isOpen}
         onClose={() => setUpdateCategoryModal({ isOpen: false, categoryId: null })}
         onConfirm={confirmUpdateCategory}
-        title="Modifier l'intérêt professionnel"
-        message="Cette modification s'appliquera à TOUS les métiers. Êtes-vous sûr de vouloir continuer ?"
-        confirmText="Modifier"
-        cancelText="Annuler"
+        title="Update Professional Interest"
+        message="This update will apply to ALL professions. Are you sure you want to continue?"
+        confirmText="Update"
+        cancelText="Cancel"
         type="warning"
       />
 
       <ConfirmModal
-        isOpen={deleteMetierModal.isOpen}
-        onClose={() => setDeleteMetierModal({ isOpen: false, metierId: null, metierName: '' })}
-        onConfirm={confirmDeleteMetier}
-        title={deleteMetierModal.isLast ? "Supprimer le dernier métier" : "Supprimer le métier"}
-        message={deleteMetierModal.isLast 
-          ? `Êtes-vous sûr de vouloir supprimer "${deleteMetierModal.metierName}" ? C'est le dernier métier. Cette action supprimera TOUS les intérêts professionnels et motivations clés.`
-          : `Êtes-vous sûr de vouloir supprimer "${deleteMetierModal.metierName}" ?`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
-        requireCheckbox={deleteMetierModal.isLast}
-        checkboxLabel={deleteMetierModal.isLast ? "Je comprends que cela supprimera tous les intérêts professionnels et motivations clés" : ""}
+        isOpen={deleteProfessionModal.isOpen}
+        onClose={() => setDeleteProfessionModal({ isOpen: false, professionId: null, professionName: '' })}
+        onConfirm={confirmDeleteProfession}
+        title={deleteProfessionModal.isLast ? "Delete Last Profession" : "Delete Profession"}
+        message={deleteProfessionModal.isLast 
+          ? `Are you sure you want to delete "${deleteProfessionModal.professionName}"? This is the last profession. This action will delete ALL professional interests and key motivations.`
+          : `Are you sure you want to delete "${deleteProfessionModal.professionName}"?`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        requireCheckbox={deleteProfessionModal.isLast}
+        checkboxLabel={deleteProfessionModal.isLast ? "I understand that this will delete all professional interests and key motivations" : ""}
         type="danger"
       />
 
-      {renameMetierModal.isOpen && (
-        <div className="modal-overlay" onClick={() => setRenameMetierModal({ isOpen: false, metierId: null })}>
+      {renameProfessionModal.isOpen && (
+        <div className="modal-overlay" onClick={() => setRenameProfessionModal({ isOpen: false, professionId: null })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <MetierRenameForm
-              metier={renameMetierModal.metierId ? metiers.find(m => m.id === renameMetierModal.metierId) : null}
-              onSubmit={handleRenameMetier}
-              onCancel={() => setRenameMetierModal({ isOpen: false, metierId: null })}
+            <ProfessionRenameForm
+              profession={renameProfessionModal.professionId ? professions.find(p => p.id === renameProfessionModal.professionId) : null}
+              onSubmit={handleRenameProfession}
+              onCancel={() => setRenameProfessionModal({ isOpen: false, professionId: null })}
             />
           </div>
         </div>
