@@ -58,7 +58,7 @@ function ConfirmModal({
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ borderTop: `4px solid ${styles.borderColor}` }}>
         <h3 className="modal-title">{title}</h3>
-        <p className="modal-message">{message}</p>
+        <div className="modal-message">{message}</div>
         
         {requireCheckbox && (
           <div className="modal-checkbox">
