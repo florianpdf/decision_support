@@ -18,6 +18,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.js',
+    // Optimize for CI: use threads for faster execution
+    threads: true,
+    maxThreads: 2,
+    minThreads: 1,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
