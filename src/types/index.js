@@ -4,44 +4,44 @@
  */
 
 /**
- * @typedef {Object} Metier
+ * @typedef {Object} Profession
  * @property {number} id - Unique identifier
- * @property {string} nom - Metier name
+ * @property {string} name - Profession name
  * @property {string} created_at - ISO date string
  */
 
 /**
  * @typedef {Object} Category
  * @property {number} id - Unique identifier
- * @property {string} nom - Category name
- * @property {string} couleur - Hex color code
- * @property {Critere[]} criteres - List of criteria
+ * @property {string} name - Category name
+ * @property {string} color - Hex color code
+ * @property {Criterion[]} criteria - List of criteria
  * @property {string} created_at - ISO date string
  */
 
 /**
- * @typedef {Object} Critere
+ * @typedef {Object} Criterion
  * @property {number} id - Unique identifier
- * @property {string} nom - Criterion name
+ * @property {string} name - Criterion name
  * @property {string} created_at - ISO date string
  */
 
 /**
- * @typedef {Object} CritereWeight
- * @property {number} metierId - Metier identifier
- * @property {number} poids - Weight/importance (1-30)
+ * @typedef {Object} CriterionWeight
+ * @property {number} professionId - Profession identifier
+ * @property {number} weight - Weight/importance (1-30)
  */
 
 /**
  * @typedef {Object} CategoryFormData
- * @property {string} nom - Category name
- * @property {string} couleur - Hex color code
+ * @property {string} name - Category name
+ * @property {string} color - Hex color code
  */
 
 /**
- * @typedef {Object} CritereFormData
- * @property {string} nom - Criterion name
- * @property {number} poids - Weight/importance (1-30)
+ * @typedef {Object} CriterionFormData
+ * @property {string} name - Criterion name
+ * @property {number} weight - Weight/importance (1-30)
  */
 
 /**

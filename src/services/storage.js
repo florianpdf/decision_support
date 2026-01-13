@@ -1,56 +1,86 @@
 /**
- * Service de gestion du stockage local (localStorage)
- * Structure: métiers avec leurs intérêts professionnels et critères
- * Les intérêts pro et critères sont partagés entre tous les métiers
- * Les poids des critères sont spécifiques à chaque métier
+ * Local storage management service
+ * Structure: professions with their professional interests and criteria
+ * Professional interests and criteria are shared across all professions
+ * Criterion weights are specific to each profession
  */
 
-// Storage keys
-const METIERS_STORAGE_KEY = 'bulle_chart_metiers';
+// Storage keys (keeping old keys for migration compatibility)
+const PROFESSIONS_STORAGE_KEY = 'bulle_chart_professions';
+const METIERS_STORAGE_KEY = 'bulle_chart_metiers'; // Legacy key for migration
 const CATEGORIES_STORAGE_KEY = 'bulle_chart_categories';
-const CRITERES_STORAGE_KEY = 'bulle_chart_criteres';
-const CRITERE_WEIGHTS_STORAGE_KEY = 'bulle_chart_critere_weights';
-const NEXT_METIER_ID_KEY = 'bulle_chart_next_metier_id';
+const CRITERIA_STORAGE_KEY = 'bulle_chart_criteria';
+const CRITERES_STORAGE_KEY = 'bulle_chart_criteres'; // Legacy key for migration
+const CRITERION_WEIGHTS_STORAGE_KEY = 'bulle_chart_criterion_weights';
+const CRITERE_WEIGHTS_STORAGE_KEY = 'bulle_chart_critere_weights'; // Legacy key
+const NEXT_PROFESSION_ID_KEY = 'bulle_chart_next_profession_id';
+const NEXT_METIER_ID_KEY = 'bulle_chart_next_metier_id'; // Legacy key
 const NEXT_CATEGORY_ID_KEY = 'bulle_chart_next_category_id';
-const NEXT_CRITERE_ID_KEY = 'bulle_chart_next_critere_id';
+const NEXT_CRITERION_ID_KEY = 'bulle_chart_next_criterion_id';
+const NEXT_CRITERE_ID_KEY = 'bulle_chart_next_critere_id'; // Legacy key
 
-// ==================== METIERS ====================
+// ==================== PROFESSIONS ====================
 
 /**
- * Charge les métiers depuis localStorage
+ * Load professions from localStorage
  */
-export const loadMetiers = () => {
+export const loadProfessions = () => {
     try {
-        const data = localStorage.getItem(METIERS_STORAGE_KEY);
+        // Try new key first
+        let data = localStorage.getItem(PROFESSIONS_STORAGE_KEY);
+        if (!data) {
+            // Try legacy key for migration
+            data = localStorage.getItem(METIERS_STORAGE_KEY);
+            if (data) {
+                const metiers = JSON.parse(data);
+                // Migrate to new structure
+                const professions = metiers.map(m => ({
+                    id: m.id,
+                    name: m.nom || m.name,
+                    created_at: m.created_at
+                }));
+                saveProfessions(professions);
+                localStorage.removeItem(METIERS_STORAGE_KEY);
+                return professions;
+            }
+        }
         if (!data) {
             return [];
         }
         return JSON.parse(data);
     } catch (error) {
-        console.error('Erreur lors du chargement des métiers:', error);
+        console.error('Error loading professions:', error);
         return [];
     }
 };
 
 /**
- * Sauvegarde les métiers dans localStorage
+ * Save professions to localStorage
  */
-export const saveMetiers = (metiers) => {
+export const saveProfessions = (professions) => {
     try {
-        localStorage.setItem(METIERS_STORAGE_KEY, JSON.stringify(metiers));
+        localStorage.setItem(PROFESSIONS_STORAGE_KEY, JSON.stringify(professions));
         return true;
     } catch (error) {
-        console.error('Erreur lors de la sauvegarde des métiers:', error);
+        console.error('Error saving professions:', error);
         return false;
     }
 };
 
 /**
- * Récupère le prochain ID de métier disponible
+ * Get next available profession ID
  */
-export const getNextMetierId = () => {
+export const getNextProfessionId = () => {
     try {
-        const nextId = parseInt(localStorage.getItem(NEXT_METIER_ID_KEY) || '1', 10);
+        let nextId = parseInt(localStorage.getItem(NEXT_PROFESSION_ID_KEY) || '0', 10);
+        if (nextId === 0) {
+            // Try legacy key
+            nextId = parseInt(localStorage.getItem(NEXT_METIER_ID_KEY) || '1', 10);
+            if (nextId > 0) {
+                setNextProfessionId(nextId);
+                localStorage.removeItem(NEXT_METIER_ID_KEY);
+            }
+        }
         return isNaN(nextId) ? 1 : nextId;
     } catch (error) {
         return 1;
@@ -58,75 +88,84 @@ export const getNextMetierId = () => {
 };
 
 /**
- * Met à jour le prochain ID de métier
+ * Update next profession ID
  */
-export const setNextMetierId = (id) => {
+export const setNextProfessionId = (id) => {
     try {
-        localStorage.setItem(NEXT_METIER_ID_KEY, id.toString());
+        localStorage.setItem(NEXT_PROFESSION_ID_KEY, id.toString());
     } catch (error) {
-        console.error('Erreur lors de la mise à jour du nextMetierId:', error);
+        console.error('Error updating nextProfessionId:', error);
     }
 };
 
 /**
- * Ajoute un nouveau métier
+ * Add a new profession
  */
-export const addMetier = (metier) => {
-    const metiers = loadMetiers();
-    const nextId = getNextMetierId();
+export const addProfession = (profession) => {
+    const professions = loadProfessions();
+    const nextId = getNextProfessionId();
     
-    const newMetier = {
+    const newProfession = {
         id: nextId,
-        nom: metier.nom.trim(),
+        name: profession.name.trim(),
         created_at: new Date().toISOString(),
     };
     
-    metiers.push(newMetier);
-    saveMetiers(metiers);
-    setNextMetierId(nextId + 1);
+    professions.push(newProfession);
+    saveProfessions(professions);
+    setNextProfessionId(nextId + 1);
     
-    return newMetier;
+    return newProfession;
 };
 
 /**
- * Met à jour un métier
+ * Update a profession
  */
-export const updateMetier = (id, updates) => {
-    const metiers = loadMetiers();
-    const index = metiers.findIndex(m => m.id === id);
+export const updateProfession = (id, updates) => {
+    const professions = loadProfessions();
+    const index = professions.findIndex(p => p.id === id);
     
     if (index === -1) {
         return null;
     }
     
-    if (updates.nom !== undefined) {
-        metiers[index].nom = updates.nom.trim();
+    if (updates.name !== undefined) {
+        professions[index].name = updates.name.trim();
     }
     
-    saveMetiers(metiers);
-    return metiers[index];
+    saveProfessions(professions);
+    return professions[index];
 };
 
 /**
- * Supprime un métier
+ * Delete a profession
  */
-export const deleteMetier = (id) => {
-    const metiers = loadMetiers();
-    const filtered = metiers.filter(m => m.id !== id);
-    saveMetiers(filtered);
+export const deleteProfession = (id) => {
+    const professions = loadProfessions();
+    const filtered = professions.filter(p => p.id !== id);
+    saveProfessions(filtered);
     
-    // Supprime aussi les poids associés à ce métier
-    const weights = loadCritereWeights();
-    const filteredWeights = weights.filter(w => w.metierId !== id);
-    saveCritereWeights(filteredWeights);
+    // Also delete weights associated with this profession
+    const weights = loadCriterionWeights();
+    const filteredWeights = weights.filter(w => w.professionId !== id);
+    saveCriterionWeights(filteredWeights);
     
     return true;
 };
 
-// ==================== CATEGORIES (Intérêts professionnels) ====================
+// Legacy functions for backward compatibility during migration
+export const loadMetiers = loadProfessions;
+export const saveMetiers = saveProfessions;
+export const getNextMetierId = getNextProfessionId;
+export const setNextMetierId = setNextProfessionId;
+export const addMetier = (metier) => addProfession({ name: metier.nom || metier.name });
+export const updateMetier = (id, updates) => updateProfession(id, { name: updates.nom || updates.name });
+export const deleteMetier = deleteProfession;
+
+// ==================== CATEGORIES (Professional Interests) ====================
 
 /**
- * Charge les catégories depuis localStorage
+ * Load categories from localStorage
  */
 export const loadCategories = () => {
     try {
@@ -134,28 +173,35 @@ export const loadCategories = () => {
         if (!data) {
             return [];
         }
-        return JSON.parse(data);
+        const categories = JSON.parse(data);
+        // Migrate old structure if needed
+        return categories.map(cat => {
+            if (cat.nom && !cat.name) {
+                return { ...cat, name: cat.nom, color: cat.couleur || cat.color };
+            }
+            return cat;
+        });
     } catch (error) {
-        console.error('Erreur lors du chargement des catégories:', error);
+        console.error('Error loading categories:', error);
         return [];
     }
 };
 
 /**
- * Sauvegarde les catégories dans localStorage
+ * Save categories to localStorage
  */
 export const saveCategories = (categories) => {
     try {
         localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
         return true;
     } catch (error) {
-        console.error('Erreur lors de la sauvegarde des catégories:', error);
+        console.error('Error saving categories:', error);
         return false;
     }
 };
 
 /**
- * Récupère le prochain ID de catégorie disponible
+ * Get next available category ID
  */
 export const getNextCategoryId = () => {
     try {
@@ -167,18 +213,18 @@ export const getNextCategoryId = () => {
 };
 
 /**
- * Met à jour le prochain ID de catégorie
+ * Update next category ID
  */
 export const setNextCategoryId = (id) => {
     try {
         localStorage.setItem(NEXT_CATEGORY_ID_KEY, id.toString());
     } catch (error) {
-        console.error('Erreur lors de la mise à jour du nextCategoryId:', error);
+        console.error('Error updating nextCategoryId:', error);
     }
 };
 
 /**
- * Ajoute une nouvelle catégorie (partagée entre tous les métiers)
+ * Add a new category (shared across all professions)
  */
 export const addCategory = (category) => {
     const categories = loadCategories();
@@ -186,11 +232,16 @@ export const addCategory = (category) => {
     
     const newCategory = {
         id: nextId,
-        nom: category.nom.trim(),
-        couleur: category.couleur,
-        critereIds: [], // Liste des IDs de critères associés
+        name: (category.name || category.nom || '').trim(),
+        color: category.color || category.couleur,
+        criterionIds: [], // List of associated criterion IDs
         created_at: new Date().toISOString(),
     };
+    
+    // Ensure criterionIds is always an array
+    if (!newCategory.criterionIds) {
+        newCategory.criterionIds = [];
+    }
     
     categories.push(newCategory);
     saveCategories(categories);
@@ -200,7 +251,7 @@ export const addCategory = (category) => {
 };
 
 /**
- * Met à jour une catégorie (modifie pour tous les métiers)
+ * Update a category (affects all professions)
  */
 export const updateCategory = (id, updates) => {
     const categories = loadCategories();
@@ -210,11 +261,11 @@ export const updateCategory = (id, updates) => {
         return null;
     }
     
-    if (updates.nom !== undefined) {
-        categories[index].nom = updates.nom.trim();
+    if (updates.name !== undefined || updates.nom !== undefined) {
+        categories[index].name = (updates.name || updates.nom || '').trim();
     }
-    if (updates.couleur !== undefined) {
-        categories[index].couleur = updates.couleur;
+    if (updates.color !== undefined || updates.couleur !== undefined) {
+        categories[index].color = updates.color || updates.couleur;
     }
     
     saveCategories(categories);
@@ -222,7 +273,7 @@ export const updateCategory = (id, updates) => {
 };
 
 /**
- * Supprime une catégorie (supprime pour tous les métiers)
+ * Delete a category (deletes for all professions)
  */
 export const deleteCategory = (id) => {
     const categories = loadCategories();
@@ -232,57 +283,91 @@ export const deleteCategory = (id) => {
         return false;
     }
     
-    // Supprime les critères associés
-    const criteres = loadCriteres();
-    const criteresToDelete = criteres.filter(c => category.critereIds.includes(c.id));
-    criteresToDelete.forEach(critere => {
-        deleteCritere(critere.id);
+    // Delete associated criteria
+    const criteria = loadCriteria();
+    const criterionIds = category.criterionIds || category.critereIds || [];
+    const criteriaToDelete = criteria.filter(c => criterionIds.includes(c.id));
+    criteriaToDelete.forEach(criterion => {
+        deleteCriterion(criterion.id);
     });
     
-    // Supprime la catégorie
+    // Delete the category
     const filtered = categories.filter(c => c.id !== id);
     saveCategories(filtered);
     
     return true;
 };
 
-// ==================== CRITERES (Motivations clés) ====================
+// ==================== CRITERIA (Key Motivations) ====================
 
 /**
- * Charge les critères depuis localStorage
+ * Load criteria from localStorage
  */
-export const loadCriteres = () => {
+export const loadCriteria = () => {
     try {
-        const data = localStorage.getItem(CRITERES_STORAGE_KEY);
+        // Try new key first
+        let data = localStorage.getItem(CRITERIA_STORAGE_KEY);
+        if (!data) {
+            // Try legacy key for migration
+            data = localStorage.getItem(CRITERES_STORAGE_KEY);
+            if (data) {
+                const criteres = JSON.parse(data);
+                // Migrate to new structure
+                const criteria = criteres.map(c => ({
+                    id: c.id,
+                    name: c.nom || c.name,
+                    categoryId: c.categoryId,
+                    created_at: c.created_at
+                }));
+                saveCriteria(criteria);
+                localStorage.removeItem(CRITERES_STORAGE_KEY);
+                return criteria;
+            }
+        }
         if (!data) {
             return [];
         }
-        return JSON.parse(data);
+        const criteria = JSON.parse(data);
+        // Migrate old structure if needed
+        return criteria.map(c => {
+            if (c.nom && !c.name) {
+                return { ...c, name: c.nom };
+            }
+            return c;
+        });
     } catch (error) {
-        console.error('Erreur lors du chargement des critères:', error);
+        console.error('Error loading criteria:', error);
         return [];
     }
 };
 
 /**
- * Sauvegarde les critères dans localStorage
+ * Save criteria to localStorage
  */
-export const saveCriteres = (criteres) => {
+export const saveCriteria = (criteria) => {
     try {
-        localStorage.setItem(CRITERES_STORAGE_KEY, JSON.stringify(criteres));
+        localStorage.setItem(CRITERIA_STORAGE_KEY, JSON.stringify(criteria));
         return true;
     } catch (error) {
-        console.error('Erreur lors de la sauvegarde des critères:', error);
+        console.error('Error saving criteria:', error);
         return false;
     }
 };
 
 /**
- * Récupère le prochain ID de critère disponible
+ * Get next available criterion ID
  */
-export const getNextCritereId = () => {
+export const getNextCriterionId = () => {
     try {
-        const nextId = parseInt(localStorage.getItem(NEXT_CRITERE_ID_KEY) || '1', 10);
+        let nextId = parseInt(localStorage.getItem(NEXT_CRITERION_ID_KEY) || '0', 10);
+        if (nextId === 0) {
+            // Try legacy key
+            nextId = parseInt(localStorage.getItem(NEXT_CRITERE_ID_KEY) || '1', 10);
+            if (nextId > 0) {
+                setNextCriterionId(nextId);
+                localStorage.removeItem(NEXT_CRITERE_ID_KEY);
+            }
+        }
         return isNaN(nextId) ? 1 : nextId;
     } catch (error) {
         return 1;
@@ -290,20 +375,20 @@ export const getNextCritereId = () => {
 };
 
 /**
- * Met à jour le prochain ID de critère
+ * Update next criterion ID
  */
-export const setNextCritereId = (id) => {
+export const setNextCriterionId = (id) => {
     try {
-        localStorage.setItem(NEXT_CRITERE_ID_KEY, id.toString());
+        localStorage.setItem(NEXT_CRITERION_ID_KEY, id.toString());
     } catch (error) {
-        console.error('Erreur lors de la mise à jour du nextCritereId:', error);
+        console.error('Error updating nextCriterionId:', error);
     }
 };
 
 /**
- * Ajoute un nouveau critère (partagé entre tous les métiers)
+ * Add a new criterion (shared across all professions)
  */
-export const addCritere = (categoryId, critere) => {
+export const addCriterion = (categoryId, criterion) => {
     const categories = loadCategories();
     const categoryIndex = categories.findIndex(c => c.id === categoryId);
     
@@ -311,139 +396,183 @@ export const addCritere = (categoryId, critere) => {
         return null;
     }
     
-    const criteres = loadCriteres();
-    const nextId = getNextCritereId();
-    const newCritere = {
+    const criteria = loadCriteria();
+    const nextId = getNextCriterionId();
+    const newCriterion = {
         id: nextId,
-        nom: critere.nom.trim(),
+        name: (criterion.name || criterion.nom || '').trim(),
         categoryId: categoryId,
         created_at: new Date().toISOString(),
     };
     
-    criteres.push(newCritere);
-    saveCriteres(criteres);
-    setNextCritereId(nextId + 1);
+    criteria.push(newCriterion);
+    saveCriteria(criteria);
+    setNextCriterionId(nextId + 1);
     
-    // Ajoute le critère à la catégorie
-    if (!categories[categoryIndex].critereIds) {
-        categories[categoryIndex].critereIds = [];
+    // Add criterion to category
+    const cat = categories[categoryIndex];
+    if (!cat.criterionIds) {
+        cat.criterionIds = cat.critereIds || [];
     }
-    categories[categoryIndex].critereIds.push(nextId);
+    cat.criterionIds.push(nextId);
+    // Remove legacy key if exists
+    if (cat.critereIds) {
+        delete cat.critereIds;
+    }
     saveCategories(categories);
     
-    return newCritere;
+    return newCriterion;
 };
 
 /**
- * Met à jour un critère (modifie pour tous les métiers)
+ * Update a criterion (affects all professions for name, only current profession for weight)
  */
-export const updateCritere = (critereId, updates) => {
-    const criteres = loadCriteres();
-    const index = criteres.findIndex(c => c.id === critereId);
+export const updateCriterion = (criterionId, updates) => {
+    const criteria = loadCriteria();
+    const index = criteria.findIndex(c => c.id === criterionId);
     
     if (index === -1) {
         return null;
     }
     
-    if (updates.nom !== undefined) {
-        criteres[index].nom = updates.nom.trim();
+    if (updates.name !== undefined || updates.nom !== undefined) {
+        criteria[index].name = (updates.name || updates.nom || '').trim();
     }
     
-    saveCriteres(criteres);
-    return criteres[index];
+    saveCriteria(criteria);
+    return criteria[index];
 };
 
 /**
- * Supprime un critère (supprime pour tous les métiers)
+ * Delete a criterion (deletes for all professions)
  */
-export const deleteCritere = (critereId) => {
-    const criteres = loadCriteres();
-    const critere = criteres.find(c => c.id === critereId);
+export const deleteCriterion = (criterionId) => {
+    const criteria = loadCriteria();
+    const criterion = criteria.find(c => c.id === criterionId);
     
-    if (!critere) {
+    if (!criterion) {
         return false;
     }
     
-    // Supprime le critère de la catégorie
+    // Delete criterion from category
     const categories = loadCategories();
-    const categoryIndex = categories.findIndex(c => c.id === critere.categoryId);
+    const categoryIndex = categories.findIndex(c => c.id === criterion.categoryId);
     if (categoryIndex !== -1) {
-        if (!categories[categoryIndex].critereIds) {
-            categories[categoryIndex].critereIds = [];
+        const cat = categories[categoryIndex];
+        const criterionIds = cat.criterionIds || cat.critereIds || [];
+        cat.criterionIds = criterionIds.filter(id => id !== criterionId);
+        if (cat.critereIds) {
+            delete cat.critereIds;
         }
-        categories[categoryIndex].critereIds = categories[categoryIndex].critereIds.filter(
-            id => id !== critereId
-        );
         saveCategories(categories);
     }
     
-    // Supprime les poids associés à ce critère
-    const weights = loadCritereWeights();
-    const filteredWeights = weights.filter(w => w.critereId !== critereId);
-    saveCritereWeights(filteredWeights);
+    // Delete weights associated with this criterion
+    const weights = loadCriterionWeights();
+    const filteredWeights = weights.filter(w => w.criterionId !== criterionId);
+    saveCriterionWeights(filteredWeights);
     
-    // Supprime le critère
-    const filtered = criteres.filter(c => c.id !== critereId);
-    saveCriteres(filtered);
+    // Delete the criterion
+    const filtered = criteria.filter(c => c.id !== criterionId);
+    saveCriteria(filtered);
     
     return true;
 };
 
-// ==================== CRITERE WEIGHTS (Poids spécifiques par métier) ====================
+// Legacy functions for backward compatibility
+export const loadCriteres = loadCriteria;
+export const saveCriteres = saveCriteria;
+export const getNextCritereId = getNextCriterionId;
+export const setNextCritereId = setNextCriterionId;
+export const addCritere = (categoryId, critere) => addCriterion(categoryId, { name: critere.nom || critere.name });
+export const updateCritere = (id, updates) => updateCriterion(id, { name: updates.nom || updates.name });
+export const deleteCritere = deleteCriterion;
+
+// ==================== CRITERION WEIGHTS (Weights specific to each profession) ====================
 
 /**
- * Charge les poids des critères depuis localStorage
- * Structure: [{ metierId, categoryId, critereId, poids }]
+ * Load criterion weights from localStorage
+ * Structure: [{ professionId, categoryId, criterionId, weight }]
  */
-export const loadCritereWeights = () => {
+export const loadCriterionWeights = () => {
     try {
-        const data = localStorage.getItem(CRITERE_WEIGHTS_STORAGE_KEY);
+        // Try new key first
+        let data = localStorage.getItem(CRITERION_WEIGHTS_STORAGE_KEY);
+        if (!data) {
+            // Try legacy key for migration
+            data = localStorage.getItem(CRITERE_WEIGHTS_STORAGE_KEY);
+            if (data) {
+                const oldWeights = JSON.parse(data);
+                // Migrate to new structure
+                const weights = oldWeights.map(w => ({
+                    professionId: w.metierId || w.professionId,
+                    categoryId: w.categoryId,
+                    criterionId: w.critereId || w.criterionId,
+                    weight: w.poids || w.weight
+                }));
+                saveCriterionWeights(weights);
+                localStorage.removeItem(CRITERE_WEIGHTS_STORAGE_KEY);
+                return weights;
+            }
+        }
         if (!data) {
             return [];
         }
-        return JSON.parse(data);
+        const weights = JSON.parse(data);
+        // Migrate old structure if needed
+        return weights.map(w => {
+            if (w.metierId || w.poids) {
+                return {
+                    professionId: w.metierId || w.professionId,
+                    categoryId: w.categoryId,
+                    criterionId: w.critereId || w.criterionId,
+                    weight: w.poids || w.weight
+                };
+            }
+            return w;
+        });
     } catch (error) {
-        console.error('Erreur lors du chargement des poids:', error);
+        console.error('Error loading weights:', error);
         return [];
     }
 };
 
 /**
- * Sauvegarde les poids des critères dans localStorage
+ * Save criterion weights to localStorage
  */
-export const saveCritereWeights = (weights) => {
+export const saveCriterionWeights = (weights) => {
     try {
-        localStorage.setItem(CRITERE_WEIGHTS_STORAGE_KEY, JSON.stringify(weights));
+        localStorage.setItem(CRITERION_WEIGHTS_STORAGE_KEY, JSON.stringify(weights));
         return true;
     } catch (error) {
-        console.error('Erreur lors de la sauvegarde des poids:', error);
+        console.error('Error saving weights:', error);
         return false;
     }
 };
 
 /**
- * Récupère le poids d'un critère pour un métier donné
+ * Get weight of a criterion for a given profession
  */
-export const getCritereWeight = (metierId, critereId) => {
-    const weights = loadCritereWeights();
-    const weight = weights.find(w => w.metierId === metierId && w.critereId === critereId);
-    return weight ? weight.poids : 15; // Défaut: 15
+export const getCriterionWeight = (professionId, criterionId) => {
+    const weights = loadCriterionWeights();
+    const weight = weights.find(w => w.professionId === professionId && w.criterionId === criterionId);
+    return weight ? weight.weight : 15; // Default: 15
 };
 
 /**
- * Met à jour le poids d'un critère pour un métier donné
+ * Update weight of a criterion for a given profession
  */
-export const setCritereWeight = (metierId, categoryId, critereId, poids) => {
-    const weights = loadCritereWeights();
+export const setCriterionWeight = (professionId, categoryId, criterionId, weight) => {
+    const weights = loadCriterionWeights();
     const index = weights.findIndex(
-        w => w.metierId === metierId && w.critereId === critereId
+        w => w.professionId === professionId && w.criterionId === criterionId
     );
     
     const weightData = {
-        metierId,
+        professionId,
         categoryId,
-        critereId,
-        poids: parseFloat(poids),
+        criterionId,
+        weight: parseFloat(weight),
     };
     
     if (index === -1) {
@@ -452,29 +581,36 @@ export const setCritereWeight = (metierId, categoryId, critereId, poids) => {
         weights[index] = weightData;
     }
     
-    saveCritereWeights(weights);
+    saveCriterionWeights(weights);
     return weightData;
 };
 
 /**
- * Initialise les poids pour un nouveau métier (copie du dernier métier créé)
+ * Initialize weights for a new profession (copy from last created profession)
  */
-export const initializeMetierWeights = (newMetierId, sourceMetierId) => {
-    const sourceWeights = loadCritereWeights().filter(w => w.metierId === sourceMetierId);
-    const weights = loadCritereWeights();
+export const initializeProfessionWeights = (newProfessionId, sourceProfessionId) => {
+    const sourceWeights = loadCriterionWeights().filter(w => w.professionId === sourceProfessionId);
+    const weights = loadCriterionWeights();
     
     sourceWeights.forEach(weight => {
         weights.push({
-            metierId: newMetierId,
+            professionId: newProfessionId,
             categoryId: weight.categoryId,
-            critereId: weight.critereId,
-            poids: weight.poids,
+            criterionId: weight.criterionId,
+            weight: weight.weight,
         });
     });
     
-    saveCritereWeights(weights);
-    return weights.filter(w => w.metierId === newMetierId);
+    saveCriterionWeights(weights);
+    return weights.filter(w => w.professionId === newProfessionId);
 };
+
+// Legacy functions
+export const loadCritereWeights = loadCriterionWeights;
+export const saveCritereWeights = saveCriterionWeights;
+export const getCritereWeight = (metierId, critereId) => getCriterionWeight(metierId, critereId);
+export const setCritereWeight = (metierId, categoryId, critereId, poids) => setCriterionWeight(metierId, categoryId, critereId, poids);
+export const initializeMetierWeights = initializeProfessionWeights;
 
 /**
  * Migrate old data structure to new structure
@@ -485,63 +621,93 @@ const migrateOldData = () => {
     
     const migratedCategories = categories.map(category => {
         // If category has old structure (criteres array), migrate it
-        if (category.criteres && Array.isArray(category.criteres) && category.criteres.length > 0 && !category.critereIds) {
+        const oldCriteres = category.criteres;
+        const oldCritereIds = category.critereIds;
+        const criterionIds = category.criterionIds || oldCritereIds || [];
+        
+        if (oldCriteres && Array.isArray(oldCriteres) && oldCriteres.length > 0 && criterionIds.length === 0) {
             needsMigration = true;
             
-            // Migrate criteres to separate storage
-            const criteres = loadCriteres();
-            const weights = loadCritereWeights();
-            const metiers = loadMetiers();
+            // Migrate criteria to separate storage
+            const criteria = loadCriteria();
+            const weights = loadCriterionWeights();
+            const professions = loadProfessions();
             
-            category.criteres.forEach(oldCritere => {
-                // Check if critere already exists
-                const existingCritere = criteres.find(c => c.id === oldCritere.id);
-                if (!existingCritere) {
-                    criteres.push({
+            oldCriteres.forEach(oldCritere => {
+                // Check if criterion already exists
+                const existingCriterion = criteria.find(c => c.id === oldCritere.id);
+                if (!existingCriterion) {
+                    criteria.push({
                         id: oldCritere.id,
-                        nom: oldCritere.nom,
+                        name: oldCritere.nom || oldCritere.name,
                         categoryId: category.id,
                         created_at: oldCritere.created_at || new Date().toISOString(),
                     });
                 }
                 
-                // Migrate weights for all metiers
-                metiers.forEach(metier => {
+                // Migrate weights for all professions
+                professions.forEach(profession => {
                     const existingWeight = weights.find(
-                        w => w.metierId === metier.id && w.critereId === oldCritere.id
+                        w => w.professionId === profession.id && w.criterionId === oldCritere.id
                     );
                     if (!existingWeight) {
                         weights.push({
-                            metierId: metier.id,
+                            professionId: profession.id,
                             categoryId: category.id,
-                            critereId: oldCritere.id,
-                            poids: oldCritere.poids || 15,
+                            criterionId: oldCritere.id,
+                            weight: oldCritere.poids || oldCritere.weight || 15,
                         });
                     }
                 });
             });
             
-            saveCriteres(criteres);
-            saveCritereWeights(weights);
+            saveCriteria(criteria);
+            saveCriterionWeights(weights);
             
             // Return migrated category
-            return {
+            const migrated = {
                 ...category,
-                critereIds: category.criteres.map(c => c.id).filter(id => id),
-                criteres: undefined // Remove old criteres array
+                criterionIds: oldCriteres.map(c => c.id).filter(id => id),
             };
+            delete migrated.criteres;
+            delete migrated.critereIds;
+            return migrated;
         }
         
-        // Ensure critereIds exists
-        if (!category.critereIds) {
+        // Ensure criterionIds exists and migrate critereIds if needed
+        if (oldCritereIds && !category.criterionIds) {
             needsMigration = true;
             return {
                 ...category,
-                critereIds: []
+                criterionIds: oldCritereIds,
             };
         }
         
-        return category;
+        if (!category.criterionIds) {
+            needsMigration = true;
+            return {
+                ...category,
+                criterionIds: []
+            };
+        }
+        
+        // Clean up legacy keys
+        const cleaned = { ...category };
+        if (cleaned.critereIds) delete cleaned.critereIds;
+        if (cleaned.criteres) delete cleaned.criteres;
+        if (cleaned.nom) {
+            cleaned.name = cleaned.nom;
+            delete cleaned.nom;
+        }
+        if (cleaned.couleur) {
+            cleaned.color = cleaned.couleur;
+            delete cleaned.couleur;
+        }
+        if (needsMigration || cleaned.nom || cleaned.couleur || cleaned.critereIds || cleaned.criteres) {
+            needsMigration = true;
+        }
+        
+        return cleaned;
     });
     
     if (needsMigration) {
@@ -552,49 +718,52 @@ const migrateOldData = () => {
 };
 
 /**
- * Récupère toutes les catégories avec leurs critères et poids pour un métier donné
+ * Get all categories with their criteria and weights for a given profession
  */
-export const getCategoriesForMetier = (metierId) => {
-    if (!metierId) {
+export const getCategoriesForProfession = (professionId) => {
+    if (!professionId) {
         return [];
     }
     
     // Migrate old data if needed
     const categories = migrateOldData();
-    const criteres = loadCriteres();
-    const weights = loadCritereWeights();
+    const criteria = loadCriteria();
+    const weights = loadCriterionWeights();
     
     return categories.map(category => {
-        const critereIds = category.critereIds || [];
-        const categoryCriteres = critereIds
-            .map(critereId => {
-                const critere = criteres.find(c => c.id === critereId);
-                if (!critere) return null;
+        const criterionIds = category.criterionIds || [];
+        const categoryCriteria = criterionIds
+            .map(criterionId => {
+                const criterion = criteria.find(c => c.id === criterionId);
+                if (!criterion) return null;
                 
                 const weight = weights.find(
-                    w => w.metierId === metierId && w.critereId === critereId
+                    w => w.professionId === professionId && w.criterionId === criterionId
                 );
                 
                 return {
-                    ...critere,
-                    poids: weight ? weight.poids : 15, // Défaut: 15
+                    ...criterion,
+                    weight: weight ? weight.weight : 15, // Default: 15
                 };
             })
             .filter(c => c !== null);
         
         return {
             ...category,
-            criteres: categoryCriteres,
+            criteria: categoryCriteria,
         };
     });
 };
 
+// Legacy function
+export const getCategoriesForMetier = getCategoriesForProfession;
+
 /**
- * Calcule le poids total d'une catégorie pour un métier donné
+ * Calculate total weight of a category for a given profession
  */
-export const getCategoryTotalWeight = (category, metierId) => {
-    if (!category || !category.criteres || category.criteres.length === 0) {
+export const getCategoryTotalWeight = (category, professionId) => {
+    if (!category || !category.criteria || category.criteria.length === 0) {
         return 0;
     }
-    return category.criteres.reduce((sum, critere) => sum + (critere.poids || 15), 0);
+    return category.criteria.reduce((sum, criterion) => sum + (criterion.weight || 15), 0);
 };
