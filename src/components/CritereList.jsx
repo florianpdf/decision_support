@@ -136,10 +136,12 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                             const isSelected = displayType === criterionType;
                             const label = CRITERION_TYPE_LABELS[criterionType];
                             const color = CRITERION_TYPE_COLORS[criterionType];
+                            const inputId = `criterion-type-${category.id}-${criterion.id}-${criterionType}`;
                             
                             return (
                               <label
                                 key={criterionType}
+                                htmlFor={inputId}
                                 style={{
                                   display: 'flex',
                                   alignItems: 'center',
@@ -154,6 +156,7 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                               >
                                 <input
                                   type="radio"
+                                  id={inputId}
                                   name={`criterion-type-${category.id}-${criterion.id}`}
                                   value={criterionType}
                                   checked={isSelected}

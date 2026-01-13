@@ -99,10 +99,12 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                             const isSelected = type === criterionType;
                             const label = CRITERION_TYPE_LABELS[criterionType];
                             const color = CRITERION_TYPE_COLORS[criterionType];
+                            const inputId = `edit-criterion-type-${critere.id}-${criterionType}`;
                             
                             return (
                                 <label
                                     key={criterionType}
+                                    htmlFor={inputId}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -117,6 +119,7 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                                 >
                                     <input
                                         type="radio"
+                                        id={inputId}
                                         name={`edit-criterion-type-${critere.id}`}
                                         value={criterionType}
                                         checked={isSelected}

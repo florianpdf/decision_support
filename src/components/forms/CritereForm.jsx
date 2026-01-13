@@ -102,10 +102,12 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
                             const isSelected = type === criterionType;
                             const label = CRITERION_TYPE_LABELS[criterionType];
                             const color = CRITERION_TYPE_COLORS[criterionType];
+                            const inputId = `criterion-type-${categoryId}-${criterionType}`;
                             
                             return (
                                 <label
                                     key={criterionType}
+                                    htmlFor={inputId}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -120,6 +122,7 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
                                 >
                                     <input
                                         type="radio"
+                                        id={inputId}
                                         name={`criterion-type-${categoryId}`}
                                         value={criterionType}
                                         checked={isSelected}
