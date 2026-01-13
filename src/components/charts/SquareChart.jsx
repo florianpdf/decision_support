@@ -345,6 +345,7 @@ function SquareChart({ categories, professionId }) {
         }
         
         const data = payload[0].payload;
+        const criterionName = data.name || '';
         const weight = data.weight || data.size || data.value || 0;
         
         let importanceLabel = '';
@@ -360,15 +361,31 @@ function SquareChart({ categories, professionId }) {
         
         return (
             <div style={{
-                backgroundColor: 'white',
-                padding: '10px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                backgroundColor: '#ffffff',
+                padding: '14px 16px',
+                border: 'none',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
+                minWidth: '180px',
+                maxWidth: '280px'
             }}>
-                <p style={{ color: '#666', fontSize: '0.9rem', margin: 0 }}>
+                <div style={{
+                    color: '#2c3e50',
+                    fontSize: '0.95rem',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    lineHeight: '1.4'
+                }}>
+                    {criterionName}
+                </div>
+                <div style={{
+                    color: '#7f8c8d',
+                    fontSize: '0.85rem',
+                    fontWeight: '400',
+                    lineHeight: '1.4'
+                }}>
                     {importanceLabel}
-                </p>
+                </div>
             </div>
         );
     }, []);
