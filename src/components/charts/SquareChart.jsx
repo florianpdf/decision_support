@@ -129,15 +129,26 @@ function SquareChart({ categories, professionId }) {
             // via root by finding the parent (depth 1) then the corresponding child
             let criterionData = null;
             
-            // Method 1: Use payload if available and has all required properties
-            // Check if payload has the properties we need (id, type, categoryColor)
-            // We need both type and categoryColor to be sure we have the correct data
-            if (payload && payload.id && payload.type !== undefined && payload.categoryColor !== undefined) {
-                criterionData = payload;
-            } 
-            // Method 2: Find via root by traversing groups and their children
-            // This is more reliable as it uses the index, not the name
-            else if (root?.children) {
+            // Always use Method 3 first (most reliable) - find by index in data
+            // This ensures each criterion is found correctly even if names are duplicate
+            // The Treemap structure maintains order, so we can use the index
+            if (data.length > 0) {
+                let globalLeafIndex = 0;
+                for (const group of data) {
+                    if (group.children) {
+                        if (globalLeafIndex <= index && index < globalLeafIndex + group.children.length) {
+                            const localIndex = index - globalLeafIndex;
+                            criterionData = group.children[localIndex];
+                            break;
+                        }
+                        globalLeafIndex += group.children.length;
+                    }
+                }
+            }
+            
+            // Fallback: Method 2 - Find via root by traversing groups and their children
+            // This is more reliable than payload as it uses the index, not the name
+            if (!criterionData && root?.children) {
                 // For depth 2, we need to find the correct leaf by traversing all groups
                 // The index in Treemap for depth 2 is a global index across all leaves
                 let globalLeafIndex = 0;
@@ -156,38 +167,30 @@ function SquareChart({ categories, professionId }) {
                 }
             }
             
-            // Method 3: Use index to find in data (via closure) - most reliable
-            // The Treemap structure maintains order, so we can use the index
-            // This ensures each criterion is found correctly even if names are duplicate
-            if (!criterionData && data.length > 0) {
-                let globalLeafIndex = 0;
-                for (const group of data) {
-                    if (group.children) {
-                        if (globalLeafIndex <= index && index < globalLeafIndex + group.children.length) {
-                            const localIndex = index - globalLeafIndex;
-                            criterionData = group.children[localIndex];
-                            break;
-                        }
-                        globalLeafIndex += group.children.length;
-                    }
-                }
+            // Last resort: Method 1 - Use payload if available and has all required properties
+            // Check if payload has the properties we need (id, type, categoryColor)
+            // We need both type and categoryColor to be sure we have the correct data
+            if (!criterionData && payload && payload.id && payload.type !== undefined && payload.categoryColor !== undefined) {
+                criterionData = payload;
             }
             
             if (!criterionData) {
                 return null;
             }
             
-            // Debug: Log criterion data to verify correct retrieval
+            // Debug: Log all criterion data to verify correct retrieval
             // Remove this after debugging
             if (criterionData.name && data.length > 0) {
                 const sameNameCount = data.reduce((count, group) => {
                     return count + (group.children?.filter(c => c.name === criterionData.name).length || 0);
                 }, 0);
                 if (sameNameCount > 1) {
-                    console.log(`[SquareChart] Found criterion "${criterionData.name}" (ID: ${criterionData.id}, index: ${index})`, {
+                    console.log(`[SquareChart] Found criterion "${criterionData.name}" (ID: ${criterionData.id}, index: ${index}, depth: ${depth})`, {
                         type: criterionData.type,
                         categoryColor: criterionData.categoryColor,
-                        fill: criterionData.fill
+                        fill: criterionData.fill,
+                        payload: payload ? 'has payload' : 'no payload',
+                        method: payload && payload.id ? 'method1' : (root?.children ? 'method2' : 'method3')
                     });
                 }
             }
