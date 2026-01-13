@@ -6,37 +6,40 @@ import { LIMITS } from './constants';
 
 /**
  * Validate category name
- * @param {string} nom - Category name
+ * @param {string} name - Category name
  * @returns {string|null} Error message or null if valid
  */
-export const validateCategoryName = (nom) => {
-  if (!nom || !nom.trim()) {
-    return 'Veuillez saisir un nom pour l\'intérêt professionnel';
+export const validateCategoryName = (name) => {
+  if (!name || !name.trim()) {
+    return 'Please enter a name for the professional interest';
   }
   return null;
 };
 
 /**
  * Validate criterion name
- * @param {string} nom - Criterion name
+ * @param {string} name - Criterion name
  * @returns {string|null} Error message or null if valid
  */
-export const validateCritereName = (nom) => {
-  if (!nom || !nom.trim()) {
-    return 'Veuillez saisir un nom pour la motivation clé';
+export const validateCriterionName = (name) => {
+  if (!name || !name.trim()) {
+    return 'Please enter a name for the key motivation';
   }
   return null;
 };
 
+// Legacy function for backward compatibility
+export const validateCritereName = validateCriterionName;
+
 /**
  * Validate weight value
- * @param {number} poids - Weight value
+ * @param {number} weight - Weight value
  * @returns {string|null} Error message or null if valid
  */
-export const validateWeight = (poids) => {
-  const poidsNum = parseFloat(poids);
-  if (isNaN(poidsNum) || poidsNum < LIMITS.MIN_WEIGHT || poidsNum > LIMITS.MAX_WEIGHT) {
-    return `L'importance doit être entre ${LIMITS.MIN_WEIGHT} et ${LIMITS.MAX_WEIGHT}`;
+export const validateWeight = (weight) => {
+  const weightNum = parseFloat(weight);
+  if (isNaN(weightNum) || weightNum < LIMITS.MIN_WEIGHT || weightNum > LIMITS.MAX_WEIGHT) {
+    return `Importance must be between ${LIMITS.MIN_WEIGHT} and ${LIMITS.MAX_WEIGHT}`;
   }
   return null;
 };
@@ -48,7 +51,7 @@ export const validateWeight = (poids) => {
  */
 export const validateCategoryLimit = (currentCount) => {
   if (currentCount >= LIMITS.MAX_CATEGORIES) {
-    return `Vous ne pouvez pas ajouter plus de ${LIMITS.MAX_CATEGORIES} intérêts professionnels`;
+    return `You cannot add more than ${LIMITS.MAX_CATEGORIES} professional interests`;
   }
   return null;
 };
@@ -58,22 +61,23 @@ export const validateCategoryLimit = (currentCount) => {
  * @param {number} currentCount - Current number of criteria in category
  * @returns {string|null} Error message or null if valid
  */
-export const validateCritereLimit = (currentCount) => {
+export const validateCriterionLimit = (currentCount) => {
   if (currentCount >= LIMITS.MAX_CRITERES_PER_CATEGORY) {
-    return `Vous ne pouvez pas ajouter plus de ${LIMITS.MAX_CRITERES_PER_CATEGORY} motivations clés par intérêt professionnel`;
+    return `You cannot add more than ${LIMITS.MAX_CRITERES_PER_CATEGORY} key motivations per professional interest`;
   }
   return null;
 };
 
 /**
  * Check if color is already used by another category
- * @param {string} couleur - Color to check
+ * @param {string} color - Color to check
  * @param {Array} categories - List of categories
  * @param {number} excludeId - Category ID to exclude from check
  * @returns {boolean} True if color is already used
  */
-export const isColorUsed = (couleur, categories, excludeId = null) => {
-  return categories.some(cat => 
-    cat.id !== excludeId && cat.couleur === couleur
-  );
+export const isColorUsed = (color, categories, excludeId = null) => {
+  return categories.some(cat => {
+    const catColor = cat.color || cat.couleur;
+    return cat.id !== excludeId && catColor === color;
+  });
 };
