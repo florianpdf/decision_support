@@ -100,11 +100,18 @@ export const useProfessions = () => {
 
   /**
    * Delete a profession
+   * Allows deletion of last profession only if no categories or criteria exist
    */
   const handleDeleteProfession = useCallback((professionId) => {
     if (professions.length === 1) {
-      // Last profession - special handling
-      throw new Error('CANT_DELETE_LAST_PROFESSION');
+      // Last profession - check if there are any categories or criteria
+      const categories = loadCategories();
+      const criteria = loadCriteria();
+      
+      if (categories.length > 0 || criteria.length > 0) {
+        throw new Error('CANT_DELETE_LAST_PROFESSION_WITH_DATA');
+      }
+      // If no categories or criteria, allow deletion
     }
 
     deleteProfession(professionId);

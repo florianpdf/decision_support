@@ -275,8 +275,18 @@ function App() {
   const onDeleteProfession = (professionId) => {
     const profession = professions.find(p => p.id === professionId);
     if (profession) {
+      const allCategories = loadCategories();
+      const allCriteria = loadCriteria();
+      const hasData = allCategories.length > 0 || allCriteria.length > 0;
+      
+      if (professions.length === 1 && hasData) {
+        // Last profession with data - cannot delete
+        showError('Impossible de supprimer le dernier métier tant qu\'il reste des intérêts professionnels ou des motivations clés. Supprimez d\'abord tous les intérêts professionnels et leurs motivations clés.');
+        return;
+      }
+      
       if (professions.length === 1) {
-        // Last profession - special confirmation
+        // Last profession without data - special confirmation
         setDeleteProfessionModal({ 
           isOpen: true, 
           professionId, 
@@ -300,8 +310,8 @@ function App() {
       showSuccess('Métier supprimé avec succès');
       setDeleteProfessionModal({ isOpen: false, professionId: null, professionName: '' });
     } catch (err) {
-      if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
-        showError('Impossible de supprimer le dernier métier. Cela supprimerait tous les intérêts professionnels et motivations clés.');
+      if (err.message.includes('CANT_DELETE_LAST_PROFESSION_WITH_DATA')) {
+        showError('Impossible de supprimer le dernier métier tant qu\'il reste des intérêts professionnels ou des motivations clés. Supprimez d\'abord tous les intérêts professionnels et leurs motivations clés.');
       } else {
         showError(err.message);
       }
@@ -492,12 +502,12 @@ function App() {
         onConfirm={confirmDeleteProfession}
         title={deleteProfessionModal.isLast ? "Supprimer le dernier métier" : "Supprimer le métier"}
         message={deleteProfessionModal.isLast 
-          ? `Êtes-vous sûr de vouloir supprimer "${deleteProfessionModal.professionName}" ? C'est le dernier métier. Cette action supprimera TOUS les intérêts professionnels et motivations clés.`
+          ? `Êtes-vous sûr de vouloir supprimer "${deleteProfessionModal.professionName}" ? C'est le dernier métier. Cette action est possible car tous les intérêts professionnels et motivations clés ont déjà été supprimés.`
           : `Êtes-vous sûr de vouloir supprimer "${deleteProfessionModal.professionName}" ?`}
         confirmText="Supprimer"
         cancelText="Annuler"
         requireCheckbox={deleteProfessionModal.isLast}
-        checkboxLabel={deleteProfessionModal.isLast ? "Je comprends que cela supprimera tous les intérêts professionnels et motivations clés" : ""}
+        checkboxLabel={deleteProfessionModal.isLast ? "Je comprends que je supprime le dernier métier" : ""}
         type="danger"
       />
 
