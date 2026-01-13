@@ -42,8 +42,8 @@ const CategoriesList = ({
   if (categories.length === 0) {
     return (
       <EmptyState
-        title="No professional interest at the moment"
-        description="Use the form to add one"
+        title="Aucun intérêt professionnel pour le moment"
+        description="Utilisez le formulaire pour en ajouter"
       />
     );
   }

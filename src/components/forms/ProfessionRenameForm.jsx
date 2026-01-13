@@ -14,7 +14,7 @@ function ProfessionRenameForm({ profession, onSubmit, onCancel }) {
     e.preventDefault();
     
     if (!name.trim()) {
-      alert('Please enter a name for the profession');
+      alert('Veuillez saisir un nom pour le métier');
       return;
     }
     
@@ -29,14 +29,14 @@ function ProfessionRenameForm({ profession, onSubmit, onCancel }) {
     <form onSubmit={handleSubmit} className="profession-rename-form">
       <div className="form-group">
         <label htmlFor="profession-rename-name">
-          📋 Profession Name <span style={{ color: '#e74c3c' }} aria-label="required">*</span>
+          📋 Nom du métier <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
         </label>
         <input
           type="text"
           id="profession-rename-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Developer, Manager, Consultant..."
+          placeholder="Ex: Développeur, Manager, Consultant..."
           required
           aria-required="true"
         />
@@ -47,14 +47,14 @@ function ProfessionRenameForm({ profession, onSubmit, onCancel }) {
           type="submit" 
           className="btn btn-primary"
         >
-          💾 Save
+          💾 Enregistrer
         </button>
         <button 
           type="button" 
           className="btn btn-secondary"
           onClick={onCancel}
         >
-          Cancel
+          Annuler
         </button>
       </div>
     </form>

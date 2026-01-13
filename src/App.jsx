@@ -59,7 +59,7 @@ function App() {
   const onAddCategory = (categoryData) => {
     try {
       handleAddCategory(categoryData);
-      showSuccess('Professional interest added successfully for all professions');
+      showSuccess('Intérêt professionnel ajouté avec succès pour tous les métiers');
     } catch (err) {
       showError(err.message);
     }
@@ -74,7 +74,7 @@ function App() {
     try {
       const { categoryId, updates } = updateCategoryModal;
       handleUpdateCategory(categoryId, updates);
-      showSuccess('Professional interest updated successfully for all professions');
+      showSuccess('Intérêt professionnel modifié avec succès pour tous les métiers');
       setUpdateCategoryModal({ isOpen: false, categoryId: null });
     } catch (err) {
       showError(err.message);
@@ -92,7 +92,7 @@ function App() {
   const confirmDeleteCategory = () => {
     try {
       handleDeleteCategory(deleteCategoryModal.categoryId);
-      showSuccess('Professional interest deleted successfully for all professions');
+      showSuccess('Intérêt professionnel supprimé avec succès pour tous les métiers');
       setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' });
     } catch (err) {
       showError(err.message);
@@ -102,7 +102,7 @@ function App() {
   const onAddCriterion = (categoryId, criterionData) => {
     try {
       handleAddCriterion(categoryId, criterionData);
-      showSuccess('Key motivation added successfully for all professions');
+      showSuccess('Motivation clé ajoutée avec succès pour tous les métiers');
     } catch (err) {
       showError(err.message);
     }
@@ -116,7 +116,7 @@ function App() {
         // For name updates, we need confirmation
         // For now, we'll show a notification
         handleUpdateCriterion(categoryId, criterionId, updates, silent);
-        showSuccess('Key motivation name updated for all professions. Weight remains specific to this profession.');
+        showSuccess('Nom de la motivation clé modifié pour tous les métiers. Le poids reste spécifique à ce métier.');
       } else {
         // Weight updates are silent and specific to current profession
         handleUpdateCriterion(categoryId, criterionId, updates, true);
@@ -137,7 +137,7 @@ function App() {
   const confirmDeleteCriterion = () => {
     try {
       handleDeleteCriterion(deleteCriterionModal.categoryId, deleteCriterionModal.criterionId);
-      showSuccess('Key motivation deleted successfully for all professions');
+      showSuccess('Motivation clé supprimée avec succès pour tous les métiers');
       setDeleteCriterionModal({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' });
     } catch (err) {
       showError(err.message);
@@ -152,11 +152,11 @@ function App() {
   const handleCreateProfession = (professionData) => {
     try {
       handleAddProfession(professionData);
-      showSuccess('Profession created successfully');
+      showSuccess('Métier créé avec succès');
       setRenameProfessionModal({ isOpen: false, professionId: null });
     } catch (err) {
       if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
-        showError('Cannot delete the last profession');
+        showError('Impossible de supprimer le dernier métier');
       } else {
         showError(err.message);
       }
@@ -171,7 +171,7 @@ function App() {
     try {
       if (renameProfessionModal.professionId) {
         handleUpdateProfession(renameProfessionModal.professionId, { name });
-        showSuccess('Profession renamed successfully');
+        showSuccess('Métier renommé avec succès');
       } else {
         handleCreateProfession({ name });
         return; // Already handled in handleCreateProfession
@@ -207,11 +207,11 @@ function App() {
   const confirmDeleteProfession = () => {
     try {
       handleDeleteProfession(deleteProfessionModal.professionId);
-      showSuccess('Profession deleted successfully');
+      showSuccess('Métier supprimé avec succès');
       setDeleteProfessionModal({ isOpen: false, professionId: null, professionName: '' });
     } catch (err) {
       if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
-        showError('Cannot delete the last profession. This would delete all professional interests and key motivations.');
+        showError('Impossible de supprimer le dernier métier. Cela supprimerait tous les intérêts professionnels et motivations clés.');
       } else {
         showError(err.message);
       }
@@ -263,7 +263,7 @@ function App() {
   if (professionsLoading) {
     return (
       <div className="app-container">
-        <EmptyState title="Loading..." />
+        <EmptyState title="Chargement..." />
       </div>
     );
   }
@@ -272,12 +272,12 @@ function App() {
     return (
       <div className="app-container">
         <header className="app-header" role="banner">
-          <h1>📊 Decision Support</h1>
-          <p>Create your first profession to get started</p>
+          <h1>📊 Aide à la Décision</h1>
+          <p>Créez votre premier métier pour commencer</p>
         </header>
         {message && <Message type="success">{message}</Message>}
         {error && <Message type="error">{error}</Message>}
-        <Card title="➕ Create Your First Profession">
+        <Card title="➕ Créer votre premier métier">
           <ProfessionForm onSubmit={handleCreateProfession} />
         </Card>
       </div>
@@ -289,8 +289,8 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header" role="banner">
-        <h1>📊 Decision Support</h1>
-        <p>Identify your professional interests and key motivations to visualize your priorities</p>
+        <h1>📊 Aide à la Décision</h1>
+        <p>Identifiez vos intérêts professionnels et vos motivations clés pour visualiser vos priorités</p>
       </header>
 
       {message && <Message type="success">{message}</Message>}
@@ -309,12 +309,12 @@ function App() {
         <>
           <div className="app-content">
             <Card
-              title="➕ Create Professional Interest"
-              subtitle="A professional interest groups several key motivations. Choose a name and a color to identify it easily."
+              title="➕ Créer un intérêt professionnel"
+              subtitle="Un intérêt professionnel regroupe plusieurs motivations clés. Choisissez un nom et une couleur pour l'identifier facilement."
             >
               {allCategories.length >= LIMITS.MAX_CATEGORIES ? (
                 <Message type="error">
-                  Limit reached: you cannot add more than {LIMITS.MAX_CATEGORIES} professional interests
+                  Limite atteinte : vous ne pouvez pas ajouter plus de {LIMITS.MAX_CATEGORIES} intérêts professionnels
                 </Message>
               ) : (
                 <CategoryForm
@@ -324,7 +324,7 @@ function App() {
               )}
               <Stats
                 value={`${allCategories.length} / ${LIMITS.MAX_CATEGORIES}`}
-                label="professional interests created"
+                label="intérêts professionnels créés"
                 className="stats-inline"
               />
             </Card>
@@ -332,9 +332,9 @@ function App() {
             <Card
               title={
                 <div className="card-title-with-action">
-                  <span>📋 My Professional Interests</span>
+                  <span>📋 Mes intérêts professionnels</span>
                   {categories.some(cat => cat.criteria && cat.criteria.length > 0) && (
-                    <Tooltip content={allCategoriesOpen ? 'Close all' : 'Open all'}>
+                    <Tooltip content={allCategoriesOpen ? 'Tout fermer' : 'Tout ouvrir'}>
                       <button
                         className="btn-icon toggle-all-categories"
                         onClick={() => {
@@ -342,7 +342,7 @@ function App() {
                             window.toggleAllCategoriesFn();
                           }
                         }}
-                        aria-label={allCategoriesOpen ? 'Close all' : 'Open all'}
+                        aria-label={allCategoriesOpen ? 'Tout fermer' : 'Tout ouvrir'}
                       >
                         <div className={`toggle-icon-wrapper ${allCategoriesOpen ? 'open' : 'closed'}`}>
                           {allCategoriesOpen ? (
@@ -358,7 +358,7 @@ function App() {
               }
             >
               {categoriesLoading ? (
-                <EmptyState title="Loading..." />
+                <EmptyState title="Chargement..." />
               ) : (
                 <CategoriesList
                   categories={categories}
@@ -372,7 +372,7 @@ function App() {
               )}
               {categories.length > 0 && (
                 <Stats
-                  value={`${categories.length} professional interest${categories.length > 1 ? 's' : ''} • ${totalCriteria} key motivation${totalCriteria > 1 ? 's' : ''} total`}
+                  value={`${categories.length} intérêt${categories.length > 1 ? 's' : ''} professionnel${categories.length > 1 ? 's' : ''} • ${totalCriteria} motivation${totalCriteria > 1 ? 's' : ''} clé${totalCriteria > 1 ? 's' : ''} au total`}
                   className="stats-inline"
                 />
               )}
@@ -380,15 +380,15 @@ function App() {
           </div>
 
           <Card
-            title="📈 Visualization"
-            subtitle="The chart below represents your professional interests and key motivations for this profession. The higher a motivation's importance, the larger its square will be."
+            title="📈 Visualisation"
+            subtitle="Le graphique ci-dessous représente vos intérêts professionnels et vos motivations clés pour ce métier. Plus une motivation a une importance élevée, plus son carré sera grand."
           >
             {hasCategoriesWithCriteria ? (
               <SquareChart categories={categories} />
             ) : (
               <EmptyState
-                title="No professional interest with key motivations to display"
-                description="Create a professional interest and add key motivations to see the chart appear"
+                title="Aucun intérêt professionnel avec motivations clés à afficher"
+                description="Créez un intérêt professionnel et ajoutez-y des motivations clés pour voir apparaître le graphique"
               />
             )}
           </Card>
@@ -400,12 +400,12 @@ function App() {
         isOpen={deleteCategoryModal.isOpen}
         onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })}
         onConfirm={confirmDeleteCategory}
-        title="Delete Professional Interest"
-        message={`Are you sure you want to delete "${deleteCategoryModal.categoryName}"? This action will delete this professional interest and all its key motivations for ALL professions.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="Supprimer l'intérêt professionnel"
+        message={`Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera cet intérêt professionnel et toutes ses motivations clés pour TOUS les métiers.`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
         requireCheckbox={true}
-        checkboxLabel={`I understand that this will delete "${deleteCategoryModal.categoryName}" in all professions`}
+        checkboxLabel={`Je comprends que cela supprimera "${deleteCategoryModal.categoryName}" dans tous les métiers`}
         type="danger"
       />
 
@@ -413,12 +413,12 @@ function App() {
         isOpen={deleteCriterionModal.isOpen}
         onClose={() => setDeleteCriterionModal({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' })}
         onConfirm={confirmDeleteCriterion}
-        title="Delete Key Motivation"
-        message={`Are you sure you want to delete "${deleteCriterionModal.criterionName}"? This action will delete this key motivation for ALL professions.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="Supprimer la motivation clé"
+        message={`Êtes-vous sûr de vouloir supprimer "${deleteCriterionModal.criterionName}" ? Cette action supprimera cette motivation clé pour TOUS les métiers.`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
         requireCheckbox={true}
-        checkboxLabel={`I understand that this will delete "${deleteCriterionModal.criterionName}" in all professions`}
+        checkboxLabel={`Je comprends que cela supprimera "${deleteCriterionModal.criterionName}" dans tous les métiers`}
         type="danger"
       />
 
@@ -426,10 +426,10 @@ function App() {
         isOpen={updateCategoryModal.isOpen}
         onClose={() => setUpdateCategoryModal({ isOpen: false, categoryId: null })}
         onConfirm={confirmUpdateCategory}
-        title="Update Professional Interest"
-        message="This update will apply to ALL professions. Are you sure you want to continue?"
-        confirmText="Update"
-        cancelText="Cancel"
+        title="Modifier l'intérêt professionnel"
+        message="Cette modification s'appliquera à TOUS les métiers. Êtes-vous sûr de vouloir continuer ?"
+        confirmText="Modifier"
+        cancelText="Annuler"
         type="warning"
       />
 
@@ -437,14 +437,14 @@ function App() {
         isOpen={deleteProfessionModal.isOpen}
         onClose={() => setDeleteProfessionModal({ isOpen: false, professionId: null, professionName: '' })}
         onConfirm={confirmDeleteProfession}
-        title={deleteProfessionModal.isLast ? "Delete Last Profession" : "Delete Profession"}
+        title={deleteProfessionModal.isLast ? "Supprimer le dernier métier" : "Supprimer le métier"}
         message={deleteProfessionModal.isLast 
-          ? `Are you sure you want to delete "${deleteProfessionModal.professionName}"? This is the last profession. This action will delete ALL professional interests and key motivations.`
-          : `Are you sure you want to delete "${deleteProfessionModal.professionName}"?`}
-        confirmText="Delete"
-        cancelText="Cancel"
+          ? `Êtes-vous sûr de vouloir supprimer "${deleteProfessionModal.professionName}" ? C'est le dernier métier. Cette action supprimera TOUS les intérêts professionnels et motivations clés.`
+          : `Êtes-vous sûr de vouloir supprimer "${deleteProfessionModal.professionName}" ?`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
         requireCheckbox={deleteProfessionModal.isLast}
-        checkboxLabel={deleteProfessionModal.isLast ? "I understand that this will delete all professional interests and key motivations" : ""}
+        checkboxLabel={deleteProfessionModal.isLast ? "Je comprends que cela supprimera tous les intérêts professionnels et motivations clés" : ""}
         type="danger"
       />
 

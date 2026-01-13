@@ -30,18 +30,18 @@ function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, 
         >
           <span className="profession-tab-name">{profession.name}</span>
           <div className="profession-tab-actions" onClick={(e) => e.stopPropagation()}>
-            <Tooltip content="Rename profession" position="top">
+            <Tooltip content="Renommer le métier" position="top">
               <IconButton
                 icon="✏️"
                 onClick={() => onRenameProfession(profession.id)}
-                ariaLabel="Rename profession"
+                ariaLabel="Renommer le métier"
               />
             </Tooltip>
-            <Tooltip content="Delete profession" position="top">
+            <Tooltip content="Supprimer le métier" position="top">
               <IconButton
                 icon="🗑️"
                 onClick={() => onDeleteProfession(profession.id)}
-                ariaLabel="Delete profession"
+                ariaLabel="Supprimer le métier"
                 disabled={professions.length === 1}
               />
             </Tooltip>
@@ -52,9 +52,9 @@ function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, 
         <button
           className="profession-tab-add"
           onClick={onAddProfession}
-          aria-label="Create a new profession"
+          aria-label="Créer un nouveau métier"
         >
-          ➕ New Profession
+          ➕ Nouveau métier
         </button>
       )}
     </div>

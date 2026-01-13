@@ -33,7 +33,7 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
         e.preventDefault();
         
         if (!name.trim()) {
-            alert('Please enter a name for the professional interest');
+            alert('Veuillez saisir un nom pour l\'intérêt professionnel');
             return;
         }
         
@@ -57,32 +57,32 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
         <form onSubmit={handleSubmit}>
             <div className="form-group">
                 <label htmlFor="category-name">
-                    📝 Professional Interest Name <span style={{ color: '#e74c3c' }} aria-label="required">*</span>
+                    📝 Nom de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                 </label>
                 <input
                     type="text"
                     id="category-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Management, Innovation, Relationship, Technical..."
+                    placeholder="Ex: Management, Innovation, Relationnel, Technique..."
                     required
                     aria-required="true"
                     aria-describedby="category-name-help"
                 />
                 <small id="category-name-help" style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
-                    Choose a name that describes your professional interest well
+                    Choisissez un nom qui décrit bien votre intérêt professionnel
                 </small>
             </div>
 
             <div className="form-group">
                 <fieldset>
                     <legend>
-                        🎨 Professional Interest Color <span style={{ color: '#e74c3c' }} aria-label="required">*</span>
+                        🎨 Couleur de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                     </legend>
                     <div style={{ marginBottom: '12px', fontSize: '0.9rem', color: '#7f8c8d' }}>
-                        Click on a color below to select it
+                        Cliquez sur une couleur ci-dessous pour la sélectionner
                     </div>
-                    <div className="color-presets-only" role="radiogroup" aria-label="Color selection">
+                    <div className="color-presets-only" role="radiogroup" aria-label="Sélection de la couleur">
                     {availableColors.length > 0 ? (
                         availableColors.map((presetColor, index) => {
                             const isSelected = color === presetColor;
@@ -104,7 +104,7 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                                         }}
                                         role="radio"
                                         aria-checked={isSelected}
-                                        aria-label={`Color ${presetColor}${isSelected ? ', selected' : ''}`}
+                                        aria-label={`Couleur ${presetColor}${isSelected ? ', sélectionnée' : ''}`}
                                         tabIndex={0}
                                     />
                                 </Tooltip>
@@ -117,7 +117,7 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                             color: '#e74c3c',
                             fontWeight: '600'
                         }}>
-                            All colors are already used. Delete a professional interest to free up a color.
+                            Toutes les couleurs sont déjà utilisées. Supprimez un intérêt professionnel pour libérer une couleur.
                         </div>
                     )}
                     </div>
@@ -137,7 +137,7 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                     cursor: availableColors.length === 0 ? 'not-allowed' : 'pointer'
                 }}
             >
-                ➕ Create Professional Interest
+                ➕ Créer l'intérêt professionnel
             </button>
         </form>
     );

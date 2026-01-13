@@ -10,7 +10,7 @@ function ProfessionForm({ onSubmit, onCancel, existingProfessions = [] }) {
     e.preventDefault();
     
     if (!name.trim()) {
-      alert('Please enter a name for the profession');
+      alert('Veuillez saisir un nom pour le métier');
       return;
     }
     
@@ -25,20 +25,20 @@ function ProfessionForm({ onSubmit, onCancel, existingProfessions = [] }) {
     <form onSubmit={handleSubmit} className="profession-form">
       <div className="form-group">
         <label htmlFor="profession-name">
-          📋 Profession Name <span style={{ color: '#e74c3c' }} aria-label="required">*</span>
+          📋 Nom du métier <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
         </label>
         <input
           type="text"
           id="profession-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ex: Developer, Manager, Consultant..."
+          placeholder="Ex: Développeur, Manager, Consultant..."
           required
           aria-required="true"
           aria-describedby="profession-name-help"
         />
         <small id="profession-name-help" style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
-          Choose a name that describes the profession well
+          Choisissez un nom qui décrit bien le métier
         </small>
       </div>
 
@@ -47,7 +47,7 @@ function ProfessionForm({ onSubmit, onCancel, existingProfessions = [] }) {
           type="submit" 
           className="btn btn-primary"
         >
-          ➕ Create Profession
+          ➕ Créer le métier
         </button>
         {onCancel && (
           <button 
@@ -55,7 +55,7 @@ function ProfessionForm({ onSubmit, onCancel, existingProfessions = [] }) {
             className="btn btn-secondary"
             onClick={onCancel}
           >
-            Cancel
+            Annuler
           </button>
         )}
       </div>
