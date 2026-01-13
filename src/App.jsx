@@ -10,11 +10,12 @@ import CategoriesSidebar from './components/CategoriesSidebar';
 import CategoryDetail from './components/CategoryDetail';
 import SquareChart from './components/charts/SquareChart';
 import ConfirmModal from './components/modals/ConfirmModal';
+import DataMigrationModal from './components/modals/DataMigrationModal';
 import Card from './components/ui/Card';
 import Message from './components/ui/Message';
 import EmptyState from './components/ui/EmptyState';
 import { LIMITS } from './utils/constants';
-import { loadCategories, loadCriteria } from './services/storage';
+import { loadCategories, loadCriteria, checkDataVersion, clearAllData, saveDataVersion } from './services/storage';
 
 /**
  * Main application component
@@ -45,6 +46,13 @@ function App() {
 
   const { message, error, showSuccess, showError } = useNotifications();
 
+  // Data migration modal state
+  const [dataMigrationModal, setDataMigrationModal] = useState({ 
+    isOpen: false, 
+    storedVersion: null, 
+    currentVersion: null 
+  });
+
   // Modal states
   const [deleteCategoryModal, setDeleteCategoryModal] = useState({ isOpen: false, categoryId: null, categoryName: '' });
   const [deleteCriterionModal, setDeleteCriterionModal] = useState({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' });
@@ -55,6 +63,50 @@ function App() {
   
   // Selected category state
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  
+  // Check data version on mount
+  useEffect(() => {
+    const versionCheck = checkDataVersion();
+    
+    if (versionCheck.needsMigration) {
+      setDataMigrationModal({
+        isOpen: true,
+        storedVersion: versionCheck.storedVersion,
+        currentVersion: versionCheck.currentVersion
+      });
+    } else {
+      // Save current version if not already saved
+      if (!versionCheck.storedVersion) {
+        saveDataVersion();
+      }
+    }
+  }, []);
+  
+  // Handle data reset
+  const handleDataReset = () => {
+    const success = clearAllData();
+    if (success) {
+      showSuccess('Données réinitialisées avec succès. La page va se recharger.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } else {
+      showError('Erreur lors de la réinitialisation des données. Veuillez suivre les instructions manuelles.');
+    }
+  };
+  
+  // Check if localStorage.clear() is available (for automatic reset)
+  const canResetAutomatically = () => {
+    try {
+      // Test if we can clear localStorage
+      const testKey = '__test_reset__';
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
   
   // Auto-select first category when categories change
   useEffect(() => {
@@ -388,6 +440,15 @@ function App() {
       )}
 
       {/* Confirmation Modals */}
+      <DataMigrationModal
+        isOpen={dataMigrationModal.isOpen}
+        onClose={() => setDataMigrationModal({ isOpen: false, storedVersion: null, currentVersion: null })}
+        onReset={handleDataReset}
+        storedVersion={dataMigrationModal.storedVersion}
+        currentVersion={dataMigrationModal.currentVersion}
+        canReset={canResetAutomatically()}
+      />
+
       <ConfirmModal
         isOpen={deleteCategoryModal.isOpen}
         onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })}

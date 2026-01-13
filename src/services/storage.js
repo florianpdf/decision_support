@@ -5,6 +5,11 @@
  * Criterion weights are specific to each profession
  */
 
+// Current data structure version
+// Increment this when the data structure changes in a breaking way
+export const DATA_VERSION = '2.0.0';
+const DATA_VERSION_KEY = 'bulle_chart_data_version';
+
 // Storage keys
 const PROFESSIONS_STORAGE_KEY = 'bulle_chart_professions';
 const CATEGORIES_STORAGE_KEY = 'bulle_chart_categories';
@@ -627,6 +632,96 @@ export const setChartColorMode = (professionId, mode) => {
         return true;
     } catch (error) {
         console.error('Error saving chart color mode:', error);
+        return false;
+    }
+};
+
+// ==================== DATA VERSION MANAGEMENT ====================
+
+/**
+ * Get the stored data version from localStorage
+ * @returns {string|null} The stored version or null if not set
+ */
+export const getStoredDataVersion = () => {
+    try {
+        return localStorage.getItem(DATA_VERSION_KEY);
+    } catch (error) {
+        console.error('Error getting data version:', error);
+        return null;
+    }
+};
+
+/**
+ * Save the current data version to localStorage
+ */
+export const saveDataVersion = () => {
+    try {
+        localStorage.setItem(DATA_VERSION_KEY, DATA_VERSION);
+        return true;
+    } catch (error) {
+        console.error('Error saving data version:', error);
+        return false;
+    }
+};
+
+/**
+ * Check if the stored data version is compatible with the current version
+ * @returns {Object} { isCompatible: boolean, storedVersion: string|null, currentVersion: string, needsMigration: boolean }
+ */
+export const checkDataVersion = () => {
+    const storedVersion = getStoredDataVersion();
+    const currentVersion = DATA_VERSION;
+    
+    // If no version is stored, it's old data (before versioning system)
+    if (!storedVersion) {
+        return {
+            isCompatible: false,
+            storedVersion: null,
+            currentVersion: currentVersion,
+            needsMigration: true
+        };
+    }
+    
+    // Compare versions (simple string comparison for now)
+    // If versions don't match, data needs migration
+    const isCompatible = storedVersion === currentVersion;
+    
+    return {
+        isCompatible,
+        storedVersion,
+        currentVersion,
+        needsMigration: !isCompatible
+    };
+};
+
+/**
+ * Clear all application data from localStorage
+ * This will reset the app to its initial state
+ */
+export const clearAllData = () => {
+    try {
+        const keysToRemove = [
+            PROFESSIONS_STORAGE_KEY,
+            CATEGORIES_STORAGE_KEY,
+            CRITERIA_STORAGE_KEY,
+            CRITERION_WEIGHTS_STORAGE_KEY,
+            CHART_COLOR_MODE_STORAGE_KEY,
+            NEXT_PROFESSION_ID_KEY,
+            NEXT_CATEGORY_ID_KEY,
+            NEXT_CRITERION_ID_KEY,
+            DATA_VERSION_KEY
+        ];
+        
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Save the current version after clearing
+        saveDataVersion();
+        
+        return true;
+    } catch (error) {
+        console.error('Error clearing data:', error);
         return false;
     }
 };
