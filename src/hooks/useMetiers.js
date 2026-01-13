@@ -10,7 +10,11 @@ import {
   updateMetier,
   deleteMetier,
   initializeMetierWeights,
-  getCategoriesForMetier
+  getCategoriesForMetier,
+  loadCategories,
+  loadCriteres,
+  loadCritereWeights,
+  saveCritereWeights
 } from '../services/storage';
 import { LIMITS } from '../utils/constants';
 
@@ -29,7 +33,46 @@ export const useMetiers = () => {
   const loadMetiersFromStorage = useCallback(() => {
     try {
       setLoading(true);
-      const loaded = loadMetiers();
+      let loaded = loadMetiers();
+      
+      // If no metiers but old data exists, create a default metier
+      if (loaded.length === 0) {
+        const oldCategories = loadCategories();
+        if (oldCategories && oldCategories.length > 0) {
+          // Migrate: create default metier for old data
+          const defaultMetier = addMetier({ nom: 'Métier par défaut' });
+          loaded = [defaultMetier];
+          
+          // Initialize weights for all existing criteres
+          const allCriteres = loadCriteres();
+          const weights = loadCritereWeights();
+          oldCategories.forEach(category => {
+            const critereIds = category.critereIds || (category.criteres ? category.criteres.map(c => c.id) : []);
+            critereIds.forEach(critereId => {
+              const critere = allCriteres.find(c => c.id === critereId);
+              if (critere) {
+                const oldCritere = category.criteres?.find(c => c.id === critereId);
+                const poids = oldCritere?.poids || 15;
+                
+                // Check if weight already exists
+                const existingWeight = weights.find(
+                  w => w.metierId === defaultMetier.id && w.critereId === critereId
+                );
+                if (!existingWeight) {
+                  weights.push({
+                    metierId: defaultMetier.id,
+                    categoryId: category.id,
+                    critereId: critereId,
+                    poids: poids,
+                  });
+                }
+              }
+            });
+          });
+          saveCritereWeights(weights);
+        }
+      }
+      
       setMetiers(loaded);
       
       // Set current metier to first one if available
