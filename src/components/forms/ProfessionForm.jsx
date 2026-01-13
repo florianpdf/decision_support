@@ -55,7 +55,7 @@ function ProfessionForm({ onSubmit, onCancel, existingProfessions = [], isFirstP
               style={{ width: '18px', height: '18px', cursor: 'pointer' }}
             />
             <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>
-              📋 Utiliser un modèle (10 intérêts professionnels avec 5 motivations clés chacun)
+              📋 Utiliser un modèle (6 intérêts professionnels avec 5 motivations clés chacun)
             </span>
           </label>
           <small style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block', marginLeft: '28px' }}>

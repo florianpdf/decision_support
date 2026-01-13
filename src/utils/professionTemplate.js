@@ -23,7 +23,7 @@ const shuffleArray = (array) => {
 
 /**
  * Generate template data for a profession
- * Creates 10 random categories with 5 criteria each
+ * Creates 6 random categories with 5 criteria each
  * @returns {Object} Template data with categories and criteria
  */
 export const generateProfessionTemplate = () => {
@@ -31,8 +31,8 @@ export const generateProfessionTemplate = () => {
   const shuffledCategories = shuffleArray(CATEGORY_SUGGESTIONS);
   const shuffledCriteria = shuffleArray(CRITERION_SUGGESTIONS);
   
-  // Select 10 random categories
-  const selectedCategories = shuffledCategories.slice(0, 10);
+  // Select 6 random categories
+  const selectedCategories = shuffledCategories.slice(0, 6);
   
   // Select colors for categories (shuffle to randomize)
   const shuffledColors = shuffleArray(COLOR_PALETTE);
