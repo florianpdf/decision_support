@@ -365,6 +365,9 @@ export const deleteCritere = (critereId) => {
     const categories = loadCategories();
     const categoryIndex = categories.findIndex(c => c.id === critere.categoryId);
     if (categoryIndex !== -1) {
+        if (!categories[categoryIndex].critereIds) {
+            categories[categoryIndex].critereIds = [];
+        }
         categories[categoryIndex].critereIds = categories[categoryIndex].critereIds.filter(
             id => id !== critereId
         );
@@ -471,15 +474,96 @@ export const initializeMetierWeights = (newMetierId, sourceMetierId) => {
 };
 
 /**
+ * Migrate old data structure to new structure
+ */
+const migrateOldData = () => {
+    const categories = loadCategories();
+    let needsMigration = false;
+    
+    const migratedCategories = categories.map(category => {
+        // If category has old structure (criteres array), migrate it
+        if (category.criteres && Array.isArray(category.criteres) && category.criteres.length > 0 && !category.critereIds) {
+            needsMigration = true;
+            
+            // Migrate criteres to separate storage
+            const criteres = loadCriteres();
+            const weights = loadCritereWeights();
+            const metiers = loadMetiers();
+            
+            category.criteres.forEach(oldCritere => {
+                // Check if critere already exists
+                const existingCritere = criteres.find(c => c.id === oldCritere.id);
+                if (!existingCritere) {
+                    criteres.push({
+                        id: oldCritere.id,
+                        nom: oldCritere.nom,
+                        categoryId: category.id,
+                        created_at: oldCritere.created_at || new Date().toISOString(),
+                    });
+                }
+                
+                // Migrate weights for all metiers
+                metiers.forEach(metier => {
+                    const existingWeight = weights.find(
+                        w => w.metierId === metier.id && w.critereId === oldCritere.id
+                    );
+                    if (!existingWeight) {
+                        weights.push({
+                            metierId: metier.id,
+                            categoryId: category.id,
+                            critereId: oldCritere.id,
+                            poids: oldCritere.poids || 15,
+                        });
+                    }
+                });
+            });
+            
+            saveCriteres(criteres);
+            saveCritereWeights(weights);
+            
+            // Return migrated category
+            return {
+                ...category,
+                critereIds: category.criteres.map(c => c.id).filter(id => id),
+                criteres: undefined // Remove old criteres array
+            };
+        }
+        
+        // Ensure critereIds exists
+        if (!category.critereIds) {
+            needsMigration = true;
+            return {
+                ...category,
+                critereIds: []
+            };
+        }
+        
+        return category;
+    });
+    
+    if (needsMigration) {
+        saveCategories(migratedCategories);
+    }
+    
+    return migratedCategories;
+};
+
+/**
  * Récupère toutes les catégories avec leurs critères et poids pour un métier donné
  */
 export const getCategoriesForMetier = (metierId) => {
-    const categories = loadCategories();
+    if (!metierId) {
+        return [];
+    }
+    
+    // Migrate old data if needed
+    const categories = migrateOldData();
     const criteres = loadCriteres();
     const weights = loadCritereWeights();
     
     return categories.map(category => {
-        const categoryCriteres = category.critereIds
+        const critereIds = category.critereIds || [];
+        const categoryCriteres = critereIds
             .map(critereId => {
                 const critere = criteres.find(c => c.id === critereId);
                 if (!critere) return null;
