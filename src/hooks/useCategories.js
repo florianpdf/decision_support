@@ -204,13 +204,3 @@ export const useCategories = (professionId) => {
   };
 };
 
-// Legacy exports for backward compatibility
-export const handleAddCritere = (categoryId, critereData) => {
-  return handleAddCriterion(categoryId, { name: critereData.nom, weight: critereData.poids });
-};
-
-export const handleUpdateCritere = (categoryId, critereId, updates, silent) => {
-  return handleUpdateCriterion(categoryId, critereId, { name: updates.nom, weight: updates.poids }, silent);
-};
-
-export const handleDeleteCritere = handleDeleteCriterion;
