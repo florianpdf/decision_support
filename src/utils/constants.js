@@ -27,3 +27,33 @@ export const WEIGHT_RANGES = {
   SMALL_DISADVANTAGE: { min: 19, max: 24 },
   DISADVANTAGE: { min: 25, max: 30 }
 };
+
+// Criterion types for advantage/disadvantage classification
+export const CRITERION_TYPES = {
+  ADVANTAGE: 'advantage',
+  SMALL_ADVANTAGE: 'small_advantage',
+  NEUTRAL: 'neutral', // NSP
+  SMALL_DISADVANTAGE: 'small_disadvantage',
+  DISADVANTAGE: 'disadvantage'
+};
+
+// Default criterion type
+export const DEFAULT_CRITERION_TYPE = CRITERION_TYPES.NEUTRAL;
+
+// Colors for criterion types (advantage/disadvantage)
+export const CRITERION_TYPE_COLORS = {
+  [CRITERION_TYPES.ADVANTAGE]: '#2e7d32',           // Dark green
+  [CRITERION_TYPES.SMALL_ADVANTAGE]: '#66bb6a',    // Light green
+  [CRITERION_TYPES.NEUTRAL]: '#ff9800',            // Orange (NSP)
+  [CRITERION_TYPES.SMALL_DISADVANTAGE]: '#ef5350', // Light red
+  [CRITERION_TYPES.DISADVANTAGE]: '#c62828'        // Dark red
+};
+
+// Labels for criterion types (French UI)
+export const CRITERION_TYPE_LABELS = {
+  [CRITERION_TYPES.ADVANTAGE]: 'Avantage',
+  [CRITERION_TYPES.SMALL_ADVANTAGE]: 'Petit avantage',
+  [CRITERION_TYPES.NEUTRAL]: 'NSP',
+  [CRITERION_TYPES.SMALL_DISADVANTAGE]: 'Petit désavantage',
+  [CRITERION_TYPES.DISADVANTAGE]: 'Désavantage'
+};

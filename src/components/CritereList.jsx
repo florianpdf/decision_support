@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Slider from '@mui/material/Slider';
 import IconButton from './ui/IconButton';
 import CritereEditForm from './forms/CritereEditForm';
-import { getWeightColor } from '../utils/weightColors';
+import { CRITERION_TYPES, CRITERION_TYPE_LABELS, CRITERION_TYPE_COLORS } from '../utils/constants';
 
 /**
  * List of criteria for a category
@@ -11,6 +11,7 @@ import { getWeightColor } from '../utils/weightColors';
 const CritereList = ({ category, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState(null);
   const [localWeight, setLocalWeight] = useState({});
+  const [localType, setLocalType] = useState({});
 
   const categoryColor = category.color;
   const criteria = category.criteria || [];
@@ -22,7 +23,7 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
     }));
   };
 
-  const handleSliderCommit = (criterionId, newValue, currentName) => {
+  const handleSliderCommit = (criterionId, newValue, currentName, currentType) => {
     setLocalWeight(prev => {
       const newState = { ...prev };
       delete newState[`${category.id}-${criterionId}`];
@@ -30,7 +31,21 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
     });
     onUpdate(category.id, criterionId, {
       name: currentName,
-      weight: newValue
+      weight: newValue,
+      type: currentType
+    }, true);
+  };
+
+  const handleTypeChange = (criterionId, newType, currentName, currentWeight) => {
+    setLocalType(prev => {
+      const newState = { ...prev };
+      delete newState[`${category.id}-${criterionId}`];
+      return newState;
+    });
+    onUpdate(category.id, criterionId, {
+      name: currentName,
+      weight: currentWeight,
+      type: newType
     }, true);
   };
 
@@ -42,9 +57,13 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
     <div className="criteres-list">
       {criteria.map((criterion) => {
         const localWeightKey = `${category.id}-${criterion.id}`;
+        const localTypeKey = `${category.id}-${criterion.id}`;
         const displayWeight = localWeight[localWeightKey] !== undefined
           ? localWeight[localWeightKey]
           : criterion.weight;
+        const displayType = localType[localTypeKey] !== undefined
+          ? localType[localTypeKey]
+          : (criterion.type || 'neutral');
         
         const criterionName = criterion.name;
 
@@ -84,7 +103,7 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                             handleSliderChange(criterion.id, newValue);
                           }}
                           onChangeCommitted={(e, newValue) => {
-                            handleSliderCommit(criterion.id, newValue, criterionName);
+                            handleSliderCommit(criterion.id, newValue, criterionName, displayType);
                           }}
                           min={1}
                           max={30}
@@ -107,6 +126,57 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                             }
                           }}
                         />
+                      </div>
+                      <div className="critere-type-container" style={{ marginTop: '15px' }}>
+                        <div className="critere-type-label" style={{ marginBottom: '8px', fontSize: '0.9rem', fontWeight: '600' }}>
+                          🎯 Type:
+                        </div>
+                        <div role="radiogroup" aria-label="Type de motivation clé" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {Object.values(CRITERION_TYPES).map((criterionType) => {
+                            const isSelected = displayType === criterionType;
+                            const label = CRITERION_TYPE_LABELS[criterionType];
+                            const color = CRITERION_TYPE_COLORS[criterionType];
+                            
+                            return (
+                              <label
+                                key={criterionType}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  backgroundColor: isSelected ? '#f0f0f0' : 'transparent',
+                                  border: `2px solid ${isSelected ? color : '#ddd'}`,
+                                  fontSize: '0.85rem',
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`criterion-type-${category.id}-${criterion.id}`}
+                                  value={criterionType}
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    handleTypeChange(criterion.id, e.target.value, criterionName, displayWeight);
+                                  }}
+                                  style={{ marginRight: '6px' }}
+                                />
+                                <div
+                                  style={{
+                                    width: '14px',
+                                    height: '14px',
+                                    borderRadius: '3px',
+                                    backgroundColor: color,
+                                    marginRight: '6px',
+                                    border: '1px solid #ddd'
+                                  }}
+                                />
+                                <span>{label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>

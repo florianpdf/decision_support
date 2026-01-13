@@ -1,12 +1,35 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import Legend from './Legend';
+import { getChartColorMode, setChartColorMode } from '../../services/storage';
+import { CRITERION_TYPE_COLORS } from '../../utils/constants';
 
 /**
  * Square chart component
  * Uses Recharts Treemap with CustomContent to display categories and their criteria
  */
-function SquareChart({ categories }) {
+function SquareChart({ categories, professionId }) {
+    const [colorMode, setColorMode] = useState('category');
+
+    // Load color mode preference for this profession
+    useEffect(() => {
+        if (professionId) {
+            const savedMode = getChartColorMode(professionId);
+            setColorMode(savedMode);
+        }
+    }, [professionId]);
+
+    // Handle color mode switch change
+    const handleColorModeChange = (event) => {
+        const newMode = event.target.checked ? 'type' : 'category';
+        setColorMode(newMode);
+        if (professionId) {
+            setChartColorMode(professionId, newMode);
+        }
+    };
+
     // Prepare data for Treemap with useMemo to avoid recalculations
     const data = useMemo(() => {
         if (!categories || categories.length === 0) {
@@ -26,8 +49,12 @@ function SquareChart({ categories }) {
                     name: criterion.name,
                     size: criterion.weight,
                     value: criterion.weight,
-                    fill: category.color,
+                    fill: colorMode === 'type' 
+                        ? (CRITERION_TYPE_COLORS[criterion.type] || CRITERION_TYPE_COLORS.neutral)
+                        : category.color,
                     weight: criterion.weight,
+                    type: criterion.type || 'neutral',
+                    categoryColor: category.color,
                 }));
                 
                 return {
@@ -40,7 +67,7 @@ function SquareChart({ categories }) {
             });
         
         return result;
-    }, [categories]);
+    }, [categories, colorMode]);
 
     // CustomContent optimized with useCallback
     // Note: we use data via closure to access leaf data
@@ -52,27 +79,44 @@ function SquareChart({ categories }) {
             return null;
         }
         
-        // For groups (depth === 1), draw background with group color
+        // For groups (depth === 1), draw background with group color or just border
         if (depth === 1) {
             const groupData = root?.children?.[index];
             if (!groupData) return null;
             
-            const groupColor = groupData.fill || '#3498db';
-            
-            return (
-                <g>
-                    <rect
-                        x={x}
-                        y={y}
-                        width={width}
-                        height={height}
-                        fill={groupColor}
-                        stroke="#FFFFFF"
-                        strokeWidth={6}
-                        fillOpacity={0.3}
-                    />
-                </g>
-            );
+            if (colorMode === 'type') {
+                // In type mode, only show white border, no background
+                return (
+                    <g>
+                        <rect
+                            x={x}
+                            y={y}
+                            width={width}
+                            height={height}
+                            fill="transparent"
+                            stroke="#FFFFFF"
+                            strokeWidth={6}
+                        />
+                    </g>
+                );
+            } else {
+                // In category mode, show background with category color
+                const groupColor = groupData.fill || '#3498db';
+                return (
+                    <g>
+                        <rect
+                            x={x}
+                            y={y}
+                            width={width}
+                            height={height}
+                            fill={groupColor}
+                            stroke="#FFFFFF"
+                            strokeWidth={6}
+                            fillOpacity={0.3}
+                        />
+                    </g>
+                );
+            }
         }
         
         // For leaves (depth === 2), draw squares
@@ -130,10 +174,13 @@ function SquareChart({ categories }) {
                 return null;
             }
             
-            const categoryColor = criterionData.fill || '#3498db';
+            // Use type color if in type mode, otherwise use category color
+            const backgroundColor = colorMode === 'type'
+                ? (CRITERION_TYPE_COLORS[criterionData.type] || CRITERION_TYPE_COLORS.neutral)
+                : (criterionData.categoryColor || criterionData.fill || '#3498db');
             
-            // Utiliser tout l'espace alloué par le Treemap (qui a déjà calculé les bonnes proportions)
-            // Le rectangle (x, y, width, height) représente déjà la bonne taille proportionnelle
+            // Use all space allocated by Treemap (which already calculated correct proportions)
+            // The rectangle (x, y, width, height) already represents the correct proportional size
             const centerX = x + width / 2;
             const centerY = y + height / 2;
             
@@ -230,13 +277,13 @@ function SquareChart({ categories }) {
             return (
                 <g>
                     {/* Draw rectangle that occupies all allocated space */}
-                    {/* Background color is the category color, border is white */}
+                    {/* Background color depends on mode: type color or category color, border is white */}
                     <rect
                         x={x}
                         y={y}
                         width={width}
                         height={height}
-                        fill={categoryColor}
+                        fill={backgroundColor}
                         stroke="#FFFFFF"
                         strokeWidth={3}
                         rx={4}
@@ -244,7 +291,7 @@ function SquareChart({ categories }) {
                         style={{ cursor: 'pointer' }}
                     />
                     {/* Display criterion name at center with line break handling */}
-                    {/* Use white text on category color background for WCAG AA compliance */}
+                    {/* Use white text on background for WCAG AA compliance */}
                     {width > 40 && height > 40 && textInfo.lines.length > 0 && (
                         <text
                             x={centerX}
@@ -277,7 +324,7 @@ function SquareChart({ categories }) {
         }
         
         return null;
-    }, [data]);
+    }, [data, colorMode]);
 
     // Custom tooltip with useCallback
     const CustomTooltip = useCallback(({ active, payload }) => {
@@ -322,6 +369,22 @@ function SquareChart({ categories }) {
 
     return (
         <div className="chart-wrapper" role="region" aria-label="Graphique de visualisation des intérêts professionnels">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
+                    Graphique de visualisation
+                </h2>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={colorMode === 'type'}
+                            onChange={handleColorModeChange}
+                            color="primary"
+                        />
+                    }
+                    label={colorMode === 'type' ? 'Couleurs par type' : 'Couleurs par catégorie'}
+                    labelPlacement="start"
+                />
+            </div>
             <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés">
                 <ResponsiveContainer width="100%" height={500}>
                     <Treemap

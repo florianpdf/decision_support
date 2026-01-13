@@ -384,7 +384,7 @@ function App() {
             subtitle="Le graphique ci-dessous représente vos intérêts professionnels et vos motivations clés pour ce métier. Plus une motivation a une importance élevée, plus son carré sera grand."
           >
             {hasCategoriesWithCriteria ? (
-              <SquareChart categories={categories} />
+              <SquareChart categories={categories} professionId={currentProfessionId} />
             ) : (
               <EmptyState
                 title="Aucun intérêt professionnel avec motivations clés à afficher"

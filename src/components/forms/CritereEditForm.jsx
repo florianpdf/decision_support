@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Slider from '@mui/material/Slider';
 import Tooltip from '../Tooltip';
+import { CRITERION_TYPES, DEFAULT_CRITERION_TYPE, CRITERION_TYPE_LABELS, CRITERION_TYPE_COLORS } from '../../utils/constants';
 
 /**
  * Form component for editing an existing key motivation
@@ -8,10 +9,12 @@ import Tooltip from '../Tooltip';
 function CritereEditForm({ critere, onSubmit, onCancel }) {
     const [name, setName] = useState(critere?.name || '');
     const [weight, setWeight] = useState(critere?.weight || 15);
+    const [type, setType] = useState(critere?.type || DEFAULT_CRITERION_TYPE);
 
     useEffect(() => {
         setName(critere?.name || '');
         setWeight(critere?.weight || 15);
+        setType(critere?.type || DEFAULT_CRITERION_TYPE);
     }, [critere]);
 
     const handleSubmit = (e) => {
@@ -25,6 +28,7 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
         onSubmit({
             name: name.trim(),
             weight: weight,
+            type: type,
         });
     };
 
@@ -80,6 +84,61 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                 }}>
                     Importance sélectionnée : {weight}
                 </div>
+            </div>
+
+            <div className="form-group">
+                <fieldset>
+                    <legend>
+                        🎯 Type de motivation clé <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
+                    </legend>
+                    <div style={{ marginBottom: '12px', fontSize: '0.9rem', color: '#7f8c8d' }}>
+                        Sélectionnez le type qui correspond à cette motivation clé
+                    </div>
+                    <div role="radiogroup" aria-label="Type de motivation clé">
+                        {Object.values(CRITERION_TYPES).map((criterionType) => {
+                            const isSelected = type === criterionType;
+                            const label = CRITERION_TYPE_LABELS[criterionType];
+                            const color = CRITERION_TYPE_COLORS[criterionType];
+                            
+                            return (
+                                <label
+                                    key={criterionType}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '10px',
+                                        marginBottom: '8px',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        backgroundColor: isSelected ? '#f0f0f0' : 'transparent',
+                                        border: `2px solid ${isSelected ? color : 'transparent'}`,
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <input
+                                        type="radio"
+                                        name={`edit-criterion-type-${critere.id}`}
+                                        value={criterionType}
+                                        checked={isSelected}
+                                        onChange={(e) => setType(e.target.value)}
+                                        style={{ marginRight: '10px' }}
+                                    />
+                                    <div
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '4px',
+                                            backgroundColor: color,
+                                            marginRight: '10px',
+                                            border: '1px solid #ddd'
+                                        }}
+                                    />
+                                    <span>{label}</span>
+                                </label>
+                            );
+                        })}
+                    </div>
+                </fieldset>
             </div>
 
             <div className="form-actions">

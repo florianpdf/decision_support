@@ -10,6 +10,7 @@ const PROFESSIONS_STORAGE_KEY = 'bulle_chart_professions';
 const CATEGORIES_STORAGE_KEY = 'bulle_chart_categories';
 const CRITERIA_STORAGE_KEY = 'bulle_chart_criteria';
 const CRITERION_WEIGHTS_STORAGE_KEY = 'bulle_chart_criterion_weights';
+const CHART_COLOR_MODE_STORAGE_KEY = 'bulle_chart_color_mode'; // Per profession: 'category' or 'type'
 const NEXT_PROFESSION_ID_KEY = 'bulle_chart_next_profession_id';
 const NEXT_CATEGORY_ID_KEY = 'bulle_chart_next_category_id';
 const NEXT_CRITERION_ID_KEY = 'bulle_chart_next_criterion_id';
@@ -391,7 +392,7 @@ export const deleteCriterion = (criterionId) => {
 
 /**
  * Load criterion weights from localStorage
- * Structure: [{ professionId, categoryId, criterionId, weight }]
+ * Structure: [{ professionId, categoryId, criterionId, weight, type }]
  */
 export const loadCriterionWeights = () => {
     try {
@@ -399,7 +400,12 @@ export const loadCriterionWeights = () => {
         if (!data) {
             return [];
         }
-        return JSON.parse(data);
+        const weights = JSON.parse(data);
+        // Ensure type field exists for backward compatibility
+        return weights.map(w => ({
+            ...w,
+            type: w.type || 'neutral' // Default to neutral if not set
+        }));
     } catch (error) {
         console.error('Error loading weights:', error);
         return [];
@@ -429,6 +435,15 @@ export const getCriterionWeight = (professionId, criterionId) => {
 };
 
 /**
+ * Get type of a criterion for a given profession
+ */
+export const getCriterionType = (professionId, criterionId) => {
+    const weights = loadCriterionWeights();
+    const weight = weights.find(w => w.professionId === professionId && w.criterionId === criterionId);
+    return weight ? (weight.type || 'neutral') : 'neutral'; // Default: neutral
+};
+
+/**
  * Update weight of a criterion for a given profession
  */
 export const setCriterionWeight = (professionId, categoryId, criterionId, weight) => {
@@ -437,11 +452,41 @@ export const setCriterionWeight = (professionId, categoryId, criterionId, weight
         w => w.professionId === professionId && w.criterionId === criterionId
     );
     
+    const existing = index !== -1 ? weights[index] : null;
     const weightData = {
         professionId,
         categoryId,
         criterionId,
         weight: parseFloat(weight),
+        type: existing?.type || 'neutral', // Preserve existing type or default
+    };
+    
+    if (index === -1) {
+        weights.push(weightData);
+    } else {
+        weights[index] = weightData;
+    }
+    
+    saveCriterionWeights(weights);
+    return weightData;
+};
+
+/**
+ * Update type of a criterion for a given profession
+ */
+export const setCriterionType = (professionId, categoryId, criterionId, type) => {
+    const weights = loadCriterionWeights();
+    const index = weights.findIndex(
+        w => w.professionId === professionId && w.criterionId === criterionId
+    );
+    
+    const existing = index !== -1 ? weights[index] : null;
+    const weightData = {
+        professionId,
+        categoryId,
+        criterionId,
+        weight: existing?.weight || 15, // Preserve existing weight or default
+        type: type,
     };
     
     if (index === -1) {
@@ -467,6 +512,7 @@ export const initializeProfessionWeights = (newProfessionId, sourceProfessionId)
             categoryId: weight.categoryId,
             criterionId: weight.criterionId,
             weight: weight.weight,
+            type: weight.type || 'neutral', // Preserve type or default
         });
     });
     
@@ -500,6 +546,7 @@ export const getCategoriesForProfession = (professionId) => {
                 return {
                     ...criterion,
                     weight: weight ? weight.weight : 15, // Default: 15
+                    type: weight ? (weight.type || 'neutral') : 'neutral', // Default: neutral
                 };
             })
             .filter(c => c !== null);
@@ -519,4 +566,43 @@ export const getCategoryTotalWeight = (category, professionId) => {
         return 0;
     }
     return category.criteria.reduce((sum, criterion) => sum + (criterion.weight || 15), 0);
+};
+
+// ==================== CHART COLOR MODE (Per profession preference) ====================
+
+/**
+ * Get chart color mode for a profession
+ * @param {number} professionId - Profession ID
+ * @returns {string} 'category' or 'type' (default: 'category')
+ */
+export const getChartColorMode = (professionId) => {
+    try {
+        const data = localStorage.getItem(CHART_COLOR_MODE_STORAGE_KEY);
+        if (!data) {
+            return 'category'; // Default
+        }
+        const modes = JSON.parse(data);
+        return modes[professionId] || 'category';
+    } catch (error) {
+        console.error('Error loading chart color mode:', error);
+        return 'category';
+    }
+};
+
+/**
+ * Set chart color mode for a profession
+ * @param {number} professionId - Profession ID
+ * @param {string} mode - 'category' or 'type'
+ */
+export const setChartColorMode = (professionId, mode) => {
+    try {
+        const data = localStorage.getItem(CHART_COLOR_MODE_STORAGE_KEY);
+        const modes = data ? JSON.parse(data) : {};
+        modes[professionId] = mode;
+        localStorage.setItem(CHART_COLOR_MODE_STORAGE_KEY, JSON.stringify(modes));
+        return true;
+    } catch (error) {
+        console.error('Error saving chart color mode:', error);
+        return false;
+    }
 };

@@ -13,6 +13,7 @@ import {
   updateCriterion,
   deleteCriterion,
   setCriterionWeight,
+  setCriterionType,
   getCategoriesForProfession
 } from '../services/storage';
 import {
@@ -141,9 +142,12 @@ export const useCategories = (professionId) => {
 
     const newCriterion = addCriterion(categoryId, { name: criterionData.name });
     
-    // Set weight for current profession
+    // Set weight and type for current profession
     if (professionId) {
       setCriterionWeight(professionId, categoryId, newCriterion.id, criterionData.weight);
+      if (criterionData.type) {
+        setCriterionType(professionId, categoryId, newCriterion.id, criterionData.type);
+      }
     }
     
     loadCategoriesFromStorage();
@@ -160,6 +164,11 @@ export const useCategories = (professionId) => {
       }
       // Update weight for current profession only
       setCriterionWeight(professionId, categoryId, criterionId, updates.weight);
+    }
+    
+    if (updates.type !== undefined && professionId) {
+      // Update type for current profession only
+      setCriterionType(professionId, categoryId, criterionId, updates.type);
     }
     
     if (updates.name !== undefined) {
