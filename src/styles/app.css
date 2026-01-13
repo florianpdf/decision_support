@@ -907,6 +907,32 @@ body {
     font-weight: 500;
 }
 
+/* Compact legend for fullscreen modal */
+.legend-integrated.legend-compact {
+    gap: 8px;
+    margin-top: 12px;
+    padding: 12px 16px;
+}
+
+.legend-compact .legend-category-item {
+    padding: 8px 12px;
+    min-width: 150px;
+    gap: 8px;
+}
+
+.legend-compact .legend-color-box {
+    width: 24px;
+    height: 24px;
+}
+
+.legend-compact .legend-category-name {
+    font-size: 0.85rem;
+}
+
+.legend-compact .legend-category-stats {
+    font-size: 0.75rem;
+}
+
 /* Stats */
 .stats {
     display: flex;
