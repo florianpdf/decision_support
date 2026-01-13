@@ -1150,8 +1150,8 @@ select:focus-visible {
     }
 }
 
-/* Metier Tabs */
-.metier-tabs {
+/* Profession Tabs */
+.profession-tabs {
     display: flex;
     gap: 8px;
     margin-bottom: 24px;
@@ -1162,25 +1162,25 @@ select:focus-visible {
     scrollbar-width: thin;
 }
 
-.metier-tabs::-webkit-scrollbar {
+.profession-tabs::-webkit-scrollbar {
     height: 6px;
 }
 
-.metier-tabs::-webkit-scrollbar-track {
+.profession-tabs::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 3px;
 }
 
-.metier-tabs::-webkit-scrollbar-thumb {
+.profession-tabs::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 3px;
 }
 
-.metier-tabs::-webkit-scrollbar-thumb:hover {
+.profession-tabs::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
 
-.metier-tab {
+.profession-tab {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1196,12 +1196,12 @@ select:focus-visible {
     min-width: 120px;
 }
 
-.metier-tab:hover {
+.profession-tab:hover {
     background: #f8f9fa;
     border-color: #5568d3;
 }
 
-.metier-tab.active {
+.profession-tab.active {
     background: #5568d3;
     color: white;
     border-color: #5568d3;
@@ -1209,23 +1209,23 @@ select:focus-visible {
     z-index: 1;
 }
 
-.metier-tab.active .metier-tab-name {
+.profession-tab.active .profession-tab-name {
     color: white;
 }
 
-.metier-tab-name {
+.profession-tab-name {
     flex: 1;
     color: #2c3e50;
     font-size: 0.95rem;
 }
 
-.metier-tab-actions {
+.profession-tab-actions {
     display: flex;
     gap: 4px;
     align-items: center;
 }
 
-.metier-tab-actions .btn-icon {
+.profession-tab-actions .btn-icon {
     width: 24px;
     height: 24px;
     padding: 0;
@@ -1235,26 +1235,26 @@ select:focus-visible {
     opacity: 0.7;
 }
 
-.metier-tab.active .metier-tab-actions .btn-icon {
+.profession-tab.active .profession-tab-actions .btn-icon {
     color: white;
     opacity: 1;
 }
 
-.metier-tab-actions .btn-icon:hover {
+.profession-tab-actions .btn-icon:hover {
     opacity: 1;
     background: rgba(0, 0, 0, 0.1);
 }
 
-.metier-tab.active .metier-tab-actions .btn-icon:hover {
+.profession-tab.active .profession-tab-actions .btn-icon:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.metier-tab-actions .btn-icon:disabled {
+.profession-tab-actions .btn-icon:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }
 
-.metier-tab-add {
+.profession-tab-add {
     padding: 12px 20px;
     background: #f8f9fa;
     border: 2px dashed #e1e8ed;
@@ -1267,46 +1267,46 @@ select:focus-visible {
     transition: all 0.2s;
 }
 
-.metier-tab-add:hover {
+.profession-tab-add:hover {
     background: #e9ecef;
     border-color: #5568d3;
     color: #4456c3;
 }
 
 @media (max-width: 768px) {
-    .metier-tabs {
+    .profession-tabs {
         gap: 4px;
     }
     
-    .metier-tab {
+    .profession-tab {
         padding: 10px 16px;
         min-width: 100px;
         font-size: 0.9rem;
     }
     
-    .metier-tab-add {
+    .profession-tab-add {
         padding: 10px 16px;
         font-size: 0.9rem;
     }
 }
 
 @media (max-width: 480px) {
-    .metier-tab {
+    .profession-tab {
         padding: 8px 12px;
         min-width: 80px;
         font-size: 0.85rem;
     }
     
-    .metier-tab-add {
+    .profession-tab-add {
         padding: 8px 12px;
         font-size: 0.85rem;
     }
     
-    .metier-tab-name {
+    .profession-tab-name {
         font-size: 0.85rem;
     }
     
-    .metier-tab-actions {
+    .profession-tab-actions {
         display: none;
     }
     
