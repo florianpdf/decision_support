@@ -2,6 +2,8 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import Switch from '@mui/material/Switch';
 import Legend from './Legend';
+import FullscreenChartModal from '../modals/FullscreenChartModal';
+import IconButton from '../ui/IconButton';
 import { getChartColorMode, setChartColorMode } from '../../services/storage';
 import { CRITERION_TYPE_COLORS } from '../../utils/constants';
 
@@ -11,6 +13,8 @@ import { CRITERION_TYPE_COLORS } from '../../utils/constants';
  */
 function SquareChart({ categories, professionId }) {
     const [colorMode, setColorMode] = useState('category');
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     // Load color mode preference for this profession
     useEffect(() => {
