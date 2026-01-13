@@ -1,5 +1,5 @@
 /**
- * Custom hook for managing categories and criteria
+ * Custom hook for managing categories and criteria with metier support
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -8,9 +8,12 @@ import {
   addCategory,
   updateCategory,
   deleteCategory,
-  addCritereToCategory,
-  updateCritereInCategory,
-  deleteCritereFromCategory
+  loadCriteres,
+  addCritere,
+  updateCritere,
+  deleteCritere,
+  setCritereWeight,
+  getCategoriesForMetier
 } from '../services/storage';
 import {
   validateCategoryName,
@@ -22,20 +25,25 @@ import {
 } from '../utils/validation';
 
 /**
- * Hook for managing categories and criteria
+ * Hook for managing categories and criteria for a specific metier
+ * @param {number} metierId - Current metier ID
  * @returns {Object} Categories state and handlers
  */
-export const useCategories = () => {
+export const useCategories = (metierId) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   /**
-   * Load categories from storage
+   * Load categories for current metier from storage
    */
   const loadCategoriesFromStorage = useCallback(() => {
     try {
       setLoading(true);
-      const loaded = loadCategories();
+      if (!metierId) {
+        setCategories([]);
+        return;
+      }
+      const loaded = getCategoriesForMetier(metierId);
       setCategories(loaded);
     } catch (err) {
       console.error('Error loading categories:', err);
@@ -43,15 +51,15 @@ export const useCategories = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [metierId]);
 
-  // Load categories on mount
+  // Load categories when metier changes
   useEffect(() => {
     loadCategoriesFromStorage();
   }, [loadCategoriesFromStorage]);
 
   /**
-   * Add a new category
+   * Add a new category (shared across all metiers)
    */
   const handleAddCategory = useCallback((categoryData) => {
     const nameError = validateCategoryName(categoryData.nom);
@@ -59,24 +67,32 @@ export const useCategories = () => {
       throw new Error(nameError);
     }
 
-    const limitError = validateCategoryLimit(categories.length);
+    const allCategories = loadCategories();
+    const limitError = validateCategoryLimit(allCategories.length);
     if (limitError) {
       throw new Error(limitError);
     }
 
-    if (isColorUsed(categoryData.couleur, categories)) {
+    if (isColorUsed(categoryData.couleur, allCategories)) {
       throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
     addCategory(categoryData);
-    loadCategoriesFromStorage();
-  }, [categories, loadCategoriesFromStorage]);
+    
+    // Initialize weight for all metiers with default value (15)
+    if (metierId) {
+      // Will be initialized when criteres are added
+      loadCategoriesFromStorage();
+    }
+  }, [metierId, loadCategoriesFromStorage]);
 
   /**
-   * Update a category
+   * Update a category (affects all metiers)
    */
   const handleUpdateCategory = useCallback((categoryId, updates) => {
-    if (updates.couleur && isColorUsed(updates.couleur, categories, categoryId)) {
+    const allCategories = loadCategories();
+    
+    if (updates.couleur && isColorUsed(updates.couleur, allCategories, categoryId)) {
       throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
@@ -86,10 +102,10 @@ export const useCategories = () => {
     }
 
     loadCategoriesFromStorage();
-  }, [categories, loadCategoriesFromStorage]);
+  }, [loadCategoriesFromStorage]);
 
   /**
-   * Delete a category
+   * Delete a category (affects all metiers)
    */
   const handleDeleteCategory = useCallback((id) => {
     deleteCategory(id);
@@ -97,7 +113,7 @@ export const useCategories = () => {
   }, [loadCategoriesFromStorage]);
 
   /**
-   * Add a criterion to a category
+   * Add a criterion to a category (shared across all metiers)
    */
   const handleAddCritere = useCallback((categoryId, critereData) => {
     const nameError = validateCritereName(critereData.nom);
@@ -110,40 +126,58 @@ export const useCategories = () => {
       throw new Error(weightError);
     }
 
-    const category = categories.find(c => c.id === categoryId);
-    const critereLimitError = validateCritereLimit(category?.criteres?.length || 0);
+    const allCategories = loadCategories();
+    const category = allCategories.find(c => c.id === categoryId);
+    if (!category) {
+      throw new Error('Intérêt professionnel non trouvé');
+    }
+
+    const allCriteres = loadCriteres();
+    const categoryCriteres = allCriteres.filter(c => c.categoryId === categoryId);
+    const critereLimitError = validateCritereLimit(categoryCriteres.length);
     if (critereLimitError) {
       throw new Error(critereLimitError);
     }
 
-    addCritereToCategory(categoryId, critereData);
+    const newCritere = addCritere(categoryId, { nom: critereData.nom });
+    
+    // Set weight for current metier
+    if (metierId) {
+      setCritereWeight(metierId, categoryId, newCritere.id, critereData.poids);
+    }
+    
     loadCategoriesFromStorage();
-  }, [categories, loadCategoriesFromStorage]);
+  }, [metierId, loadCategoriesFromStorage]);
 
   /**
-   * Update a criterion in a category
+   * Update a criterion (affects all metiers for name, only current metier for weight)
    */
   const handleUpdateCritere = useCallback((categoryId, critereId, updates, silent = false) => {
-    if (updates.poids !== undefined) {
+    if (updates.poids !== undefined && metierId) {
       const weightError = validateWeight(updates.poids);
       if (weightError) {
         throw new Error(weightError);
       }
+      // Update weight for current metier only
+      setCritereWeight(metierId, categoryId, critereId, updates.poids);
     }
-
-    const updated = updateCritereInCategory(categoryId, critereId, updates);
-    if (!updated) {
-      throw new Error('Motivation clé non trouvée');
+    
+    if (updates.nom !== undefined) {
+      // Update name for all metiers
+      const updated = updateCritere(critereId, { nom: updates.nom });
+      if (!updated) {
+        throw new Error('Motivation clé non trouvée');
+      }
     }
 
     loadCategoriesFromStorage();
-  }, [loadCategoriesFromStorage]);
+  }, [metierId, loadCategoriesFromStorage]);
 
   /**
-   * Delete a criterion from a category
+   * Delete a criterion (affects all metiers)
    */
   const handleDeleteCritere = useCallback((categoryId, critereId) => {
-    deleteCritereFromCategory(categoryId, critereId);
+    deleteCritere(critereId);
     loadCategoriesFromStorage();
   }, [loadCategoriesFromStorage]);
 
