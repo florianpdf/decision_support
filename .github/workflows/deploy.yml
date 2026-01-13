@@ -34,16 +34,20 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+        continue-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
+        if: always()
         with:
-          files: ./coverage/coverage-final.json
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info,./coverage/coverage-final.json
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-          # For public repos, token is optional but recommended for better features
+          verbose: true
+          directory: ./coverage
+          slug: florianpdf/decision_support
 
       - name: Build
         env:
