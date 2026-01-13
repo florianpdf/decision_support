@@ -11,7 +11,7 @@ const Card = ({ children, className = '', title, subtitle, ...props }) => {
         <h2>{title}</h2>
       )}
       {subtitle && (
-        <p className="card-subtitle">{subtitle}</p>
+        <div className="card-subtitle">{subtitle}</div>
       )}
       {children}
     </div>
@@ -22,7 +22,7 @@ Card.propTypes = {
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
   title: PropTypes.node,
-  subtitle: PropTypes.string
+  subtitle: PropTypes.node
 };
 
 export default React.memo(Card);
