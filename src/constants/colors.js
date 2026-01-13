@@ -1,22 +1,22 @@
 /**
- * Palette de couleurs douces et agréables
- * Équilibre entre saturation et douceur pour une meilleure lisibilité
+ * Soft and pleasant color palette
+ * Balance between saturation and softness for better readability
  * 
- * IMPORTANT: Cette palette est limitée à 10 couleurs pour correspondre
- * à la limite maximale de 10 catégories dans l'application.
+ * IMPORTANT: This palette is limited to 10 colors to match
+ * the maximum limit of 10 categories in the application.
  */
 export const COLOR_PALETTE = [
-    '#6BB6FF', // Bleu doux
-    '#66D9A3', // Vert doux
-    '#FFB366', // Orange doux
-    '#FF7F9F', // Rose doux
-    '#B894FF', // Violet doux
-    '#5DD9E8', // Cyan doux
-    '#FF8CC8', // Rose doux
-    '#8B9AFF', // Bleu indigo doux
-    '#4DD9B8', // Turquoise doux
-    '#FFCC66', // Jaune doux
+    '#6BB6FF', // Soft blue
+    '#66D9A3', // Soft green
+    '#FFB366', // Soft orange
+    '#FF7F9F', // Soft pink
+    '#B894FF', // Soft purple
+    '#5DD9E8', // Soft cyan
+    '#FF8CC8', // Soft pink
+    '#8B9AFF', // Soft indigo blue
+    '#4DD9B8', // Soft turquoise
+    '#FFCC66', // Soft yellow
 ];
 
-// Couleur par défaut (première de la palette)
+// Default color (first in palette)
 export const DEFAULT_COLOR = COLOR_PALETTE[0];

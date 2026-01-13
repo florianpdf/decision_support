@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CategoryForm from './forms/CategoryForm';
-import { COLOR_PALETTE, DEFAULT_COLOR } from '../constants/colors';
+import CategoryForm from '../../components/forms/CategoryForm';
+import { COLOR_PALETTE, DEFAULT_COLOR } from '../../constants/colors';
 
 describe('CategoryForm', () => {
   const mockOnSubmit = vi.fn();
@@ -31,8 +31,8 @@ describe('CategoryForm', () => {
 
   it('should filter out used colors', () => {
     const existingCategories = [
-      { id: 1, nom: 'Category 1', couleur: COLOR_PALETTE[0], criteres: [] },
-      { id: 2, nom: 'Category 2', couleur: COLOR_PALETTE[1], criteres: [] }
+      { id: 1, name: 'Category 1', color: COLOR_PALETTE[0], criteria: [] },
+      { id: 2, name: 'Category 2', color: COLOR_PALETTE[1], criteria: [] }
     ];
     
     render(<CategoryForm onSubmit={mockOnSubmit} existingCategories={existingCategories} />);
@@ -44,9 +44,9 @@ describe('CategoryForm', () => {
   it('should show message when all colors are used', () => {
     const existingCategories = COLOR_PALETTE.map((color, index) => ({
       id: index + 1,
-      nom: `Category ${index + 1}`,
-      couleur: color,
-      criteres: []
+      name: `Category ${index + 1}`,
+      color: color,
+      criteria: []
     }));
     
     render(<CategoryForm onSubmit={mockOnSubmit} existingCategories={existingCategories} />);
@@ -65,8 +65,8 @@ describe('CategoryForm', () => {
     await user.click(submitButton);
     
     expect(mockOnSubmit).toHaveBeenCalledWith({
-      nom: 'Test Category',
-      couleur: DEFAULT_COLOR
+      name: 'Test Category',
+      color: DEFAULT_COLOR
     });
   });
 
@@ -80,8 +80,8 @@ describe('CategoryForm', () => {
     await user.click(submitButton);
     
     expect(mockOnSubmit).toHaveBeenCalledWith({
-      nom: 'Test Category',
-      couleur: DEFAULT_COLOR
+      name: 'Test Category',
+      color: DEFAULT_COLOR
     });
   });
 
@@ -131,7 +131,7 @@ describe('CategoryForm', () => {
     const { rerender } = render(<CategoryForm onSubmit={mockOnSubmit} existingCategories={[]} />);
     
     const existingCategories = [
-      { id: 1, nom: 'Category 1', couleur: DEFAULT_COLOR, criteres: [] }
+      { id: 1, name: 'Category 1', color: DEFAULT_COLOR, criteria: [] }
     ];
     
     rerender(<CategoryForm onSubmit={mockOnSubmit} existingCategories={existingCategories} />);

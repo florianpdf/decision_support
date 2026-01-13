@@ -1,30 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App from './App';
-import * as storage from './services/storage';
+import App from '../App';
+import * as storage from '../services/storage';
 
 // Mock the storage service
-vi.mock('./services/storage', () => ({
-  loadCategories: vi.fn(() => []),
-  addCategory: vi.fn((category) => ({
-    id: 1,
-    ...category,
-    criteres: [],
-    created_at: new Date().toISOString()
-  })),
-  updateCategory: vi.fn(),
-  deleteCategory: vi.fn(),
-  addCritereToCategory: vi.fn(),
-  updateCritereInCategory: vi.fn(),
-  deleteCritereFromCategory: vi.fn(),
-  getCategoryTotalWeight: vi.fn((category) => {
-    if (!category || !category.criteres || category.criteres.length === 0) {
-      return 0;
-    }
-    return category.criteres.reduce((sum, critere) => sum + critere.poids, 0);
-  })
-}));
+vi.mock('../services/storage', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    loadProfessions: vi.fn(() => []),
+    loadCategories: vi.fn(() => []),
+    addCategory: vi.fn((category) => ({
+      id: 1,
+      ...category,
+      criteria: [],
+      created_at: new Date().toISOString()
+    })),
+    updateCategory: vi.fn(),
+    deleteCategory: vi.fn(),
+    addCriterion: vi.fn(),
+    updateCriterion: vi.fn(),
+    deleteCriterion: vi.fn(),
+    getCategoryTotalWeight: vi.fn((category) => {
+      if (!category || !category.criteria || category.criteria.length === 0) {
+        return 0;
+      }
+      return category.criteria.reduce((sum, criterion) => sum + criterion.weight, 0);
+    })
+  };
+});
 
 describe('App', () => {
   beforeEach(() => {
@@ -67,7 +72,7 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
     
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByLabelText(/name de l'intérêt professionnel/i);
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
     
     await user.type(nameInput, 'Test Category');
@@ -81,9 +86,9 @@ describe('App', () => {
   it('should show error when category limit is reached', async () => {
     const categories = Array.from({ length: 10 }, (_, i) => ({
       id: i + 1,
-      nom: `Category ${i + 1}`,
-      couleur: '#FF0000',
-      criteres: []
+      name: `Category ${i + 1}`,
+      color: '#FF0000',
+      criteria: []
     }));
     
     storage.loadCategories.mockReturnValue(categories);
@@ -98,8 +103,8 @@ describe('App', () => {
 
   it('should display category counter', () => {
     const categories = [
-      { id: 1, nom: 'Category 1', couleur: '#FF0000', criteres: [] },
-      { id: 2, nom: 'Category 2', couleur: '#00FF00', criteres: [] }
+      { id: 1, name: 'Category 1', color: '#FF0000', criteria: [] },
+      { id: 2, name: 'Category 2', color: '#00FF00', criteria: [] }
     ];
     
     storage.loadCategories.mockReturnValue(categories);

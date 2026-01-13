@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CritereForm from './forms/CritereForm';
+import CritereForm from '../../components/forms/CritereForm';
 
 describe('CritereForm', () => {
   const mockOnSubmit = vi.fn();
@@ -18,7 +18,7 @@ describe('CritereForm', () => {
   it('should render form with all fields', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    expect(screen.getByLabelText(/nom de la motivation clé/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/name de la motivation clé/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/importance de la motivation clé/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ajouter la motivation clé/i })).toBeInTheDocument();
   });
@@ -33,12 +33,13 @@ describe('CritereForm', () => {
     await user.click(submitButton);
     
     expect(mockOnSubmit).toHaveBeenCalledWith({
-      nom: 'Test Motivation',
-      poids: 1
+      name: 'Test Motivation',
+      weight: 15,
+      type: 'neutral'
     });
   });
 
-  it('should trim critere name', async () => {
+  it('should trim criterion name', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
     const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
@@ -48,8 +49,9 @@ describe('CritereForm', () => {
     await user.click(submitButton);
     
     expect(mockOnSubmit).toHaveBeenCalledWith({
-      nom: 'Test Motivation',
-      poids: 1
+      name: 'Test Motivation',
+      weight: 15,
+      type: 'neutral'
     });
   });
 
@@ -84,8 +86,8 @@ describe('CritereForm', () => {
     
     // The slider value should be reflected in the submission
     expect(mockOnSubmit).toHaveBeenCalledWith({
-      nom: 'Test',
-      poids: expect.any(Number)
+      name: 'Test',
+      weight: expect.any(Number)
     });
   });
 
@@ -106,7 +108,7 @@ describe('CritereForm', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
     // The cancel button only has an emoji, so we find it by its type and class
-    const cancelButton = screen.getByRole('button', { name: /✖️/i });
+    const cancelButton = screen.getByRole('button', { name: /annuler/i });
     await user.click(cancelButton);
     
     expect(mockOnCancel).toHaveBeenCalled();
@@ -121,6 +123,6 @@ describe('CritereForm', () => {
   it('should display default weight value', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    expect(screen.getByText(/importance sélectionnée : 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/importance sélectionnée : 15/i)).toBeInTheDocument();
   });
 });

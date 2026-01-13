@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { COLOR_PALETTE } from '../../constants/colors';
 import Tooltip from '../Tooltip';
 
@@ -7,13 +7,19 @@ import Tooltip from '../Tooltip';
  */
 function CategoryEditForm({ category, onSubmit, onCancel, existingCategories = [] }) {
     // Get colors already used by other categories (excluding current category)
-    const usedColors = existingCategories
-        .filter(cat => cat.id !== category.id)
-        .map(cat => cat.color);
+    const usedColors = useMemo(() => 
+        existingCategories
+            .filter(cat => cat.id !== category.id)
+            .map(cat => cat.color),
+        [existingCategories, category.id]
+    );
     
     // Filter palette to show only available colors (excluding current category's color)
-    const availableColors = COLOR_PALETTE.filter(color => 
-        color === category.color || !usedColors.includes(color)
+    const availableColors = useMemo(() => 
+        COLOR_PALETTE.filter(color => 
+            color === category.color || !usedColors.includes(color)
+        ),
+        [category.color, usedColors]
     );
 
     const [name, setName] = useState(category.name);
@@ -24,7 +30,7 @@ function CategoryEditForm({ category, onSubmit, onCancel, existingCategories = [
         if (usedColors.includes(color) && availableColors.length > 0) {
             setColor(availableColors[0]);
         }
-    }, [existingCategories, color, usedColors, availableColors]);
+    }, [color, usedColors, availableColors]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -125,4 +131,4 @@ function CategoryEditForm({ category, onSubmit, onCancel, existingCategories = [
     );
 }
 
-export default CategoryEditForm;
+export default React.memo(CategoryEditForm);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { getCategoryTotalWeight } from '../services/storage';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -8,17 +8,18 @@ import CategoryEditForm from './forms/CategoryEditForm';
 import CritereList from './CritereList';
 import CritereForm from './forms/CritereForm';
 import Message from './ui/Message';
+import EmptyState from './ui/EmptyState';
+import Tooltip from './Tooltip';
 import { LIMITS } from '../utils/constants';
 
 /**
- * Individual category item component
+ * Component displaying the detail of a selected category
+ * Shows category info, criteria list, and allows editing
  */
-const CategoryItem = ({
+const CategoryDetail = ({
   category,
-  isOpen,
-  onToggle,
-  onUpdate,
-  onDelete,
+  onUpdateCategory,
+  onDeleteCategory,
   onAddCriterion,
   onUpdateCriterion,
   onDeleteCriterion,
@@ -26,17 +27,43 @@ const CategoryItem = ({
 }) => {
   const [editing, setEditing] = useState(false);
   const [addingCriterion, setAddingCriterion] = useState(false);
+  const [allCriteriaOpen, setAllCriteriaOpen] = useState(false);
+  const critereListRef = useRef(null);
 
-  const categoryName = category.name;
-  const categoryColor = category.color;
-  const criteria = category.criteria || [];
+  // Get criteria early to avoid initialization issues
+  const criteria = category?.criteria || [];
+
+  // Update allCriteriaOpen state when criteria change
+  useEffect(() => {
+    if (criteria.length === 0) {
+      setAllCriteriaOpen(false);
+    }
+  }, [criteria.length]);
+
+  const toggleAllCriteria = () => {
+    const newState = !allCriteriaOpen;
+    setAllCriteriaOpen(newState);
+    if (critereListRef.current && critereListRef.current.toggleAll) {
+      critereListRef.current.toggleAll(newState);
+    }
+  };
+
+  if (!category) {
+    return (
+      <div className="category-detail">
+        <EmptyState
+          title="Aucun intérêt professionnel sélectionné"
+          description="Sélectionnez un intérêt professionnel dans la liste de gauche pour voir ses détails"
+        />
+      </div>
+    );
+  }
   const hasCriteria = criteria.length > 0;
   const canDelete = !hasCriteria;
-
   const totalWeight = getCategoryTotalWeight(category);
 
   const handleUpdate = (updates) => {
-    onUpdate(category.id, updates);
+    onUpdateCategory(category.id, updates);
     setEditing(false);
   };
 
@@ -46,73 +73,71 @@ const CategoryItem = ({
   };
 
   return (
-    <div className="category-item">
-      <div className="category-header">
-        <div
-          className="category-info clickable"
-          onClick={() => onToggle()}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onToggle();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-expanded={isOpen}
-          aria-label={
-            hasCriteria
-              ? `${categoryName}, ${criteria.length} motivation${criteria.length > 1 ? 's' : ''} clé${criteria.length > 1 ? 's' : ''}, cliquer pour ${isOpen ? 'fermer' : 'ouvrir'}`
-              : `${categoryName}, aucune motivation clé, cliquer pour ajouter une motivation clé`
-          }
-        >
+    <div className="category-detail">
+      <div className="category-detail-header">
+        <div className="category-detail-title">
           <div
-            className="category-color"
-            style={{ backgroundColor: categoryColor }}
+            className="category-color-detail"
+            style={{ backgroundColor: category.color }}
           />
-          <div className="category-content">
-            <div className="category-nom">
-              {categoryName}
-              <span className="accordion-icon">
-                {isOpen ? (
-                  <ExpandMoreIcon style={{ fontSize: '1.2rem' }} />
-                ) : (
-                  <ChevronRightIcon style={{ fontSize: '1.2rem' }} />
-                )}
-              </span>
-            </div>
-            <div className="category-details">
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {category.name}
+              {hasCriteria && (
+                <Tooltip content={allCriteriaOpen ? 'Tout fermer' : 'Tout ouvrir'}>
+                  <button
+                    className="btn-icon toggle-all-criteria"
+                    onClick={toggleAllCriteria}
+                    aria-label={allCriteriaOpen ? 'Tout fermer' : 'Tout ouvrir'}
+                    style={{ 
+                      background: 'transparent', 
+                      border: 'none', 
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <div className={`toggle-icon-wrapper ${allCriteriaOpen ? 'open' : 'closed'}`}>
+                      {allCriteriaOpen ? (
+                        <ExpandMoreIcon style={{ fontSize: '1.2rem', color: category.color }} />
+                      ) : (
+                        <ChevronRightIcon style={{ fontSize: '1.2rem', color: category.color }} />
+                      )}
+                    </div>
+                  </button>
+                </Tooltip>
+              )}
+            </h2>
+            <div className="category-detail-stats">
               {hasCriteria ? (
                 <>
                   {criteria.length} motivation{criteria.length > 1 ? 's' : ''} clé{criteria.length > 1 ? 's' : ''} • Importance totale: {totalWeight}
                 </>
               ) : (
-                <span className="category-empty-hint">
+                <span style={{ color: '#95a5a6', fontStyle: 'italic' }}>
                   Aucune motivation clé (ne s'affichera pas sur le graphique)
                 </span>
               )}
             </div>
           </div>
         </div>
-        <div className="category-actions">
+        <div className="category-detail-actions">
           <IconButton
             icon={editing ? '✖️' : '✏️'}
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={() => {
               setEditing(!editing);
-              setAddingCritere(false);
+              setAddingCriterion(false);
             }}
             tooltip={editing ? 'Annuler' : 'Modifier l\'intérêt professionnel'}
-            ariaLabel={editing ? 'Annuler la modification' : `Modifier l'intérêt professionnel ${categoryName}`}
-            style={{ color: categoryColor }}
+            ariaLabel={editing ? 'Annuler la modification' : `Modifier l'intérêt professionnel ${category.name}`}
+            style={{ color: category.color }}
             className="btn-icon-category"
           />
           <IconButton
             icon="🗑️"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(category.id);
-            }}
+            onClick={() => onDeleteCategory(category.id)}
             tooltip={
               canDelete
                 ? 'Supprimer l\'intérêt professionnel'
@@ -120,17 +145,17 @@ const CategoryItem = ({
             }
             ariaLabel={
               canDelete
-                ? `Supprimer l'intérêt professionnel ${categoryName}`
-                : `Impossible de supprimer ${categoryName} : contient des motivations clés`
+                ? `Supprimer l'intérêt professionnel ${category.name}`
+                : `Impossible de supprimer ${category.name} : contient des motivations clés`
             }
             disabled={!canDelete}
-            style={{ color: categoryColor }}
+            style={{ color: category.color }}
             className="btn-icon-category"
           />
         </div>
       </div>
 
-      {editing && (
+      {editing ? (
         <div className="category-edit-container">
           <CategoryEditForm
             category={category}
@@ -139,10 +164,8 @@ const CategoryItem = ({
             existingCategories={existingCategories}
           />
         </div>
-      )}
-
-      {isOpen && (
-        <div className="category-content-expanded">
+      ) : (
+        <div className="category-detail-content">
           {addingCriterion ? (
             <div className="critere-form-container">
               <CritereForm
@@ -155,9 +178,11 @@ const CategoryItem = ({
             <>
               {hasCriteria && (
                 <CritereList
+                  ref={critereListRef}
                   category={category}
                   onUpdate={onUpdateCriterion}
                   onDelete={onDeleteCriterion}
+                  onToggleStateChange={setAllCriteriaOpen}
                 />
               )}
               {criteria.length >= LIMITS.MAX_CRITERES_PER_CATEGORY ? (
@@ -175,10 +200,10 @@ const CategoryItem = ({
                     marginTop: '15px',
                     width: '100%',
                     justifyContent: 'center',
-                    background: categoryColor,
-                    border: `2px solid ${categoryColor}`
+                    background: category.color,
+                    border: `2px solid ${category.color}`
                   }}
-                  aria-label={`Ajouter une motivation clé à ${categoryName}`}
+                  aria-label={`Ajouter une motivation clé à ${category.name}`}
                 >
                   ➕ Ajouter une motivation clé ({criteria.length} / {LIMITS.MAX_CRITERES_PER_CATEGORY})
                 </button>
@@ -191,21 +216,19 @@ const CategoryItem = ({
   );
 };
 
-CategoryItem.propTypes = {
+CategoryDetail.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     color: PropTypes.string.isRequired,
     criteria: PropTypes.array
-  }).isRequired,
-  isOpen: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  }),
+  onUpdateCategory: PropTypes.func.isRequired,
+  onDeleteCategory: PropTypes.func.isRequired,
   onAddCriterion: PropTypes.func.isRequired,
   onUpdateCriterion: PropTypes.func.isRequired,
   onDeleteCriterion: PropTypes.func.isRequired,
   existingCategories: PropTypes.array.isRequired
 };
 
-export default React.memo(CategoryItem);
+export default React.memo(CategoryDetail);

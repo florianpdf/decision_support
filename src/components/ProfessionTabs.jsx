@@ -1,5 +1,4 @@
 import React from 'react';
-import Tooltip from './Tooltip';
 import IconButton from './ui/IconButton';
 
 /**
@@ -30,21 +29,21 @@ function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, 
         >
           <span className="profession-tab-name">{profession.name}</span>
           <div className="profession-tab-actions" onClick={(e) => e.stopPropagation()}>
-            <Tooltip content="Renommer le métier" position="top">
-              <IconButton
-                icon="✏️"
-                onClick={() => onRenameProfession(profession.id)}
-                ariaLabel="Renommer le métier"
-              />
-            </Tooltip>
-            <Tooltip content="Supprimer le métier" position="top">
-              <IconButton
-                icon="🗑️"
-                onClick={() => onDeleteProfession(profession.id)}
-                ariaLabel="Supprimer le métier"
-                disabled={professions.length === 1}
-              />
-            </Tooltip>
+            <IconButton
+              icon="✏️"
+              onClick={() => onRenameProfession(profession.id)}
+              tooltip="Renommer le métier"
+              tooltipPosition="top"
+              ariaLabel="Renommer le métier"
+            />
+            <IconButton
+              icon="🗑️"
+              onClick={() => onDeleteProfession(profession.id)}
+              tooltip="Supprimer le métier"
+              tooltipPosition="top"
+              ariaLabel="Supprimer le métier"
+              disabled={professions.length === 1}
+            />
           </div>
         </div>
       ))}

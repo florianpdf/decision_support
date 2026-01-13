@@ -5,7 +5,7 @@ import {
   meetsWCAGAAA,
   getAccessibleTextColor,
   adjustColorForContrast
-} from './colorContrast';
+} from '../../utils/colorContrast';
 
 describe('Color Contrast Utilities', () => {
   describe('getContrastRatio', () => {

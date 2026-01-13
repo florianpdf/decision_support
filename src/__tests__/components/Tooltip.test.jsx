@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Tooltip from './Tooltip';
+import Tooltip from '../../components/Tooltip';
 
 describe('Tooltip', () => {
   it('should render children when no content provided', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import SquareChart from './charts/SquareChart';
+import SquareChart from '../../components/charts/SquareChart';
 
 // Mock Recharts components
 vi.mock('recharts', () => ({
@@ -13,26 +13,26 @@ describe('SquareChart', () => {
   const mockCategories = [
     {
       id: 1,
-      nom: 'Category 1',
-      couleur: '#FF0000',
-      criteres: [
-        { id: 1, nom: 'Critere 1', poids: 10 },
-        { id: 2, nom: 'Critere 2', poids: 20 }
+      name: 'Category 1',
+      color: '#FF0000',
+      criteria: [
+        { id: 1, name: 'Criterion 1', weight: 10 },
+        { id: 2, name: 'Criterion 2', weight: 20 }
       ]
     },
     {
       id: 2,
-      nom: 'Category 2',
-      couleur: '#00FF00',
-      criteres: [
-        { id: 3, nom: 'Critere 3', poids: 15 }
+      name: 'Category 2',
+      color: '#00FF00',
+      criteria: [
+        { id: 3, name: 'Criterion 3', weight: 15 }
       ]
     }
   ];
 
-  it('should render empty state when no categories with criteres', () => {
+  it('should render empty state when no categories with criteria', () => {
     const emptyCategories = [
-      { id: 1, nom: 'Category 1', couleur: '#FF0000', criteres: [] }
+      { id: 1, name: 'Category 1', color: '#FF0000', criteria: [] }
     ];
     
     render(<SquareChart categories={emptyCategories} />);
@@ -40,7 +40,7 @@ describe('SquareChart', () => {
     expect(screen.getByText(/aucune donnée à afficher/i)).toBeInTheDocument();
   });
 
-  it('should render chart when categories have criteres', () => {
+  it('should render chart when categories have criteria', () => {
     render(<SquareChart categories={mockCategories} />);
     
     expect(screen.getByTestId('treemap')).toBeInTheDocument();
@@ -54,10 +54,10 @@ describe('SquareChart', () => {
     expect(screen.getByText('Category 2')).toBeInTheDocument();
   });
 
-  it('should filter out categories without criteres', () => {
+  it('should filter out categories without criteria', () => {
     const categoriesWithEmpty = [
       ...mockCategories,
-      { id: 3, nom: 'Category 3', couleur: '#0000FF', criteres: [] }
+      { id: 3, name: 'Category 3', color: '#0000FF', criteria: [] }
     ];
     
     render(<SquareChart categories={categoriesWithEmpty} />);

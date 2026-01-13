@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { COLOR_PALETTE, DEFAULT_COLOR } from '../../constants/colors';
 import Tooltip from '../Tooltip';
 
@@ -7,27 +7,39 @@ import Tooltip from '../Tooltip';
  */
 function CategoryForm({ onSubmit, existingCategories = [] }) {
     // Get already used colors
-    const usedColors = existingCategories.map(cat => cat.color).filter(Boolean);
+    const usedColors = useMemo(() => 
+        existingCategories.map(cat => cat.color).filter(Boolean),
+        [existingCategories]
+    );
     
     // Filter palette to keep only available colors
-    const availableColors = COLOR_PALETTE.filter(color => !usedColors.includes(color));
+    const availableColors = useMemo(() => 
+        COLOR_PALETTE.filter(color => !usedColors.includes(color)),
+        [usedColors]
+    );
     
     // If no color is available, use first from default palette
     // Otherwise, use first available color
-    const defaultAvailableColor = availableColors.length > 0 ? availableColors[0] : DEFAULT_COLOR;
+    const defaultAvailableColor = useMemo(() => 
+        availableColors.length > 0 ? availableColors[0] : DEFAULT_COLOR,
+        [availableColors]
+    );
     
     // Initialize with available color if current color is no longer available
     const [name, setName] = useState('');
-    const [color, setColor] = useState(
-        usedColors.includes(DEFAULT_COLOR) ? defaultAvailableColor : DEFAULT_COLOR
-    );
+    const [color, setColor] = useState(() => {
+        const initialUsedColors = existingCategories.map(cat => cat.color).filter(Boolean);
+        const initialAvailableColors = COLOR_PALETTE.filter(color => !initialUsedColors.includes(color));
+        const initialDefaultColor = initialAvailableColors.length > 0 ? initialAvailableColors[0] : DEFAULT_COLOR;
+        return initialUsedColors.includes(DEFAULT_COLOR) ? initialDefaultColor : DEFAULT_COLOR;
+    });
     
     // Update color if it becomes unavailable
     useEffect(() => {
         if (usedColors.includes(color) && availableColors.length > 0) {
             setColor(availableColors[0]);
         }
-    }, [existingCategories, color, usedColors, availableColors]);
+    }, [color, usedColors, availableColors]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -143,4 +155,4 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
     );
 }
 
-export default CategoryForm;
+export default React.memo(CategoryForm);

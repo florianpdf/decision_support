@@ -4,18 +4,20 @@ Application web React pour identifier et visualiser vos intérêts professionnel
 
 ## 🚀 Fonctionnalités
 
-- ✅ **Gestion des intérêts professionnels** : Création, modification, suppression avec couleurs personnalisées
-- ✅ **Gestion des motivations clés** : Ajout, modification, suppression avec importance (1-30)
-- ✅ **Visualisation graphique** : Treemap où la taille dépend de l'importance
+- ✅ **Gestion multi-professions** : Créer et gérer jusqu'à 5 professions différentes
+- ✅ **Gestion des intérêts professionnels** : Création, modification, suppression avec couleurs personnalisées (max 10)
+- ✅ **Gestion des motivations clés** : Ajout, modification, suppression avec importance (1-30) et type (Avantage/Désavantage/NSP)
+- ✅ **Visualisation graphique** : Treemap interactif où la taille dépend de l'importance
+- ✅ **Modes de visualisation** : Basculer entre couleurs par catégorie ou par type de motivation
 - ✅ **Modification en temps réel** : Slider pour ajuster l'importance avec mise à jour instantanée
 - ✅ **Interface responsive** : Adaptée aux différentes tailles d'écran
-- ✅ **Accessibilité** : Conforme aux standards WCAG
+- ✅ **Accessibilité** : Conforme aux standards WCAG AA
 - ✅ **Persistance locale** : Données sauvegardées dans le navigateur (localStorage)
-- ✅ **Tests complets** : 110 tests avec couverture maximale
+- ✅ **Tests complets** : Tests unitaires avec couverture maximale
 
 ## 📋 Prérequis
 
-- Node.js >= 16.x et npm
+- Node.js >= 20.x et npm
 
 ## 🛠️ Installation
 
@@ -175,22 +177,31 @@ localStorage.setItem('bulle_chart_categories', '[votre JSON]')
 ## 🐛 Dépannage
 
 ### L'application ne se lance pas
-- Vérifiez que Node.js est installé : `node --version`
+- Vérifiez que Node.js >= 20 est installé : `node --version`
 - Supprimez `node_modules/` et relancez `npm install`
+- Vérifiez que le port 3000 n'est pas déjà utilisé
 
 ### Les données ne persistent pas
 - Vérifiez que les cookies/localStorage ne sont pas désactivés dans votre navigateur
 - Vérifiez la console du navigateur pour les erreurs
+- Consultez [RESET_LOCALSTORAGE.md](./RESET_LOCALSTORAGE.md) pour réinitialiser les données
 
 ### Les tests échouent
 - Vérifiez que toutes les dépendances sont installées : `npm install`
 - Vérifiez que les imports sont corrects après un refactoring
 - Consultez [TESTING.md](./TESTING.md) pour les guidelines de tests
 
+### Problèmes de déploiement GitHub Pages
+- Vérifiez que GitHub Actions est activé dans les paramètres du repository
+- Vérifiez que le workflow `.github/workflows/deploy.yml` s'exécute correctement
+- Attendez quelques minutes pour la propagation DNS après le déploiement
+
 ## 📚 Documentation
 
 - [TESTING.md](./TESTING.md) - Guide complet pour écrire et maintenir les tests
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Guide de contribution au projet
+- [RESET_LOCALSTORAGE.md](./RESET_LOCALSTORAGE.md) - Guide pour réinitialiser les données
+- [ACCESSIBILITY.md](./ACCESSIBILITY.md) - Rapport de conformité d'accessibilité WCAG AA
 
 ## 📄 Licence
 

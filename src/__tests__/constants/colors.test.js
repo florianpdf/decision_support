@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { COLOR_PALETTE, DEFAULT_COLOR } from './colors';
+import { COLOR_PALETTE, DEFAULT_COLOR } from '../../constants/colors';
 
 describe('Colors Constants', () => {
   describe('COLOR_PALETTE', () => {

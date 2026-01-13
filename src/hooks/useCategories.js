@@ -78,13 +78,15 @@ export const useCategories = (professionId) => {
       throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
-    addCategory(categoryData);
+    const newCategory = addCategory(categoryData);
     
     // Initialize weight for all professions with default value (15)
     if (professionId) {
       // Will be initialized when criteria are added
       loadCategoriesFromStorage();
     }
+    
+    return newCategory.id;
   }, [professionId, loadCategoriesFromStorage]);
 
   /**

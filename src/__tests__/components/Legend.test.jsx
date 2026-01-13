@@ -1,30 +1,30 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Legend from './charts/Legend';
+import Legend from '../../components/charts/Legend';
 
 describe('Legend', () => {
-  it('should return null when no categories with criteres', () => {
+  it('should return null when no categories with criteria', () => {
     const { container } = render(<Legend categories={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('should return null when categories have no criteres', () => {
+  it('should return null when categories have no criteria', () => {
     const categories = [
-      { id: 1, nom: 'Category 1', couleur: '#FF0000', criteres: [] }
+      { id: 1, name: 'Category 1', color: '#FF0000', criteria: [] }
     ];
     const { container } = render(<Legend categories={categories} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('should display categories with criteres', () => {
+  it('should display categories with criteria', () => {
     const categories = [
       {
         id: 1,
-        nom: 'Category 1',
-        couleur: '#FF0000',
-        criteres: [
-          { id: 1, nom: 'Critere 1', poids: 10 },
-          { id: 2, nom: 'Critere 2', poids: 20 }
+        name: 'Category 1',
+        color: '#FF0000',
+        criteria: [
+          { id: 1, name: 'Criterion 1', weight: 10 },
+          { id: 2, name: 'Criterion 2', weight: 20 }
         ]
       }
     ];
@@ -40,15 +40,15 @@ describe('Legend', () => {
     const categories = [
       {
         id: 1,
-        nom: 'Category 1',
-        couleur: '#FF0000',
-        criteres: [{ id: 1, nom: 'Critere 1', poids: 10 }]
+        name: 'Category 1',
+        color: '#FF0000',
+        criteria: [{ id: 1, name: 'Criterion 1', weight: 10 }]
       },
       {
         id: 2,
-        nom: 'Category 2',
-        couleur: '#00FF00',
-        criteres: [{ id: 2, nom: 'Critere 2', poids: 20 }]
+        name: 'Category 2',
+        color: '#00FF00',
+        criteria: [{ id: 2, name: 'Criterion 2', weight: 20 }]
       }
     ];
     
@@ -58,19 +58,19 @@ describe('Legend', () => {
     expect(screen.getByText('Category 2')).toBeInTheDocument();
   });
 
-  it('should filter out categories without criteres', () => {
+  it('should filter out categories without criteria', () => {
     const categories = [
       {
         id: 1,
-        nom: 'Category 1',
-        couleur: '#FF0000',
-        criteres: [{ id: 1, nom: 'Critere 1', poids: 10 }]
+        name: 'Category 1',
+        color: '#FF0000',
+        criteria: [{ id: 1, name: 'Criterion 1', weight: 10 }]
       },
       {
         id: 2,
-        nom: 'Category 2',
-        couleur: '#00FF00',
-        criteres: []
+        name: 'Category 2',
+        color: '#00FF00',
+        criteria: []
       }
     ];
     
@@ -80,13 +80,13 @@ describe('Legend', () => {
     expect(screen.queryByText('Category 2')).not.toBeInTheDocument();
   });
 
-  it('should display correct singular form for critere', () => {
+  it('should display correct singular form for criterion', () => {
     const categories = [
       {
         id: 1,
-        nom: 'Category 1',
-        couleur: '#FF0000',
-        criteres: [{ id: 1, nom: 'Critere 1', poids: 10 }]
+        name: 'Category 1',
+        color: '#FF0000',
+        criteria: [{ id: 1, name: 'Criterion 1', weight: 10 }]
       }
     ];
     
@@ -95,15 +95,15 @@ describe('Legend', () => {
     expect(screen.getByText(/1 motivation clé/i)).toBeInTheDocument();
   });
 
-  it('should display correct plural form for criteres', () => {
+  it('should display correct plural form for criteria', () => {
     const categories = [
       {
         id: 1,
-        nom: 'Category 1',
-        couleur: '#FF0000',
-        criteres: [
-          { id: 1, nom: 'Critere 1', poids: 10 },
-          { id: 2, nom: 'Critere 2', poids: 20 }
+        name: 'Category 1',
+        color: '#FF0000',
+        criteria: [
+          { id: 1, name: 'Criterion 1', weight: 10 },
+          { id: 2, name: 'Criterion 2', weight: 20 }
         ]
       }
     ];

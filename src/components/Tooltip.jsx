@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 /**
- * Composant Tooltip personnalisé avec un design moderne
- * S'adapte à la largeur disponible pour une meilleure lisibilité
+ * Custom Tooltip component with modern design
+ * Adapts to available width for better readability
  */
 function Tooltip({ children, content, position = 'top' }) {
     const [isVisible, setIsVisible] = useState(false);
@@ -18,37 +18,42 @@ function Tooltip({ children, content, position = 'top' }) {
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
 
-            // Ajuster la position pour éviter de sortir de l'écran
-            let left = tooltip.style.left;
-            let top = tooltip.style.top;
+            // Use fixed position to avoid z-index issues
+            tooltip.style.position = 'fixed';
+            tooltip.style.zIndex = '10000';
 
-            // Pour les tooltips top/bottom, ajuster horizontalement
-            if (position === 'top' || position === 'bottom') {
-                const tooltipLeft = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
-                if (tooltipLeft < 10) {
-                    tooltip.style.left = '10px';
-                    tooltip.style.transform = 'translateX(0)';
-                } else if (tooltipLeft + tooltipRect.width > viewportWidth - 10) {
-                    tooltip.style.left = 'auto';
-                    tooltip.style.right = '10px';
-                    tooltip.style.transform = 'translateX(0)';
-                }
+            // Calculate position relative to viewport
+            if (position === 'top') {
+                const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                const top = rect.top - tooltipRect.height - 8;
+                
+                tooltip.style.left = `${Math.max(10, Math.min(left, viewportWidth - tooltipRect.width - 10))}px`;
+                tooltip.style.top = `${Math.max(10, top)}px`;
+                tooltip.style.transform = 'translateX(0)';
+            } else if (position === 'bottom') {
+                const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                const top = rect.bottom + 8;
+                
+                tooltip.style.left = `${Math.max(10, Math.min(left, viewportWidth - tooltipRect.width - 10))}px`;
+                tooltip.style.top = `${Math.min(top, viewportHeight - tooltipRect.height - 10)}px`;
+                tooltip.style.transform = 'translateX(0)';
+            } else if (position === 'left') {
+                const left = rect.left - tooltipRect.width - 8;
+                const top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                
+                tooltip.style.left = `${Math.max(10, left)}px`;
+                tooltip.style.top = `${Math.max(10, Math.min(top, viewportHeight - tooltipRect.height - 10))}px`;
+                tooltip.style.transform = 'translateY(0)';
+            } else if (position === 'right') {
+                const left = rect.right + 8;
+                const top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                
+                tooltip.style.left = `${Math.min(left, viewportWidth - tooltipRect.width - 10)}px`;
+                tooltip.style.top = `${Math.max(10, Math.min(top, viewportHeight - tooltipRect.height - 10))}px`;
+                tooltip.style.transform = 'translateY(0)';
             }
 
-            // Pour les tooltips left/right, ajuster verticalement
-            if (position === 'left' || position === 'right') {
-                const tooltipTop = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
-                if (tooltipTop < 10) {
-                    tooltip.style.top = '10px';
-                    tooltip.style.transform = 'translateY(0)';
-                } else if (tooltipTop + tooltipRect.height > viewportHeight - 10) {
-                    tooltip.style.top = 'auto';
-                    tooltip.style.bottom = '10px';
-                    tooltip.style.transform = 'translateY(0)';
-                }
-            }
-
-            // Limiter la largeur maximale selon l'espace disponible
+            // Limit max width based on available space
             if (position === 'top' || position === 'bottom') {
                 const availableWidth = Math.min(viewportWidth - 20, 400);
                 tooltip.style.maxWidth = `${availableWidth}px`;
@@ -63,17 +68,15 @@ function Tooltip({ children, content, position = 'top' }) {
         return children;
     }
 
-    // Traiter le contenu pour ajouter des retours à la ligne après chaque point
-    const formatContent = (text) => {
-        if (typeof text !== 'string') {
-            return text;
+    // Process content to add line breaks after each period
+    const formattedContent = React.useMemo(() => {
+        if (typeof content !== 'string') {
+            return content;
         }
-        // Remplacer chaque point suivi d'un espace par un point + retour à la ligne
-        // Mais pas les points qui sont déjà en fin de ligne ou suivis d'un autre point
-        return text.replace(/\.\s+/g, '.\n').trim();
-    };
-
-    const formattedContent = formatContent(content);
+        // Replace each period followed by space with period + line break
+        // But not periods that are already at end of line or followed by another period
+        return content.replace(/\.\s+/g, '.\n').trim();
+    }, [content]);
 
     return (
         <div
@@ -84,7 +87,10 @@ function Tooltip({ children, content, position = 'top' }) {
         >
             {children}
             {isVisible && (
-                <div ref={tooltipRef} className={`tooltip tooltip-${position}`}>
+                <div 
+                    ref={tooltipRef} 
+                    className={`tooltip tooltip-${position}`}
+                >
                     {formattedContent}
                 </div>
             )}
@@ -92,4 +98,4 @@ function Tooltip({ children, content, position = 'top' }) {
     );
 }
 
-export default Tooltip;
+export default React.memo(Tooltip);

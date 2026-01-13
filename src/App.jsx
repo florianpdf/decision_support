@@ -6,16 +6,13 @@ import ProfessionTabs from './components/ProfessionTabs';
 import ProfessionForm from './components/forms/ProfessionForm';
 import ProfessionRenameForm from './components/forms/ProfessionRenameForm';
 import CategoryForm from './components/forms/CategoryForm';
-import CategoriesList from './components/CategoriesList';
+import CategoriesSidebar from './components/CategoriesSidebar';
+import CategoryDetail from './components/CategoryDetail';
 import SquareChart from './components/charts/SquareChart';
 import ConfirmModal from './components/modals/ConfirmModal';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import Tooltip from './components/Tooltip';
 import Card from './components/ui/Card';
 import Message from './components/ui/Message';
 import EmptyState from './components/ui/EmptyState';
-import Stats from './components/ui/Stats';
 import { LIMITS } from './utils/constants';
 import { loadCategories, loadCriteria } from './services/storage';
 
@@ -54,12 +51,32 @@ function App() {
   const [updateCategoryModal, setUpdateCategoryModal] = useState({ isOpen: false, categoryId: null });
   const [deleteProfessionModal, setDeleteProfessionModal] = useState({ isOpen: false, professionId: null, professionName: '' });
   const [renameProfessionModal, setRenameProfessionModal] = useState({ isOpen: false, professionId: null });
+  const [createCategoryModal, setCreateCategoryModal] = useState({ isOpen: false });
+  
+  // Selected category state
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  
+  // Auto-select first category when categories change
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategoryId) {
+      setSelectedCategoryId(categories[0].id);
+    } else if (categories.length === 0) {
+      setSelectedCategoryId(null);
+    } else if (selectedCategoryId && !categories.find(c => c.id === selectedCategoryId)) {
+      // Selected category was deleted, select first one or null
+      setSelectedCategoryId(categories.length > 0 ? categories[0].id : null);
+    }
+  }, [categories, selectedCategoryId]);
 
   // Wrapper functions that handle notifications and confirmations
   const onAddCategory = (categoryData) => {
     try {
-      handleAddCategory(categoryData);
+      const newCategoryId = handleAddCategory(categoryData);
       showSuccess('Intérêt professionnel ajouté avec succès pour tous les métiers');
+      // Select the newly created category
+      if (newCategoryId) {
+        setSelectedCategoryId(newCategoryId);
+      }
     } catch (err) {
       showError(err.message);
     }
@@ -248,37 +265,9 @@ function App() {
   const hasCategoriesWithCriteria = categories.some(
     cat => cat.criteria && cat.criteria.length > 0
   );
-
-  // Track state of all categories (open/closed) for the toggle button
-  const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
-
-  // Update state when categories open/close state changes
-  useEffect(() => {
-    const checkAllOpen = () => {
-      if (!window.openCategoriesState) {
-        setAllCategoriesOpen(false);
-        return;
-      }
-
-      const categoriesWithCriteria = categories.filter(
-        cat => cat.criteria && cat.criteria.length > 0
-      );
-
-      if (categoriesWithCriteria.length === 0) {
-        setAllCategoriesOpen(false);
-        return;
-      }
-
-      const allOpen = categoriesWithCriteria.every(
-        cat => window.openCategoriesState[cat.id] === true
-      );
-      setAllCategoriesOpen(allOpen);
-    };
-
-    checkAllOpen();
-    const interval = setInterval(checkAllOpen, 100);
-    return () => clearInterval(interval);
-  }, [categories]);
+  
+  // Get selected category
+  const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
 
   // If no professions, show creation form
   if (professionsLoading) {
@@ -328,82 +317,63 @@ function App() {
 
       {currentProfession && (
         <>
-          <div className="app-content">
-            <Card
-              title="➕ Créer un intérêt professionnel"
-              subtitle="Un intérêt professionnel regroupe plusieurs motivations clés. Choisissez un nom et une couleur pour l'identifier facilement."
-            >
-              {allCategories.length >= LIMITS.MAX_CATEGORIES ? (
-                <Message type="error">
-                  Limite atteinte : vous ne pouvez pas ajouter plus de {LIMITS.MAX_CATEGORIES} intérêts professionnels
-                </Message>
-              ) : (
-                <CategoryForm
-                  onSubmit={onAddCategory}
-                  existingCategories={allCategories}
-                />
-              )}
-              <Stats
-                value={`${allCategories.length} / ${LIMITS.MAX_CATEGORIES}`}
-                label="intérêts professionnels créés"
-                className="stats-inline"
-              />
-            </Card>
-
-            <Card
-              title={
-                <div className="card-title-with-action">
-                  <span>📋 Mes intérêts professionnels</span>
-                  {categories.some(cat => cat.criteria && cat.criteria.length > 0) && (
-                    <Tooltip content={allCategoriesOpen ? 'Tout fermer' : 'Tout ouvrir'}>
-                      <button
-                        className="btn-icon toggle-all-categories"
-                        onClick={() => {
-                          if (window.toggleAllCategoriesFn) {
-                            window.toggleAllCategoriesFn();
-                          }
-                        }}
-                        aria-label={allCategoriesOpen ? 'Tout fermer' : 'Tout ouvrir'}
-                      >
-                        <div className={`toggle-icon-wrapper ${allCategoriesOpen ? 'open' : 'closed'}`}>
-                          {allCategoriesOpen ? (
-                            <ExpandMoreIcon style={{ fontSize: '1.2rem' }} />
-                          ) : (
-                            <ChevronRightIcon style={{ fontSize: '1.2rem' }} />
-                          )}
-                        </div>
-                      </button>
-                    </Tooltip>
-                  )}
-                </div>
-              }
-            >
-              {categoriesLoading ? (
-                <EmptyState title="Chargement..." />
-              ) : (
-                <CategoriesList
-                  categories={categories}
-                  onDeleteCategory={onDeleteCategory}
+          <div className="app-content-two-columns">
+            <div className="app-content-left">
+              <Card title="📋 Mes intérêts professionnels">
+                {categoriesLoading ? (
+                  <EmptyState title="Chargement..." />
+                ) : (
+                  <CategoriesSidebar
+                    categories={categories}
+                    selectedCategoryId={selectedCategoryId}
+                    onSelectCategory={setSelectedCategoryId}
+                    onCreateCategory={() => setCreateCategoryModal({ isOpen: true })}
+                  />
+                )}
+              </Card>
+            </div>
+            
+            <div className="app-content-right">
+              <Card title="Détail de l'intérêt professionnel">
+                <CategoryDetail
+                  category={selectedCategory}
                   onUpdateCategory={onUpdateCategory}
+                  onDeleteCategory={onDeleteCategory}
                   onAddCriterion={onAddCriterion}
-                  onDeleteCriterion={onDeleteCriterion}
                   onUpdateCriterion={onUpdateCriterion}
+                  onDeleteCriterion={onDeleteCriterion}
                   existingCategories={allCategories}
                 />
-              )}
-              {categories.length > 0 && (
-                <Stats
-                  value={`${categories.length} intérêt${categories.length > 1 ? 's' : ''} professionnel${categories.length > 1 ? 's' : ''} • ${totalCriteria} motivation${totalCriteria > 1 ? 's' : ''} clé${totalCriteria > 1 ? 's' : ''} au total`}
-                  label=""
-                  className="stats-inline"
-                />
-              )}
-            </Card>
+              </Card>
+            </div>
           </div>
 
           <Card
             title="📈 Visualisation"
-            subtitle="Le graphique ci-dessous représente vos intérêts professionnels et vos motivations clés pour ce métier. Plus une motivation a une importance élevée, plus son carré sera grand."
+            subtitle={
+              <div style={{ lineHeight: '1.6' }}>
+                <p style={{ margin: '0 0 12px 0' }}>
+                  Le graphique ci-dessous représente vos <strong>intérêts professionnels</strong> et vos <strong>motivations clés</strong> pour ce métier.
+                </p>
+                <p style={{ margin: '0 0 12px 0' }}>
+                  <strong>Plus une motivation a une importance élevée, plus son carré sera grand.</strong>
+                </p>
+                <p style={{ margin: '0 0 8px 0', fontWeight: '600' }}>
+                  Deux modes de visualisation disponibles :
+                </p>
+                <ul style={{ margin: '0 0 12px 0', paddingLeft: '20px' }}>
+                  <li style={{ marginBottom: '6px' }}>
+                    <strong>Couleurs par catégorie</strong> : chaque intérêt professionnel a sa propre couleur
+                  </li>
+                  <li style={{ marginBottom: '6px' }}>
+                    <strong>Couleurs par type</strong> : les couleurs indiquent si une motivation est un avantage, un désavantage, ou neutre
+                  </li>
+                </ul>
+                <p style={{ margin: '0', fontStyle: 'italic', color: '#5a6268' }}>
+                  💡 La visualisation par type permet d'identifier rapidement les motivations positives et négatives pour ce métier.
+                </p>
+              </div>
+            }
           >
             {hasCategoriesWithCriteria ? (
               <SquareChart categories={categories} professionId={currentProfessionId} />
@@ -423,7 +393,7 @@ function App() {
         onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })}
         onConfirm={confirmDeleteCategory}
         title="Supprimer l'intérêt professionnel"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera cet intérêt professionnel et toutes ses motivations clés pour TOUS les métiers.`}
+        message={`Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera cet intérêt professionnel pour TOUS les métiers.`}
         confirmText="Supprimer"
         cancelText="Annuler"
         requireCheckbox={true}
@@ -481,6 +451,35 @@ function App() {
               onSubmit={handleRenameProfession}
               onCancel={() => setRenameProfessionModal({ isOpen: false, professionId: null })}
             />
+          </div>
+        </div>
+      )}
+
+      {createCategoryModal.isOpen && (
+        <div className="modal-overlay" onClick={() => setCreateCategoryModal({ isOpen: false })}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0, marginBottom: '20px' }}>
+              ➕ Créer un intérêt professionnel
+            </h2>
+            <p style={{ marginBottom: '20px', color: '#7f8c8d' }}>
+              Un intérêt professionnel regroupe plusieurs motivations clés. Choisissez un nom et une couleur pour l'identifier facilement.
+            </p>
+            {allCategories.length >= LIMITS.MAX_CATEGORIES ? (
+              <Message type="error">
+                Limite atteinte : vous ne pouvez pas ajouter plus de {LIMITS.MAX_CATEGORIES} intérêts professionnels
+              </Message>
+            ) : (
+              <CategoryForm
+                onSubmit={(categoryData) => {
+                  onAddCategory(categoryData);
+                  setCreateCategoryModal({ isOpen: false });
+                }}
+                existingCategories={allCategories}
+              />
+            )}
+            <div style={{ marginTop: '15px', textAlign: 'center', color: '#7f8c8d', fontSize: '0.9rem' }}>
+              {allCategories.length} / {LIMITS.MAX_CATEGORIES} intérêts professionnels créés
+            </div>
           </div>
         </div>
       )}

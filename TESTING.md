@@ -14,20 +14,29 @@ This project uses **Vitest** as the testing framework with **React Testing Libra
 
 ## Test Structure
 
+All tests are located in `src/__tests__/` directory, organized by type:
+
 ```
 src/
+├── __tests__/
+│   ├── components/
+│   │   └── ComponentName.test.jsx
+│   ├── hooks/
+│   │   └── useHookName.test.js
+│   ├── utils/
+│   │   └── utilityName.test.js
+│   ├── services/
+│   │   └── serviceName.test.js
+│   └── constants/
+│       └── constants.test.js
 ├── components/
-│   ├── ComponentName.jsx
-│   └── ComponentName.test.jsx
+│   └── ComponentName.jsx
 ├── hooks/
-│   ├── useHookName.js
-│   └── useHookName.test.js
+│   └── useHookName.js
 ├── utils/
-│   ├── utilityName.js
-│   └── utilityName.test.js
+│   └── utilityName.js
 └── services/
-    ├── serviceName.js
-    └── serviceName.test.js
+    └── serviceName.js
 ```
 
 ## Running Tests
