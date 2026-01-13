@@ -962,7 +962,29 @@ body {
     align-items: center;
     gap: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.3s ease-out;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-height 0.25s ease-out, opacity 0.25s ease-out, transform 0.25s ease-out, margin-bottom 0.25s ease-out, padding 0.25s ease-out;
+}
+
+.message-entering {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.message-visible {
+    max-height: 200px;
+    opacity: 1;
+    transform: translateY(0);
+    margin-bottom: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
 }
 
 @keyframes slideIn {
