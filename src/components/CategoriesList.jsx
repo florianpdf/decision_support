@@ -10,9 +10,9 @@ const CategoriesList = ({
   categories,
   onDeleteCategory,
   onUpdateCategory,
-  onAddCritere,
-  onDeleteCritere,
-  onUpdateCritere,
+  onAddCriterion,
+  onDeleteCriterion,
+  onUpdateCriterion,
   existingCategories
 }) => {
   const [openCategories, setOpenCategories] = useState({});
@@ -42,8 +42,8 @@ const CategoriesList = ({
   if (categories.length === 0) {
     return (
       <EmptyState
-        title="Aucun intérêt professionnel pour le moment"
-        description="Utilisez le formulaire pour en ajouter"
+        title="No professional interest at the moment"
+        description="Use the form to add one"
       />
     );
   }
@@ -58,9 +58,9 @@ const CategoriesList = ({
           onToggle={() => toggleCategory(category.id)}
           onUpdate={onUpdateCategory}
           onDelete={onDeleteCategory}
-          onAddCritere={onAddCritere}
-          onUpdateCritere={onUpdateCritere}
-          onDeleteCritere={onDeleteCritere}
+          onAddCriterion={onAddCriterion}
+          onUpdateCriterion={onUpdateCriterion}
+          onDeleteCriterion={onDeleteCriterion}
           existingCategories={existingCategories || categories}
         />
       ))}
@@ -72,9 +72,9 @@ CategoriesList.propTypes = {
   categories: PropTypes.array.isRequired,
   onDeleteCategory: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
-  onAddCritere: PropTypes.func.isRequired,
-  onDeleteCritere: PropTypes.func.isRequired,
-  onUpdateCritere: PropTypes.func.isRequired,
+  onAddCriterion: PropTypes.func.isRequired,
+  onDeleteCriterion: PropTypes.func.isRequired,
+  onUpdateCriterion: PropTypes.func.isRequired,
   existingCategories: PropTypes.array
 };
 

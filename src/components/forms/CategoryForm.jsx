@@ -3,108 +3,108 @@ import { COLOR_PALETTE, DEFAULT_COLOR } from '../../constants/colors';
 import Tooltip from '../Tooltip';
 
 /**
- * Composant formulaire pour ajouter une nouvelle catégorie
+ * Form component for adding a new category
  */
 function CategoryForm({ onSubmit, existingCategories = [] }) {
-    // Récupérer les couleurs déjà utilisées
-    const usedColors = existingCategories.map(cat => cat.couleur);
+    // Get already used colors
+    const usedColors = existingCategories.map(cat => cat.color || cat.couleur).filter(Boolean);
     
-    // Filtrer la palette pour ne garder que les couleurs disponibles
+    // Filter palette to keep only available colors
     const availableColors = COLOR_PALETTE.filter(color => !usedColors.includes(color));
     
-    // Si aucune couleur n'est disponible, utiliser la première de la palette par défaut
-    // Sinon, utiliser la première couleur disponible
+    // If no color is available, use first from default palette
+    // Otherwise, use first available color
     const defaultAvailableColor = availableColors.length > 0 ? availableColors[0] : DEFAULT_COLOR;
     
-    // Initialiser avec une couleur disponible si la couleur actuelle n'est plus disponible
-    const [nom, setNom] = useState('');
-    const [couleur, setCouleur] = useState(
+    // Initialize with available color if current color is no longer available
+    const [name, setName] = useState('');
+    const [color, setColor] = useState(
         usedColors.includes(DEFAULT_COLOR) ? defaultAvailableColor : DEFAULT_COLOR
     );
     
-    // Mettre à jour la couleur si elle devient indisponible
+    // Update color if it becomes unavailable
     useEffect(() => {
-        if (usedColors.includes(couleur) && availableColors.length > 0) {
-            setCouleur(availableColors[0]);
+        if (usedColors.includes(color) && availableColors.length > 0) {
+            setColor(availableColors[0]);
         }
-    }, [existingCategories, couleur, usedColors, availableColors]);
+    }, [existingCategories, color, usedColors, availableColors]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        if (!nom.trim()) {
-            alert('Veuillez saisir un nom pour l\'intérêt professionnel');
+        if (!name.trim()) {
+            alert('Please enter a name for the professional interest');
             return;
         }
         
         onSubmit({
-            nom: nom.trim(),
-            couleur: couleur,
+            name: name.trim(),
+            color: color,
         });
 
-        // Réinitialiser le formulaire avec une couleur disponible
-        setNom('');
-        const remainingUsedColors = [...usedColors, couleur];
+        // Reset form with available color
+        setName('');
+        const remainingUsedColors = [...usedColors, color];
         const remainingAvailableColors = COLOR_PALETTE.filter(color => !remainingUsedColors.includes(color));
-        setCouleur(remainingAvailableColors.length > 0 ? remainingAvailableColors[0] : DEFAULT_COLOR);
+        setColor(remainingAvailableColors.length > 0 ? remainingAvailableColors[0] : DEFAULT_COLOR);
     };
 
-    const handleColorPresetClick = (color) => {
-        setCouleur(color);
+    const handleColorPresetClick = (selectedColor) => {
+        setColor(selectedColor);
     };
 
     return (
         <form onSubmit={handleSubmit}>
             <div className="form-group">
-                <label htmlFor="nom">
-                    📝 Nom de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
+                <label htmlFor="category-name">
+                    📝 Professional Interest Name <span style={{ color: '#e74c3c' }} aria-label="required">*</span>
                 </label>
                 <input
                     type="text"
-                    id="nom"
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
-                    placeholder="Ex: Management, Innovation, Relationnel, Technique..."
+                    id="category-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ex: Management, Innovation, Relationship, Technical..."
                     required
                     aria-required="true"
-                    aria-describedby="nom-help"
+                    aria-describedby="category-name-help"
                 />
-                <small id="nom-help" style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
-                    Choisissez un nom qui décrit bien votre intérêt professionnel
+                <small id="category-name-help" style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
+                    Choose a name that describes your professional interest well
                 </small>
             </div>
 
             <div className="form-group">
                 <fieldset>
                     <legend>
-                        🎨 Couleur de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
+                        🎨 Professional Interest Color <span style={{ color: '#e74c3c' }} aria-label="required">*</span>
                     </legend>
                     <div style={{ marginBottom: '12px', fontSize: '0.9rem', color: '#7f8c8d' }}>
-                        Cliquez sur une couleur ci-dessous pour la sélectionner
+                        Click on a color below to select it
                     </div>
-                    <div className="color-presets-only" role="radiogroup" aria-label="Sélection de la couleur">
+                    <div className="color-presets-only" role="radiogroup" aria-label="Color selection">
                     {availableColors.length > 0 ? (
-                        availableColors.map((color, index) => {
-                            const isSelected = couleur === color;
+                        availableColors.map((presetColor, index) => {
+                            const isSelected = color === presetColor;
                             return (
                                 <Tooltip 
                                     key={index} 
-                                    content={color} 
+                                    content={presetColor} 
                                     position="top"
                                 >
                                     <div
                                         className={`color-preset ${isSelected ? 'active' : ''}`}
-                                        style={{ backgroundColor: color }}
-                                        onClick={() => handleColorPresetClick(color)}
+                                        style={{ backgroundColor: presetColor }}
+                                        onClick={() => handleColorPresetClick(presetColor)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' || e.key === ' ') {
                                                 e.preventDefault();
-                                                handleColorPresetClick(color);
+                                                handleColorPresetClick(presetColor);
                                             }
                                         }}
                                         role="radio"
                                         aria-checked={isSelected}
-                                        aria-label={`Couleur ${color}${isSelected ? ', sélectionnée' : ''}`}
+                                        aria-label={`Color ${presetColor}${isSelected ? ', selected' : ''}`}
                                         tabIndex={0}
                                     />
                                 </Tooltip>
@@ -117,7 +117,7 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                             color: '#e74c3c',
                             fontWeight: '600'
                         }}>
-                            Toutes les couleurs sont déjà utilisées. Supprimez un intérêt professionnel pour libérer une couleur.
+                            All colors are already used. Delete a professional interest to free up a color.
                         </div>
                     )}
                     </div>
@@ -131,13 +131,13 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                 style={{ 
                     width: '100%', 
                     justifyContent: 'center',
-                    background: couleur,
-                    border: `2px solid ${couleur}`,
+                    background: color,
+                    border: `2px solid ${color}`,
                     opacity: availableColors.length === 0 ? 0.5 : 1,
                     cursor: availableColors.length === 0 ? 'not-allowed' : 'pointer'
                 }}
             >
-                ➕ Créer l'intérêt professionnel
+                ➕ Create Professional Interest
             </button>
         </form>
     );
