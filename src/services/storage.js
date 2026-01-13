@@ -503,19 +503,31 @@ export const setCriterionType = (professionId, categoryId, criterionId, type) =>
 
 /**
  * Initialize weights for a new profession (copy from last created profession)
+ * Each criterion (identified by criterionId) gets its own weight/type copy
+ * This ensures that even if multiple criteria share the same name, they remain independent
  */
 export const initializeProfessionWeights = (newProfessionId, sourceProfessionId) => {
     const sourceWeights = loadCriterionWeights().filter(w => w.professionId === sourceProfessionId);
     const weights = loadCriterionWeights();
     
+    // Copy each weight entry by criterionId (not by name)
+    // This ensures each criterion has its own independent weight/type
     sourceWeights.forEach(weight => {
-        weights.push({
-            professionId: newProfessionId,
-            categoryId: weight.categoryId,
-            criterionId: weight.criterionId,
-            weight: weight.weight,
-            type: weight.type || 'neutral', // Preserve type or default
-        });
+        // Check if weight already exists for this profession and criterion
+        const existingIndex = weights.findIndex(
+            w => w.professionId === newProfessionId && w.criterionId === weight.criterionId
+        );
+        
+        if (existingIndex === -1) {
+            // Create new weight entry for this profession
+            weights.push({
+                professionId: newProfessionId,
+                categoryId: weight.categoryId,
+                criterionId: weight.criterionId, // Use criterionId, not name
+                weight: weight.weight,
+                type: weight.type || 'neutral', // Preserve type or default
+            });
+        }
     });
     
     saveCriterionWeights(weights);
