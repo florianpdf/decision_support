@@ -52,7 +52,7 @@ describe('CategoryForm', () => {
     render(<CategoryForm onSubmit={mockOnSubmit} existingCategories={existingCategories} />);
     
     expect(screen.getByText(/toutes les couleurs sont déjà utilisées/i)).toBeInTheDocument();
-    expect(screen.getByRole('button')).toBeDisabled();
+    expect(screen.getByRole('button', { name: /créer l'intérêt professionnel/i })).toBeDisabled();
   });
 
   it('should call onSubmit with correct data', async () => {
@@ -151,6 +151,38 @@ describe('CategoryForm', () => {
     
     await waitFor(() => {
       expect(firstColor).toHaveAttribute('aria-checked', 'true');
+    });
+  });
+
+  it('should open suggestions modal when icon is clicked', async () => {
+    render(<CategoryForm onSubmit={mockOnSubmit} />);
+    
+    const suggestionsButton = screen.getByRole('button', { name: /voir les suggestions/i });
+    await user.click(suggestionsButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/suggestions d'intérêts professionnels/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should fill name input when suggestion is selected', async () => {
+    render(<CategoryForm onSubmit={mockOnSubmit} />);
+    
+    const suggestionsButton = screen.getByRole('button', { name: /voir les suggestions/i });
+    await user.click(suggestionsButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/suggestions d'intérêts professionnels/i)).toBeInTheDocument();
+    });
+    
+    // Click on first suggestion
+    const firstSuggestion = screen.getByText('Management');
+    await user.click(firstSuggestion);
+    
+    // Modal should close and input should be filled
+    await waitFor(() => {
+      expect(screen.queryByText(/suggestions d'intérêts professionnels/i)).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/nom de l'intérêt professionnel/i)).toHaveValue('Management');
     });
   });
 });

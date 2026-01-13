@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { COLOR_PALETTE, DEFAULT_COLOR } from '../../constants/colors';
 import Tooltip from '../Tooltip';
+import CategorySuggestionsModal from '../modals/CategorySuggestionsModal';
+import IconButton from '../ui/IconButton';
 
 /**
  * Form component for adding a new category
@@ -34,6 +36,9 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
         return initialUsedColors.includes(DEFAULT_COLOR) ? initialDefaultColor : DEFAULT_COLOR;
     });
     
+    // Modal state for suggestions
+    const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
+    
     // Update color if it becomes unavailable
     useEffect(() => {
         if (usedColors.includes(color) && availableColors.length > 0) {
@@ -66,21 +71,33 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
     };
 
     return (
+        <>
         <form onSubmit={handleSubmit}>
             <div className="form-group">
                 <label htmlFor="category-name">
                     📝 Nom de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
                 </label>
-                <input
-                    type="text"
-                    id="category-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ex: Management, Innovation, Relationnel, Technique..."
-                    required
-                    aria-required="true"
-                    aria-describedby="category-name-help"
-                />
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                        type="text"
+                        id="category-name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Ex: Management, Innovation, Relationnel, Technique..."
+                        required
+                        aria-required="true"
+                        aria-describedby="category-name-help"
+                        style={{ flex: 1 }}
+                    />
+                    <IconButton
+                        icon="💡"
+                        onClick={() => setShowSuggestionsModal(true)}
+                        tooltip="Voir les suggestions d'intérêts professionnels"
+                        tooltipPosition="top"
+                        ariaLabel="Voir les suggestions"
+                        style={{ flexShrink: 0 }}
+                    />
+                </div>
                 <small id="category-name-help" style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
                     Choisissez un nom qui décrit bien votre intérêt professionnel
                 </small>
@@ -152,6 +169,14 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                 ➕ Créer l'intérêt professionnel
             </button>
         </form>
+
+        <CategorySuggestionsModal
+            isOpen={showSuggestionsModal}
+            onClose={() => setShowSuggestionsModal(false)}
+            onSelect={(suggestion) => setName(suggestion)}
+            existingCategories={existingCategories}
+        />
+        </>
     );
 }
 
