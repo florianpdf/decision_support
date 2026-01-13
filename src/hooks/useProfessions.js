@@ -82,7 +82,7 @@ export const useProfessions = () => {
       }
     } catch (err) {
       console.error('Error loading professions:', err);
-      throw new Error('Error loading professions');
+      throw new Error('Erreur lors du chargement des métiers');
     } finally {
       setLoading(false);
     }
@@ -98,11 +98,11 @@ export const useProfessions = () => {
    */
   const handleAddProfession = useCallback((professionData) => {
     if (!professionData.name || !professionData.name.trim()) {
-      throw new Error('Profession name is required');
+      throw new Error('Le nom du métier est obligatoire');
     }
 
     if (professions.length >= LIMITS.MAX_METIERS) {
-      throw new Error(`You cannot create more than ${LIMITS.MAX_METIERS} professions`);
+      throw new Error(`Vous ne pouvez pas créer plus de ${LIMITS.MAX_METIERS} métiers`);
     }
 
     const newProfession = addProfession(professionData);
@@ -124,12 +124,12 @@ export const useProfessions = () => {
    */
   const handleUpdateProfession = useCallback((professionId, updates) => {
     if (updates.name !== undefined && !updates.name.trim()) {
-      throw new Error('Profession name is required');
+      throw new Error('Le nom du métier est obligatoire');
     }
 
     const updated = updateProfession(professionId, updates);
     if (!updated) {
-      throw new Error('Profession not found');
+      throw new Error('Métier non trouvé');
     }
 
     loadProfessionsFromStorage();

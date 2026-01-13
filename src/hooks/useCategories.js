@@ -47,7 +47,7 @@ export const useCategories = (professionId) => {
       setCategories(loaded);
     } catch (err) {
       console.error('Error loading categories:', err);
-      throw new Error('Error loading professional interests');
+      throw new Error('Erreur lors du chargement des intérêts professionnels');
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export const useCategories = (professionId) => {
     }
 
     if (isColorUsed(color, allCategories)) {
-      throw new Error('This color is already used by another professional interest');
+      throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
     addCategory({ name, color });
@@ -97,12 +97,12 @@ export const useCategories = (professionId) => {
     
     const color = updates.color || updates.couleur;
     if (color && isColorUsed(color, allCategories, categoryId)) {
-      throw new Error('This color is already used by another professional interest');
+      throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
     const updated = updateCategory(categoryId, updates);
     if (!updated) {
-      throw new Error('Professional interest not found');
+      throw new Error('Intérêt professionnel non trouvé');
     }
 
     loadCategoriesFromStorage();
@@ -136,7 +136,7 @@ export const useCategories = (professionId) => {
     const allCategories = loadCategories();
     const category = allCategories.find(c => c.id === categoryId);
     if (!category) {
-      throw new Error('Professional interest not found');
+      throw new Error('Intérêt professionnel non trouvé');
     }
 
     const allCriteria = loadCriteria();
@@ -176,7 +176,7 @@ export const useCategories = (professionId) => {
       // Update name for all professions
       const updated = updateCriterion(criterionId, { name });
       if (!updated) {
-        throw new Error('Key motivation not found');
+        throw new Error('Motivation clé non trouvée');
       }
     }
 

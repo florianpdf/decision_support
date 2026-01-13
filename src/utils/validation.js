@@ -11,7 +11,7 @@ import { LIMITS } from './constants';
  */
 export const validateCategoryName = (name) => {
   if (!name || !name.trim()) {
-    return 'Please enter a name for the professional interest';
+    return 'Veuillez saisir un nom pour l\'intérêt professionnel';
   }
   return null;
 };
@@ -23,7 +23,7 @@ export const validateCategoryName = (name) => {
  */
 export const validateCriterionName = (name) => {
   if (!name || !name.trim()) {
-    return 'Please enter a name for the key motivation';
+    return 'Veuillez saisir un nom pour la motivation clé';
   }
   return null;
 };
@@ -39,7 +39,7 @@ export const validateCritereName = validateCriterionName;
 export const validateWeight = (weight) => {
   const weightNum = parseFloat(weight);
   if (isNaN(weightNum) || weightNum < LIMITS.MIN_WEIGHT || weightNum > LIMITS.MAX_WEIGHT) {
-    return `Importance must be between ${LIMITS.MIN_WEIGHT} and ${LIMITS.MAX_WEIGHT}`;
+    return `L'importance doit être entre ${LIMITS.MIN_WEIGHT} et ${LIMITS.MAX_WEIGHT}`;
   }
   return null;
 };
@@ -51,7 +51,7 @@ export const validateWeight = (weight) => {
  */
 export const validateCategoryLimit = (currentCount) => {
   if (currentCount >= LIMITS.MAX_CATEGORIES) {
-    return `You cannot add more than ${LIMITS.MAX_CATEGORIES} professional interests`;
+    return `Vous ne pouvez pas ajouter plus de ${LIMITS.MAX_CATEGORIES} intérêts professionnels`;
   }
   return null;
 };
@@ -63,7 +63,7 @@ export const validateCategoryLimit = (currentCount) => {
  */
 export const validateCriterionLimit = (currentCount) => {
   if (currentCount >= LIMITS.MAX_CRITERES_PER_CATEGORY) {
-    return `You cannot add more than ${LIMITS.MAX_CRITERES_PER_CATEGORY} key motivations per professional interest`;
+    return `Vous ne pouvez pas ajouter plus de ${LIMITS.MAX_CRITERES_PER_CATEGORY} motivations clés par intérêt professionnel`;
   }
   return null;
 };
