@@ -281,10 +281,24 @@ function SquareChart({ categories }) {
         return null;
     }, [data]);
 
-    // Tooltip personnalisé avec useCallback
+    // Custom tooltip with useCallback
     const CustomTooltip = useCallback(({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+            const weight = data.poids || data.weight || data.size || data.value || 0;
+            
+            // Determine importance level based on weight
+            let importanceLabel = '';
+            if (weight >= 0 && weight <= 9) {
+                importanceLabel = `Importance faible (${weight})`;
+            } else if (weight >= 10 && weight <= 19) {
+                importanceLabel = `Importance moyenne (${weight})`;
+            } else if (weight > 19) {
+                importanceLabel = `Importance haute (${weight})`;
+            } else {
+                importanceLabel = `Importance: ${weight}`;
+            }
+            
             return (
                 <div style={{
                     backgroundColor: 'white',
@@ -293,7 +307,7 @@ function SquareChart({ categories }) {
                     borderRadius: '4px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}>
-                    <p style={{ color: '#666', fontSize: '0.9rem' }}>Importance: {data.poids || data.size || data.value}</p>
+                    <p style={{ color: '#666', fontSize: '0.9rem' }}>{importanceLabel}</p>
                 </div>
             );
         }
