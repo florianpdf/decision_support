@@ -3,11 +3,11 @@ import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import Legend from './Legend';
 
 /**
- * Composant graphique nuage de carrés
- * Utilise Recharts Treemap avec CustomContent pour afficher les catégories et leurs critères
+ * Square chart component
+ * Uses Recharts Treemap with CustomContent to display categories and their criteria
  */
 function SquareChart({ categories }) {
-    // Préparer les données pour le Treemap avec useMemo pour éviter les recalculs
+    // Prepare data for Treemap with useMemo to avoid recalculations
     const data = useMemo(() => {
         if (!categories || categories.length === 0) {
             return [];
@@ -42,22 +42,22 @@ function SquareChart({ categories }) {
         return result;
     }, [categories]);
 
-    // CustomContent optimisé avec useCallback
-    // Note: on utilise data via closure pour accéder aux données des feuilles
+    // CustomContent optimized with useCallback
+    // Note: we use data via closure to access leaf data
     const CustomizedContent = useCallback((props) => {
         const { root, depth, x, y, width, height, index, name, payload } = props;
         
-        // Pour la racine (depth === 0), ne rien dessiner
+        // For root (depth === 0), draw nothing
         if (depth === 0) {
             return null;
         }
         
-        // Pour les groupes (depth === 1), dessiner un fond avec la couleur du groupe
+        // For groups (depth === 1), draw background with group color
         if (depth === 1) {
             const groupData = root?.children?.[index];
             if (!groupData) return null;
             
-            const couleur = groupData.fill || groupData.couleur || '#3498db';
+            const groupColor = groupData.fill || '#3498db';
             
             return (
                 <g>
@@ -66,7 +66,7 @@ function SquareChart({ categories }) {
                         y={y}
                         width={width}
                         height={height}
-                        fill={couleur}
+                        fill={groupColor}
                         stroke="#FFFFFF"
                         strokeWidth={6}
                         fillOpacity={0.3}
@@ -75,21 +75,21 @@ function SquareChart({ categories }) {
             );
         }
         
-        // Pour les feuilles (depth === 2), dessiner les carrés
-        // Le Treemap calcule déjà les proportions correctes : chaque critère occupe
-        // un espace proportionnel à son poids par rapport aux autres critères de sa catégorie
+        // For leaves (depth === 2), draw squares
+        // Treemap already calculates correct proportions: each criterion occupies
+        // a space proportional to its weight relative to other criteria in its category
         if (depth === 2) {
-            // Dans Recharts Treemap, pour les feuilles, on peut accéder aux données
-            // via le root en trouvant le parent (depth 1) puis l'enfant correspondant
-            let critereData = null;
+            // In Recharts Treemap, for leaves, we can access data
+            // via root by finding the parent (depth 1) then the corresponding child
+            let criterionData = null;
             
-            // Méthode 1: Utiliser payload si disponible
+            // Method 1: Use payload if available
             if (payload) {
-                critereData = payload;
+                criterionData = payload;
             } 
-            // Méthode 2: Trouver via le root en parcourant les groupes et leurs children
+            // Method 2: Find via root by traversing groups and their children
             else if (root?.children) {
-                // Pour depth 2, l'index est relatif au parent (depth 1)
+                // For depth 2, index is relative to parent (depth 1)
                 let parentGroup = null;
                 let childIndexInParent = -1;
                 let globalLeafIndex = 0;
@@ -109,28 +109,28 @@ function SquareChart({ categories }) {
                 }
                 
                 if (parentGroup && parentGroup.children && childIndexInParent >= 0) {
-                    critereData = parentGroup.children[childIndexInParent];
+                    criterionData = parentGroup.children[childIndexInParent];
                 }
             }
             
-            // Méthode 3: Utiliser le name pour trouver dans data (via closure)
-            if (!critereData && name && data.length > 0) {
+            // Method 3: Use name to find in data (via closure)
+            if (!criterionData && name && data.length > 0) {
                 for (const group of data) {
                     if (group.children) {
                         const found = group.children.find(child => child.name === name);
                         if (found) {
-                            critereData = found;
+                            criterionData = found;
                             break;
                         }
                     }
                 }
             }
             
-            if (!critereData) {
+            if (!criterionData) {
                 return null;
             }
             
-            const couleurCategorie = critereData.fill || critereData.couleur || '#3498db';
+            const categoryColor = criterionData.fill || '#3498db';
             
             // Utiliser tout l'espace alloué par le Treemap (qui a déjà calculé les bonnes proportions)
             // Le rectangle (x, y, width, height) représente déjà la bonne taille proportionnelle
@@ -221,15 +221,15 @@ function SquareChart({ categories }) {
                 return { lines, fontSize, lineHeight };
             };
             
-            const critereName = name || critereData.name || '';
+            const criterionName = name || criterionData.name || '';
             const fontSize = Math.max(12, Math.min(20, Math.min(width, height) / 3));
-            const textInfo = formatTextForSquare(critereName, width, height, fontSize);
+            const textInfo = formatTextForSquare(criterionName, width, height, fontSize);
             const totalTextHeight = textInfo.lines.length * textInfo.lineHeight;
             const startY = centerY - (totalTextHeight / 2) + (textInfo.lineHeight / 2);
             
             return (
                 <g>
-                    {/* Dessiner un rectangle qui occupe tout l'espace alloué */}
+                    {/* Draw rectangle that occupies all allocated space */}
                     {/* Background color is the category color, border is white */}
                     <rect
                         x={x}
@@ -243,7 +243,7 @@ function SquareChart({ categories }) {
                         ry={4}
                         style={{ cursor: 'pointer' }}
                     />
-                    {/* Afficher le nom du critère au centre avec gestion des retours à la ligne */}
+                    {/* Display criterion name at center with line break handling */}
                     {/* Use white text on category color background for WCAG AA compliance */}
                     {width > 40 && height > 40 && textInfo.lines.length > 0 && (
                         <text
