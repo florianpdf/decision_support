@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 /**
  * Reusable Message component for notifications
- * Handles smooth enter/exit transitions
+ * Handles smooth enter transitions
  */
 const Message = ({ type, children, className = '', ...props }) => {
   const [isVisible, setIsVisible] = useState(false);
