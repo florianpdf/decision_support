@@ -239,10 +239,37 @@ function App() {
     setRenameProfessionModal({ isOpen: true, professionId: null });
   };
 
-  const handleCreateProfession = (professionData) => {
+  const handleCreateProfession = async (professionData) => {
     try {
-      handleAddProfession(professionData);
-      showSuccess('Métier créé avec succès');
+      const newProfession = handleAddProfession(professionData);
+      
+      // If template is requested, create template data
+      if (professionData.useTemplate) {
+        const { generateProfessionTemplate } = await import('../utils/professionTemplate');
+        const template = generateProfessionTemplate();
+        
+        // Create categories and criteria from template
+        template.categories.forEach((categoryData) => {
+          const categoryId = handleAddCategory({
+            name: categoryData.name,
+            color: categoryData.color
+          });
+          
+          // Add criteria to the category
+          categoryData.criteria.forEach((criterionData) => {
+            handleAddCriterion(categoryId, {
+              name: criterionData.name,
+              weight: criterionData.weight,
+              type: criterionData.type
+            });
+          });
+        });
+        
+        showSuccess('Métier créé avec succès avec le modèle');
+      } else {
+        showSuccess('Métier créé avec succès');
+      }
+      
       setRenameProfessionModal({ isOpen: false, professionId: null });
     } catch (err) {
       if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
@@ -350,7 +377,7 @@ function App() {
         {message && <Message type="success">{message}</Message>}
         {error && <Message type="error">{error}</Message>}
         <Card title="➕ Créer votre premier métier">
-          <ProfessionForm onSubmit={handleCreateProfession} />
+          <ProfessionForm onSubmit={handleCreateProfession} isFirstProfession={true} />
         </Card>
       </div>
     );
