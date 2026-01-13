@@ -10,50 +10,56 @@ import { getWeightColor } from '../utils/weightColors';
  */
 const CritereList = ({ category, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState(null);
-  const [localPoids, setLocalPoids] = useState({});
+  const [localWeight, setLocalWeight] = useState({});
 
-  const handleSliderChange = (critereId, newValue) => {
-    setLocalPoids(prev => ({
+  // Support both old and new data structure
+  const categoryColor = category.color || category.couleur;
+  const criteria = category.criteria || category.criteres || [];
+
+  const handleSliderChange = (criterionId, newValue) => {
+    setLocalWeight(prev => ({
       ...prev,
-      [`${category.id}-${critereId}`]: newValue
+      [`${category.id}-${criterionId}`]: newValue
     }));
   };
 
-  const handleSliderCommit = (critereId, newValue, currentNom) => {
-    setLocalPoids(prev => {
+  const handleSliderCommit = (criterionId, newValue, currentName) => {
+    setLocalWeight(prev => {
       const newState = { ...prev };
-      delete newState[`${category.id}-${critereId}`];
+      delete newState[`${category.id}-${criterionId}`];
       return newState;
     });
-    onUpdate(category.id, critereId, {
-      nom: currentNom,
-      poids: newValue
+    onUpdate(category.id, criterionId, {
+      name: currentName,
+      weight: newValue
     }, true);
   };
 
-  if (!category.criteres || category.criteres.length === 0) {
+  if (!criteria || criteria.length === 0) {
     return null;
   }
 
   return (
     <div className="criteres-list">
-      {category.criteres.map((critere) => {
-        const localPoidsKey = `${category.id}-${critere.id}`;
-        const displayPoids = localPoids[localPoidsKey] !== undefined
-          ? localPoids[localPoidsKey]
-          : critere.poids;
+      {criteria.map((criterion) => {
+        const localWeightKey = `${category.id}-${criterion.id}`;
+        const displayWeight = localWeight[localWeightKey] !== undefined
+          ? localWeight[localWeightKey]
+          : (criterion.weight || criterion.poids);
+        
+        const criterionName = criterion.name || criterion.nom;
 
         return (
           <div
-            key={critere.id}
-            className={`critere-item ${editingId === critere.id ? 'editing' : ''}`}
+            key={criterion.id}
+            className={`critere-item ${editingId === criterion.id ? 'editing' : ''}`}
           >
-            {editingId === critere.id ? (
+            {editingId === criterion.id ? (
               <div className="critere-edit-container">
                 <CritereEditForm
-                  critere={critere}
-                  onSubmit={(updatedCritere) => {
-                    onUpdate(category.id, critere.id, updatedCritere);
+                  critere={criterion}
+                  onSubmit={(updatedCriterion) => {
+                    onUpdate(category.id, criterion.id, updatedCriterion);
                     setEditingId(null);
                   }}
                   onCancel={() => setEditingId(null)}
@@ -64,22 +70,22 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                 <div className="critere-item-content">
                   <div
                     className="critere-color"
-                    style={{ backgroundColor: category.couleur }}
+                    style={{ backgroundColor: categoryColor }}
                   />
                   <div className="critere-info">
-                    <div className="critere-nom">{critere.nom}</div>
+                    <div className="critere-nom">{criterionName}</div>
                     <div className="critere-details">
                       <div className="critere-weight-label">
-                        ⚖️ Importance: {displayPoids}
+                        ⚖️ Importance: {displayWeight}
                       </div>
                       <div className="critere-slider-container">
                         <Slider
-                          value={displayPoids}
+                          value={displayWeight}
                           onChange={(e, newValue) => {
-                            handleSliderChange(critere.id, newValue);
+                            handleSliderChange(criterion.id, newValue);
                           }}
                           onChangeCommitted={(e, newValue) => {
-                            handleSliderCommit(critere.id, newValue, critere.nom);
+                            handleSliderCommit(criterion.id, newValue, criterionName);
                           }}
                           min={1}
                           max={30}
@@ -89,10 +95,10 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                           marks
                           sx={{
                             '& .MuiSlider-thumb': {
-                              color: category.couleur
+                              color: categoryColor
                             },
                             '& .MuiSlider-track': {
-                              color: category.couleur
+                              color: categoryColor
                             },
                             '& .MuiSlider-rail': {
                               color: '#e0e0e0'
@@ -111,22 +117,22 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
                     icon="✏️"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEditingId(critere.id);
+                      setEditingId(criterion.id);
                     }}
                     tooltip="Modifier la motivation clé"
-                    ariaLabel={`Modifier la motivation clé ${critere.nom}`}
-                    style={{ color: category.couleur }}
+                    ariaLabel={`Modifier la motivation clé ${criterionName}`}
+                    style={{ color: categoryColor }}
                     className="btn-icon-category"
                   />
                   <IconButton
                     icon="🗑️"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(category.id, critere.id);
+                      onDelete(category.id, criterion.id);
                     }}
                     tooltip="Supprimer la motivation clé"
-                    ariaLabel={`Supprimer la motivation clé ${critere.nom}`}
-                    style={{ color: category.couleur }}
+                    ariaLabel={`Supprimer la motivation clé ${criterionName}`}
+                    style={{ color: categoryColor }}
                     className="btn-icon-category"
                   />
                 </div>
@@ -142,8 +148,10 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
 CritereList.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    couleur: PropTypes.string.isRequired,
-    criteres: PropTypes.array
+    color: PropTypes.string,
+    couleur: PropTypes.string, // Legacy support
+    criteria: PropTypes.array,
+    criteres: PropTypes.array // Legacy support
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired
