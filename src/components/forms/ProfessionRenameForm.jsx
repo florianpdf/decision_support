@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 /**
- * Component for renaming a profession
+ * Component for renaming a profession or creating a new one
  */
 function ProfessionRenameForm({ profession, onSubmit, onCancel }) {
   const [name, setName] = useState(profession?.name || '');
@@ -21,9 +21,7 @@ function ProfessionRenameForm({ profession, onSubmit, onCancel }) {
     onSubmit(name.trim());
   };
 
-  if (!profession) {
-    return null;
-  }
+  // Allow form to be displayed even when profession is null (for creating new profession)
 
   return (
     <form onSubmit={handleSubmit} className="profession-rename-form">
@@ -47,7 +45,7 @@ function ProfessionRenameForm({ profession, onSubmit, onCancel }) {
           type="submit" 
           className="btn btn-primary"
         >
-          💾 Enregistrer
+          {profession ? '💾 Enregistrer' : '➕ Créer le métier'}
         </button>
         <button 
           type="button" 

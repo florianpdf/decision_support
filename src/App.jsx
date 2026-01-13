@@ -473,8 +473,11 @@ function App() {
       {renameProfessionModal.isOpen && (
         <div className="modal-overlay" onClick={() => setRenameProfessionModal({ isOpen: false, professionId: null })}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0, marginBottom: '20px' }}>
+              {renameProfessionModal.professionId ? '✏️ Renommer le métier' : '➕ Créer un nouveau métier'}
+            </h2>
             <ProfessionRenameForm
-              profession={renameProfessionModal.professionId ? professions.find(p => p.id === renameProfessionModal.professionId) : null}
+              profession={renameProfessionModal.professionId ? professions.find(p => p.id === renameProfessionModal.professionId) : undefined}
               onSubmit={handleRenameProfession}
               onCancel={() => setRenameProfessionModal({ isOpen: false, professionId: null })}
             />
