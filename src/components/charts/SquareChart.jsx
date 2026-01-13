@@ -406,10 +406,10 @@ function SquareChart({ categories, professionId }) {
         <>
             <div className="chart-wrapper" role="region" aria-label="Graphique de visualisation des intérêts professionnels">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
-                        Graphique de visualisation
-                    </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
+                            Graphique de visualisation
+                        </h2>
                         <IconButton
                             icon="🔍"
                             onClick={() => setIsFullscreen(true)}
@@ -417,6 +417,8 @@ function SquareChart({ categories, professionId }) {
                             tooltipPosition="top"
                             ariaLabel="Voir en plein écran"
                         />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <span 
                             style={{ 
                                 fontSize: '0.9rem', 
@@ -517,8 +519,8 @@ function SquareChart({ categories, professionId }) {
                         </span>
                     </div>
                 </div>
-                <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés">
-                    <ResponsiveContainer width="100%" height="calc(100vh - 250px)">
+                <div className="chart-container" aria-label="Treemap représentant les intérêts professionnels et leurs motivations clés" style={{ flex: 1, minHeight: 0 }}>
+                    <ResponsiveContainer width="100%" height="100%">
                         <Treemap
                             data={data}
                             dataKey="size"

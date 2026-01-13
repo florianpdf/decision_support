@@ -81,7 +81,7 @@ function FullscreenChartModal({ isOpen, onClose, children }) {
         </button>
 
         {/* Content */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', minHeight: 0, overflow: 'hidden' }}>
           {children}
         </div>
       </div>
