@@ -373,6 +373,7 @@ function App() {
               {categories.length > 0 && (
                 <Stats
                   value={`${categories.length} intérêt${categories.length > 1 ? 's' : ''} professionnel${categories.length > 1 ? 's' : ''} • ${totalCriteria} motivation${totalCriteria > 1 ? 's' : ''} clé${totalCriteria > 1 ? 's' : ''} au total`}
+                  label=""
                   className="stats-inline"
                 />
               )}

@@ -15,7 +15,7 @@ const Stats = ({ value, label, className = '', ...props }) => {
 
 Stats.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string, // Optional, can be empty string
   className: PropTypes.string
 };
 

@@ -19,26 +19,31 @@ const CategoryItem = ({
   onToggle,
   onUpdate,
   onDelete,
-  onAddCritere,
-  onUpdateCritere,
-  onDeleteCritere,
+  onAddCriterion,
+  onUpdateCriterion,
+  onDeleteCriterion,
   existingCategories
 }) => {
   const [editing, setEditing] = useState(false);
-  const [addingCritere, setAddingCritere] = useState(false);
+  const [addingCriterion, setAddingCriterion] = useState(false);
+
+  // Support both old and new data structure
+  const categoryName = category.name || category.nom;
+  const categoryColor = category.color || category.couleur;
+  const criteria = category.criteria || category.criteres || [];
+  const hasCriteria = criteria.length > 0;
+  const canDelete = !hasCriteria;
 
   const totalWeight = getCategoryTotalWeight(category);
-  const hasCriteres = category.criteres && category.criteres.length > 0;
-  const canDelete = !hasCriteres;
 
   const handleUpdate = (updates) => {
     onUpdate(category.id, updates);
     setEditing(false);
   };
 
-  const handleAddCritere = (critereData) => {
-    onAddCritere(category.id, critereData);
-    setAddingCritere(false);
+  const handleAddCriterion = (criterionData) => {
+    onAddCriterion(category.id, criterionData);
+    setAddingCriterion(false);
   };
 
   return (
@@ -57,18 +62,18 @@ const CategoryItem = ({
           tabIndex={0}
           aria-expanded={isOpen}
           aria-label={
-            hasCriteres
-              ? `${category.nom}, ${category.criteres.length} motivation${category.criteres.length > 1 ? 's' : ''} clé${category.criteres.length > 1 ? 's' : ''}, cliquer pour ${isOpen ? 'fermer' : 'ouvrir'}`
-              : `${category.nom}, aucune motivation clé, cliquer pour ajouter une motivation clé`
+            hasCriteria
+              ? `${categoryName}, ${criteria.length} motivation${criteria.length > 1 ? 's' : ''} clé${criteria.length > 1 ? 's' : ''}, cliquer pour ${isOpen ? 'fermer' : 'ouvrir'}`
+              : `${categoryName}, aucune motivation clé, cliquer pour ajouter une motivation clé`
           }
         >
           <div
             className="category-color"
-            style={{ backgroundColor: category.couleur }}
+            style={{ backgroundColor: categoryColor }}
           />
           <div className="category-content">
             <div className="category-nom">
-              {category.nom}
+              {categoryName}
               <span className="accordion-icon">
                 {isOpen ? (
                   <ExpandMoreIcon style={{ fontSize: '1.2rem' }} />
@@ -78,9 +83,9 @@ const CategoryItem = ({
               </span>
             </div>
             <div className="category-details">
-              {hasCriteres ? (
+              {hasCriteria ? (
                 <>
-                  {category.criteres.length} motivation{category.criteres.length > 1 ? 's' : ''} clé{category.criteres.length > 1 ? 's' : ''} • Importance totale: {totalWeight}
+                  {criteria.length} motivation{criteria.length > 1 ? 's' : ''} clé{criteria.length > 1 ? 's' : ''} • Importance totale: {totalWeight}
                 </>
               ) : (
                 <span className="category-empty-hint">
@@ -99,8 +104,8 @@ const CategoryItem = ({
               setAddingCritere(false);
             }}
             tooltip={editing ? 'Annuler' : 'Modifier l\'intérêt professionnel'}
-            ariaLabel={editing ? 'Annuler la modification' : `Modifier l'intérêt professionnel ${category.nom}`}
-            style={{ color: category.couleur }}
+            ariaLabel={editing ? 'Annuler la modification' : `Modifier l'intérêt professionnel ${categoryName}`}
+            style={{ color: categoryColor }}
             className="btn-icon-category"
           />
           <IconButton
@@ -116,11 +121,11 @@ const CategoryItem = ({
             }
             ariaLabel={
               canDelete
-                ? `Supprimer l'intérêt professionnel ${category.nom}`
-                : `Impossible de supprimer ${category.nom} : contient des motivations clés`
+                ? `Supprimer l'intérêt professionnel ${categoryName}`
+                : `Impossible de supprimer ${categoryName} : contient des motivations clés`
             }
             disabled={!canDelete}
-            style={{ color: category.couleur }}
+            style={{ color: categoryColor }}
             className="btn-icon-category"
           />
         </div>
@@ -139,24 +144,24 @@ const CategoryItem = ({
 
       {isOpen && (
         <div className="category-content-expanded">
-          {addingCritere ? (
+          {addingCriterion ? (
             <div className="critere-form-container">
               <CritereForm
                 categoryId={category.id}
-                onSubmit={handleAddCritere}
-                onCancel={() => setAddingCritere(false)}
+                onSubmit={handleAddCriterion}
+                onCancel={() => setAddingCriterion(false)}
               />
             </div>
           ) : (
             <>
-              {hasCriteres && (
+              {hasCriteria && (
                 <CritereList
                   category={category}
-                  onUpdate={onUpdateCritere}
-                  onDelete={onDeleteCritere}
+                  onUpdate={onUpdateCriterion}
+                  onDelete={onDeleteCriterion}
                 />
               )}
-              {category.criteres && category.criteres.length >= LIMITS.MAX_CRITERES_PER_CATEGORY ? (
+              {criteria.length >= LIMITS.MAX_CRITERES_PER_CATEGORY ? (
                 <Message type="error" className="message-inline">
                   ⚠️ Limite atteinte : {LIMITS.MAX_CRITERES_PER_CATEGORY} motivations clés maximum par intérêt professionnel
                 </Message>
@@ -164,19 +169,19 @@ const CategoryItem = ({
                 <button
                   className="btn btn-primary btn-small"
                   onClick={() => {
-                    setAddingCritere(true);
+                    setAddingCriterion(true);
                     setEditing(false);
                   }}
                   style={{
                     marginTop: '15px',
                     width: '100%',
                     justifyContent: 'center',
-                    background: category.couleur,
-                    border: `2px solid ${category.couleur}`
+                    background: categoryColor,
+                    border: `2px solid ${categoryColor}`
                   }}
-                  aria-label={`Ajouter une motivation clé à ${category.nom}`}
+                  aria-label={`Ajouter une motivation clé à ${categoryName}`}
                 >
-                  ➕ Ajouter une motivation clé ({category.criteres ? category.criteres.length : 0} / {LIMITS.MAX_CRITERES_PER_CATEGORY})
+                  ➕ Ajouter une motivation clé ({criteria.length} / {LIMITS.MAX_CRITERES_PER_CATEGORY})
                 </button>
               )}
             </>
@@ -190,17 +195,20 @@ const CategoryItem = ({
 CategoryItem.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    nom: PropTypes.string.isRequired,
-    couleur: PropTypes.string.isRequired,
-    criteres: PropTypes.array
+    name: PropTypes.string,
+    nom: PropTypes.string, // Legacy support
+    color: PropTypes.string,
+    couleur: PropTypes.string, // Legacy support
+    criteria: PropTypes.array,
+    criteres: PropTypes.array // Legacy support
   }).isRequired,
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onAddCritere: PropTypes.func.isRequired,
-  onUpdateCritere: PropTypes.func.isRequired,
-  onDeleteCritere: PropTypes.func.isRequired,
+  onAddCriterion: PropTypes.func.isRequired,
+  onUpdateCriterion: PropTypes.func.isRequired,
+  onDeleteCriterion: PropTypes.func.isRequired,
   existingCategories: PropTypes.array.isRequired
 };
 
