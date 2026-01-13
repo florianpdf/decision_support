@@ -4,6 +4,13 @@
  */
 
 /**
+ * @typedef {Object} Metier
+ * @property {number} id - Unique identifier
+ * @property {string} nom - Metier name
+ * @property {string} created_at - ISO date string
+ */
+
+/**
  * @typedef {Object} Category
  * @property {number} id - Unique identifier
  * @property {string} nom - Category name
@@ -16,8 +23,13 @@
  * @typedef {Object} Critere
  * @property {number} id - Unique identifier
  * @property {string} nom - Criterion name
- * @property {number} poids - Weight/importance (1-30)
  * @property {string} created_at - ISO date string
+ */
+
+/**
+ * @typedef {Object} CritereWeight
+ * @property {number} metierId - Metier identifier
+ * @property {number} poids - Weight/importance (1-30)
  */
 
 /**
