@@ -84,9 +84,31 @@ function App() {
   const onDeleteCategory = (id) => {
     const allCategories = loadCategories();
     const category = allCategories.find(c => c.id === id);
-    if (category) {
-      setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.name });
+    if (!category) {
+      return;
     }
+
+    // Check if category has criteria
+    const allCriteria = loadCriteria();
+    const categoryCriteria = allCriteria.filter(c => c.categoryId === id);
+    if (categoryCriteria.length > 0) {
+      showError('Un intérêt professionnel ne peut pas être supprimé s\'il contient des motivations clés');
+      return;
+    }
+
+    // If only one profession, delete directly without confirmation
+    if (professions.length === 1) {
+      try {
+        handleDeleteCategory(id);
+        showSuccess('Intérêt professionnel supprimé avec succès');
+      } catch (err) {
+        showError(err.message);
+      }
+      return;
+    }
+
+    // If two or more professions, show confirmation
+    setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.name });
   };
 
   const confirmDeleteCategory = () => {
