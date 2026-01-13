@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import IconButton from './ui/IconButton';
+import { loadCategories, loadCriteria } from '../services/storage';
 
 /**
  * Component for displaying profession tabs
@@ -8,6 +9,13 @@ function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, 
   if (professions.length === 0) {
     return null;
   }
+
+  // Check if there are any categories or criteria (for last profession deletion check)
+  const hasData = useMemo(() => {
+    const categories = loadCategories();
+    const criteria = loadCriteria();
+    return categories.length > 0 || criteria.length > 0;
+  }, []);
 
   return (
     <div className="profession-tabs" role="tablist" aria-label="Navigation between professions">
@@ -39,10 +47,14 @@ function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, 
             <IconButton
               icon="🗑️"
               onClick={() => onDeleteProfession(profession.id)}
-              tooltip="Supprimer le métier"
+              tooltip={
+                professions.length === 1 && hasData
+                  ? "Impossible de supprimer le dernier métier tant qu'il reste des intérêts professionnels ou des motivations clés. Supprimez d'abord tous les intérêts professionnels et leurs motivations clés."
+                  : "Supprimer le métier"
+              }
               tooltipPosition="top"
               ariaLabel="Supprimer le métier"
-              disabled={professions.length === 1}
+              disabled={professions.length === 1 && hasData}
             />
           </div>
         </div>
