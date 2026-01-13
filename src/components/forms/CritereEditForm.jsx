@@ -94,7 +94,7 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                     <div style={{ marginBottom: '12px', fontSize: '0.9rem', color: '#7f8c8d' }}>
                         Sélectionnez le type qui correspond à cette motivation clé
                     </div>
-                    <div role="radiogroup" aria-label="Type de motivation clé">
+                    <div role="radiogroup" aria-label="Type de motivation clé" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         {Object.values(CRITERION_TYPES).map((criterionType) => {
                             const isSelected = type === criterionType;
                             const label = CRITERION_TYPE_LABELS[criterionType];
@@ -108,12 +108,12 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        padding: '10px',
-                                        marginBottom: '8px',
-                                        borderRadius: '8px',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
                                         cursor: 'pointer',
                                         backgroundColor: isSelected ? '#f0f0f0' : 'transparent',
-                                        border: `2px solid ${isSelected ? color : 'transparent'}`,
+                                        border: `2px solid ${isSelected ? color : '#ddd'}`,
+                                        fontSize: '0.85rem',
                                         transition: 'all 0.2s'
                                     }}
                                 >
@@ -128,11 +128,11 @@ function CritereEditForm({ critere, onSubmit, onCancel }) {
                                     />
                                     <div
                                         style={{
-                                            width: '20px',
-                                            height: '20px',
-                                            borderRadius: '4px',
+                                            width: '14px',
+                                            height: '14px',
+                                            borderRadius: '3px',
                                             backgroundColor: color,
-                                            marginRight: '10px',
+                                            marginRight: '6px',
                                             border: '1px solid #ddd'
                                         }}
                                     />
