@@ -75,7 +75,6 @@ export const validateCriterionLimit = (currentCount) => {
  */
 export const isColorUsed = (color, categories, excludeId = null) => {
   return categories.some(cat => {
-    const catColor = cat.color || cat.couleur;
-    return cat.id !== excludeId && catColor === color;
+    return cat.id !== excludeId && cat.color === color;
   });
 };
