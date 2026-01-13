@@ -32,20 +32,18 @@ function MetierTabs({ metiers, currentMetierId, onSelectMetier, onAddMetier, onD
           <div className="metier-tab-actions" onClick={(e) => e.stopPropagation()}>
             <Tooltip content="Renommer le métier" position="top">
               <IconButton
+                icon="✏️"
                 onClick={() => onRenameMetier(metier.id)}
-                aria-label="Renommer le métier"
-              >
-                ✏️
-              </IconButton>
+                ariaLabel="Renommer le métier"
+              />
             </Tooltip>
             <Tooltip content="Supprimer le métier" position="top">
               <IconButton
+                icon="🗑️"
                 onClick={() => onDeleteMetier(metier.id)}
-                aria-label="Supprimer le métier"
+                ariaLabel="Supprimer le métier"
                 disabled={metiers.length === 1}
-              >
-                🗑️
-              </IconButton>
+              />
             </Tooltip>
           </div>
         </div>
