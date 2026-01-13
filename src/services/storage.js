@@ -325,6 +325,9 @@ export const addCritere = (categoryId, critere) => {
     setNextCritereId(nextId + 1);
     
     // Ajoute le critère à la catégorie
+    if (!categories[categoryIndex].critereIds) {
+        categories[categoryIndex].critereIds = [];
+    }
     categories[categoryIndex].critereIds.push(nextId);
     saveCategories(categories);
     
