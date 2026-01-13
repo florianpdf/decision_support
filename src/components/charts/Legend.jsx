@@ -5,7 +5,7 @@ import { CRITERION_TYPE_COLORS, CRITERION_TYPE_LABELS, CRITERION_TYPES } from '.
 /**
  * Legend component displaying categories or criterion types based on color mode
  */
-function Legend({ categories, colorMode = 'category', professionId }) {
+function Legend({ categories, colorMode = 'category', professionId, compact = false }) {
     // Filter categories that have at least one criterion
     const categoriesWithCriteria = categories.filter(cat => 
         cat.criteria && cat.criteria.length > 0
@@ -54,7 +54,7 @@ function Legend({ categories, colorMode = 'category', professionId }) {
         }
 
         return (
-            <div className="legend-integrated">
+            <div className={`legend-integrated ${compact ? 'legend-compact' : ''}`}>
                 {typesWithData.map((type) => {
                     const stats = typeStats[type];
                     return (
@@ -78,7 +78,7 @@ function Legend({ categories, colorMode = 'category', professionId }) {
 
     // Display by category (default)
     return (
-        <div className="legend-integrated">
+        <div className={`legend-integrated ${compact ? 'legend-compact' : ''}`}>
             {categoriesWithCriteria.map((category) => {
                 const totalWeight = getCategoryTotalWeight(category, professionId);
                 const criteriaCount = category.criteria ? category.criteria.length : 0;

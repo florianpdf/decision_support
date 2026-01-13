@@ -533,7 +533,7 @@ function SquareChart({ categories, professionId }) {
                         </Treemap>
                     </ResponsiveContainer>
                 </div>
-                <Legend categories={categories} colorMode={colorMode} professionId={professionId} />
+                <Legend categories={categories} colorMode={colorMode} professionId={professionId} compact={true} />
             </FullscreenChartModal>
         </>
     );
