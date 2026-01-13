@@ -36,43 +36,6 @@ export const useProfessions = () => {
       setLoading(true);
       let loaded = loadProfessions();
       
-      // If no professions but old data exists, create a default profession
-      if (loaded.length === 0) {
-        const oldCategories = loadCategories();
-        if (oldCategories && oldCategories.length > 0) {
-          // Migrate: create default profession for old data
-          const defaultProfession = addProfessionStorage({ name: 'Default Profession' });
-          loaded = [defaultProfession];
-          
-          // Initialize weights for all existing criteria
-          const allCriteria = loadCriteria();
-          const weights = loadCriterionWeights();
-          oldCategories.forEach(category => {
-            const criterionIds = category.criterionIds || category.critereIds || (category.criteres ? category.criteres.map(c => c.id) : []);
-            criterionIds.forEach(criterionId => {
-              const criterion = allCriteria.find(c => c.id === criterionId);
-              if (criterion) {
-                const oldCriterion = category.criteres?.find(c => c.id === criterionId);
-                const weight = oldCriterion?.poids || oldCriterion?.weight || 15;
-                
-                // Check if weight already exists
-                const existingWeight = weights.find(
-                  w => w.professionId === defaultProfession.id && w.criterionId === criterionId
-                );
-                if (!existingWeight) {
-                  weights.push({
-                    professionId: defaultProfession.id,
-                    categoryId: category.id,
-                    criterionId: criterionId,
-                    weight: weight,
-                  });
-                }
-              }
-            });
-          });
-          saveCriterionWeights(weights);
-        }
-      }
       
       setProfessions(loaded);
       

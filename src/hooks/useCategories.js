@@ -62,10 +62,7 @@ export const useCategories = (professionId) => {
    * Add a new category (shared across all professions)
    */
   const handleAddCategory = useCallback((categoryData) => {
-    const name = categoryData.name || categoryData.nom;
-    const color = categoryData.color || categoryData.couleur;
-    
-    const nameError = validateCategoryName(name);
+    const nameError = validateCategoryName(categoryData.name);
     if (nameError) {
       throw new Error(nameError);
     }
@@ -76,11 +73,11 @@ export const useCategories = (professionId) => {
       throw new Error(limitError);
     }
 
-    if (isColorUsed(color, allCategories)) {
+    if (isColorUsed(categoryData.color, allCategories)) {
       throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
-    addCategory({ name, color });
+    addCategory(categoryData);
     
     // Initialize weight for all professions with default value (15)
     if (professionId) {
@@ -95,8 +92,7 @@ export const useCategories = (professionId) => {
   const handleUpdateCategory = useCallback((categoryId, updates) => {
     const allCategories = loadCategories();
     
-    const color = updates.color || updates.couleur;
-    if (color && isColorUsed(color, allCategories, categoryId)) {
+    if (updates.color && isColorUsed(updates.color, allCategories, categoryId)) {
       throw new Error('Cette couleur est déjà utilisée par un autre intérêt professionnel');
     }
 
@@ -120,15 +116,12 @@ export const useCategories = (professionId) => {
    * Add a criterion to a category (shared across all professions)
    */
   const handleAddCriterion = useCallback((categoryId, criterionData) => {
-    const name = criterionData.name || criterionData.nom;
-    const weight = criterionData.weight || criterionData.poids;
-    
-    const nameError = validateCriterionName(name);
+    const nameError = validateCriterionName(criterionData.name);
     if (nameError) {
       throw new Error(nameError);
     }
 
-    const weightError = validateWeight(weight);
+    const weightError = validateWeight(criterionData.weight);
     if (weightError) {
       throw new Error(weightError);
     }
@@ -146,11 +139,11 @@ export const useCategories = (professionId) => {
       throw new Error(criterionLimitError);
     }
 
-    const newCriterion = addCriterion(categoryId, { name });
+    const newCriterion = addCriterion(categoryId, { name: criterionData.name });
     
     // Set weight for current profession
     if (professionId) {
-      setCriterionWeight(professionId, categoryId, newCriterion.id, weight);
+      setCriterionWeight(professionId, categoryId, newCriterion.id, criterionData.weight);
     }
     
     loadCategoriesFromStorage();
@@ -160,21 +153,18 @@ export const useCategories = (professionId) => {
    * Update a criterion (affects all professions for name, only current profession for weight)
    */
   const handleUpdateCriterion = useCallback((categoryId, criterionId, updates, silent = false) => {
-    const weight = updates.weight !== undefined ? updates.weight : updates.poids;
-    const name = updates.name !== undefined ? updates.name : updates.nom;
-    
-    if (weight !== undefined && professionId) {
-      const weightError = validateWeight(weight);
+    if (updates.weight !== undefined && professionId) {
+      const weightError = validateWeight(updates.weight);
       if (weightError) {
         throw new Error(weightError);
       }
       // Update weight for current profession only
-      setCriterionWeight(professionId, categoryId, criterionId, weight);
+      setCriterionWeight(professionId, categoryId, criterionId, updates.weight);
     }
     
-    if (name !== undefined) {
+    if (updates.name !== undefined) {
       // Update name for all professions
-      const updated = updateCriterion(criterionId, { name });
+      const updated = updateCriterion(criterionId, { name: updates.name });
       if (!updated) {
         throw new Error('Motivation clé non trouvée');
       }

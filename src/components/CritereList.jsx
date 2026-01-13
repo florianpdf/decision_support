@@ -12,9 +12,8 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
   const [editingId, setEditingId] = useState(null);
   const [localWeight, setLocalWeight] = useState({});
 
-  // Support both old and new data structure
-  const categoryColor = category.color || category.couleur;
-  const criteria = category.criteria || category.criteres || [];
+  const categoryColor = category.color;
+  const criteria = category.criteria || [];
 
   const handleSliderChange = (criterionId, newValue) => {
     setLocalWeight(prev => ({
@@ -45,9 +44,9 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
         const localWeightKey = `${category.id}-${criterion.id}`;
         const displayWeight = localWeight[localWeightKey] !== undefined
           ? localWeight[localWeightKey]
-          : (criterion.weight || criterion.poids);
+          : criterion.weight;
         
-        const criterionName = criterion.name || criterion.nom;
+        const criterionName = criterion.name;
 
         return (
           <div
@@ -148,10 +147,8 @@ const CritereList = ({ category, onUpdate, onDelete }) => {
 CritereList.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    color: PropTypes.string,
-    couleur: PropTypes.string, // Legacy support
-    criteria: PropTypes.array,
-    criteres: PropTypes.array // Legacy support
+    color: PropTypes.string.isRequired,
+    criteria: PropTypes.array
   }).isRequired,
   onUpdate: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired

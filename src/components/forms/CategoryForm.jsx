@@ -7,7 +7,7 @@ import Tooltip from '../Tooltip';
  */
 function CategoryForm({ onSubmit, existingCategories = [] }) {
     // Get already used colors
-    const usedColors = existingCategories.map(cat => cat.color || cat.couleur).filter(Boolean);
+    const usedColors = existingCategories.map(cat => cat.color).filter(Boolean);
     
     // Filter palette to keep only available colors
     const availableColors = COLOR_PALETTE.filter(color => !usedColors.includes(color));

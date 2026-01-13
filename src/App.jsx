@@ -85,7 +85,7 @@ function App() {
     const allCategories = loadCategories();
     const category = allCategories.find(c => c.id === id);
     if (category) {
-      setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.name || category.nom });
+      setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.name });
     }
   };
 
@@ -111,8 +111,7 @@ function App() {
   const onUpdateCriterion = (categoryId, criterionId, updates, silent = false) => {
     try {
       // If updating name, show confirmation
-      const name = updates.name !== undefined ? updates.name : updates.nom;
-      if (name !== undefined && !silent) {
+      if (updates.name !== undefined && !silent) {
         // For name updates, we need confirmation
         // For now, we'll show a notification
         handleUpdateCriterion(categoryId, criterionId, updates, silent);
@@ -130,7 +129,7 @@ function App() {
     const allCriteria = loadCriteria();
     const criterion = allCriteria.find(c => c.id === criterionId);
     if (criterion) {
-      setDeleteCriterionModal({ isOpen: true, categoryId, criterionId, criterionName: criterion.name || criterion.nom });
+      setDeleteCriterionModal({ isOpen: true, categoryId, criterionId, criterionName: criterion.name });
     }
   };
 

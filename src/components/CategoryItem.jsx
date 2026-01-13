@@ -27,10 +27,9 @@ const CategoryItem = ({
   const [editing, setEditing] = useState(false);
   const [addingCriterion, setAddingCriterion] = useState(false);
 
-  // Support both old and new data structure
-  const categoryName = category.name || category.nom;
-  const categoryColor = category.color || category.couleur;
-  const criteria = category.criteria || category.criteres || [];
+  const categoryName = category.name;
+  const categoryColor = category.color;
+  const criteria = category.criteria || [];
   const hasCriteria = criteria.length > 0;
   const canDelete = !hasCriteria;
 
@@ -195,12 +194,9 @@ const CategoryItem = ({
 CategoryItem.propTypes = {
   category: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    name: PropTypes.string,
-    nom: PropTypes.string, // Legacy support
-    color: PropTypes.string,
-    couleur: PropTypes.string, // Legacy support
-    criteria: PropTypes.array,
-    criteres: PropTypes.array // Legacy support
+    name: PropTypes.string.isRequired,
+    color: PropTypes.string.isRequired,
+    criteria: PropTypes.array
   }).isRequired,
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,

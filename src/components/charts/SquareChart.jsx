@@ -16,29 +16,25 @@ function SquareChart({ categories }) {
         // Filter categories that have at least one criterion
         // and create hierarchical structure: each category is a parent with its criteria as children
         const result = categories
-            .filter(category => (category.criteria || category.criteres) && (category.criteria?.length > 0 || category.criteres?.length > 0))
+            .filter(category => category.criteria && category.criteria.length > 0)
             .map((category) => {
                 // Calculate total weight of category (sum of criterion weights)
-                const criteria = category.criteria || category.criteres || [];
-                const totalValue = criteria.reduce((sum, critere) => sum + (critere.weight || critere.poids || 0), 0);
+                const totalValue = category.criteria.reduce((sum, criterion) => sum + (criterion.weight || 0), 0);
                 
                 // Create children (criteria) for this category
-                const children = criteria.map((critere) => ({
-                    name: critere.name || critere.nom,
-                    size: critere.weight || critere.poids,
-                    value: critere.weight || critere.poids,
-                    fill: category.color || category.couleur,
-                    couleur: category.color || category.couleur,
-                    poids: critere.weight || critere.poids,
-                    weight: critere.weight || critere.poids,
+                const children = category.criteria.map((criterion) => ({
+                    name: criterion.name,
+                    size: criterion.weight,
+                    value: criterion.weight,
+                    fill: category.color,
+                    weight: criterion.weight,
                 }));
                 
                 return {
-                    name: category.name || category.nom,
+                    name: category.name,
                     size: totalValue,
                     value: totalValue,
-                    fill: category.color || category.couleur,
-                    couleur: category.color || category.couleur,
+                    fill: category.color,
                     children: children,
                 };
             });
@@ -240,7 +236,7 @@ function SquareChart({ categories }) {
                         y={y}
                         width={width}
                         height={height}
-                        fill={couleurCategorie}
+                        fill={categoryColor}
                         stroke="#FFFFFF"
                         strokeWidth={3}
                         rx={4}
@@ -287,7 +283,7 @@ function SquareChart({ categories }) {
     const CustomTooltip = useCallback(({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
-            const weight = data.poids || data.weight || data.size || data.value || 0;
+            const weight = data.weight || data.size || data.value || 0;
             
             // Determine importance level based on weight
             let importanceLabel = '';

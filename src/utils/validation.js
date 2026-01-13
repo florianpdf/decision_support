@@ -28,8 +28,6 @@ export const validateCriterionName = (name) => {
   return null;
 };
 
-// Legacy function for backward compatibility
-export const validateCritereName = validateCriterionName;
 
 /**
  * Validate weight value

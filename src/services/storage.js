@@ -5,19 +5,14 @@
  * Criterion weights are specific to each profession
  */
 
-// Storage keys (keeping old keys for migration compatibility)
+// Storage keys
 const PROFESSIONS_STORAGE_KEY = 'bulle_chart_professions';
-const METIERS_STORAGE_KEY = 'bulle_chart_metiers'; // Legacy key for migration
 const CATEGORIES_STORAGE_KEY = 'bulle_chart_categories';
 const CRITERIA_STORAGE_KEY = 'bulle_chart_criteria';
-const CRITERES_STORAGE_KEY = 'bulle_chart_criteres'; // Legacy key for migration
 const CRITERION_WEIGHTS_STORAGE_KEY = 'bulle_chart_criterion_weights';
-const CRITERE_WEIGHTS_STORAGE_KEY = 'bulle_chart_critere_weights'; // Legacy key
 const NEXT_PROFESSION_ID_KEY = 'bulle_chart_next_profession_id';
-const NEXT_METIER_ID_KEY = 'bulle_chart_next_metier_id'; // Legacy key
 const NEXT_CATEGORY_ID_KEY = 'bulle_chart_next_category_id';
 const NEXT_CRITERION_ID_KEY = 'bulle_chart_next_criterion_id';
-const NEXT_CRITERE_ID_KEY = 'bulle_chart_next_critere_id'; // Legacy key
 
 // ==================== PROFESSIONS ====================
 
@@ -26,24 +21,7 @@ const NEXT_CRITERE_ID_KEY = 'bulle_chart_next_critere_id'; // Legacy key
  */
 export const loadProfessions = () => {
     try {
-        // Try new key first
-        let data = localStorage.getItem(PROFESSIONS_STORAGE_KEY);
-        if (!data) {
-            // Try legacy key for migration
-            data = localStorage.getItem(METIERS_STORAGE_KEY);
-            if (data) {
-                const metiers = JSON.parse(data);
-                // Migrate to new structure
-                const professions = metiers.map(m => ({
-                    id: m.id,
-                    name: m.nom || m.name,
-                    created_at: m.created_at
-                }));
-                saveProfessions(professions);
-                localStorage.removeItem(METIERS_STORAGE_KEY);
-                return professions;
-            }
-        }
+        const data = localStorage.getItem(PROFESSIONS_STORAGE_KEY);
         if (!data) {
             return [];
         }
@@ -72,15 +50,7 @@ export const saveProfessions = (professions) => {
  */
 export const getNextProfessionId = () => {
     try {
-        let nextId = parseInt(localStorage.getItem(NEXT_PROFESSION_ID_KEY) || '0', 10);
-        if (nextId === 0) {
-            // Try legacy key
-            nextId = parseInt(localStorage.getItem(NEXT_METIER_ID_KEY) || '1', 10);
-            if (nextId > 0) {
-                setNextProfessionId(nextId);
-                localStorage.removeItem(NEXT_METIER_ID_KEY);
-            }
-        }
+        const nextId = parseInt(localStorage.getItem(NEXT_PROFESSION_ID_KEY) || '1', 10);
         return isNaN(nextId) ? 1 : nextId;
     } catch (error) {
         return 1;
@@ -153,15 +123,6 @@ export const deleteProfession = (id) => {
     return true;
 };
 
-// Legacy functions for backward compatibility during migration
-export const loadMetiers = loadProfessions;
-export const saveMetiers = saveProfessions;
-export const getNextMetierId = getNextProfessionId;
-export const setNextMetierId = setNextProfessionId;
-export const addMetier = (metier) => addProfession({ name: metier.nom || metier.name });
-export const updateMetier = (id, updates) => updateProfession(id, { name: updates.nom || updates.name });
-export const deleteMetier = deleteProfession;
-
 // ==================== CATEGORIES (Professional Interests) ====================
 
 /**
@@ -173,14 +134,7 @@ export const loadCategories = () => {
         if (!data) {
             return [];
         }
-        const categories = JSON.parse(data);
-        // Migrate old structure if needed
-        return categories.map(cat => {
-            if (cat.nom && !cat.name) {
-                return { ...cat, name: cat.nom, color: cat.couleur || cat.color };
-            }
-            return cat;
-        });
+        return JSON.parse(data);
     } catch (error) {
         console.error('Error loading categories:', error);
         return [];
@@ -232,16 +186,11 @@ export const addCategory = (category) => {
     
     const newCategory = {
         id: nextId,
-        name: (category.name || category.nom || '').trim(),
-        color: category.color || category.couleur,
-        criterionIds: [], // List of associated criterion IDs
+        name: category.name.trim(),
+        color: category.color,
+        criterionIds: [],
         created_at: new Date().toISOString(),
     };
-    
-    // Ensure criterionIds is always an array
-    if (!newCategory.criterionIds) {
-        newCategory.criterionIds = [];
-    }
     
     categories.push(newCategory);
     saveCategories(categories);
@@ -261,11 +210,11 @@ export const updateCategory = (id, updates) => {
         return null;
     }
     
-    if (updates.name !== undefined || updates.nom !== undefined) {
-        categories[index].name = (updates.name || updates.nom || '').trim();
+    if (updates.name !== undefined) {
+        categories[index].name = updates.name.trim();
     }
-    if (updates.color !== undefined || updates.couleur !== undefined) {
-        categories[index].color = updates.color || updates.couleur;
+    if (updates.color !== undefined) {
+        categories[index].color = updates.color;
     }
     
     saveCategories(categories);
@@ -285,7 +234,7 @@ export const deleteCategory = (id) => {
     
     // Delete associated criteria
     const criteria = loadCriteria();
-    const criterionIds = category.criterionIds || category.critereIds || [];
+    const criterionIds = category.criterionIds || [];
     const criteriaToDelete = criteria.filter(c => criterionIds.includes(c.id));
     criteriaToDelete.forEach(criterion => {
         deleteCriterion(criterion.id);
@@ -305,36 +254,11 @@ export const deleteCategory = (id) => {
  */
 export const loadCriteria = () => {
     try {
-        // Try new key first
-        let data = localStorage.getItem(CRITERIA_STORAGE_KEY);
-        if (!data) {
-            // Try legacy key for migration
-            data = localStorage.getItem(CRITERES_STORAGE_KEY);
-            if (data) {
-                const criteres = JSON.parse(data);
-                // Migrate to new structure
-                const criteria = criteres.map(c => ({
-                    id: c.id,
-                    name: c.nom || c.name,
-                    categoryId: c.categoryId,
-                    created_at: c.created_at
-                }));
-                saveCriteria(criteria);
-                localStorage.removeItem(CRITERES_STORAGE_KEY);
-                return criteria;
-            }
-        }
+        const data = localStorage.getItem(CRITERIA_STORAGE_KEY);
         if (!data) {
             return [];
         }
-        const criteria = JSON.parse(data);
-        // Migrate old structure if needed
-        return criteria.map(c => {
-            if (c.nom && !c.name) {
-                return { ...c, name: c.nom };
-            }
-            return c;
-        });
+        return JSON.parse(data);
     } catch (error) {
         console.error('Error loading criteria:', error);
         return [];
@@ -359,15 +283,7 @@ export const saveCriteria = (criteria) => {
  */
 export const getNextCriterionId = () => {
     try {
-        let nextId = parseInt(localStorage.getItem(NEXT_CRITERION_ID_KEY) || '0', 10);
-        if (nextId === 0) {
-            // Try legacy key
-            nextId = parseInt(localStorage.getItem(NEXT_CRITERE_ID_KEY) || '1', 10);
-            if (nextId > 0) {
-                setNextCriterionId(nextId);
-                localStorage.removeItem(NEXT_CRITERE_ID_KEY);
-            }
-        }
+        const nextId = parseInt(localStorage.getItem(NEXT_CRITERION_ID_KEY) || '1', 10);
         return isNaN(nextId) ? 1 : nextId;
     } catch (error) {
         return 1;
@@ -400,7 +316,7 @@ export const addCriterion = (categoryId, criterion) => {
     const nextId = getNextCriterionId();
     const newCriterion = {
         id: nextId,
-        name: (criterion.name || criterion.nom || '').trim(),
+        name: criterion.name.trim(),
         categoryId: categoryId,
         created_at: new Date().toISOString(),
     };
@@ -412,13 +328,9 @@ export const addCriterion = (categoryId, criterion) => {
     // Add criterion to category
     const cat = categories[categoryIndex];
     if (!cat.criterionIds) {
-        cat.criterionIds = cat.critereIds || [];
+        cat.criterionIds = [];
     }
     cat.criterionIds.push(nextId);
-    // Remove legacy key if exists
-    if (cat.critereIds) {
-        delete cat.critereIds;
-    }
     saveCategories(categories);
     
     return newCriterion;
@@ -435,8 +347,8 @@ export const updateCriterion = (criterionId, updates) => {
         return null;
     }
     
-    if (updates.name !== undefined || updates.nom !== undefined) {
-        criteria[index].name = (updates.name || updates.nom || '').trim();
+    if (updates.name !== undefined) {
+        criteria[index].name = updates.name.trim();
     }
     
     saveCriteria(criteria);
@@ -459,11 +371,7 @@ export const deleteCriterion = (criterionId) => {
     const categoryIndex = categories.findIndex(c => c.id === criterion.categoryId);
     if (categoryIndex !== -1) {
         const cat = categories[categoryIndex];
-        const criterionIds = cat.criterionIds || cat.critereIds || [];
-        cat.criterionIds = criterionIds.filter(id => id !== criterionId);
-        if (cat.critereIds) {
-            delete cat.critereIds;
-        }
+        cat.criterionIds = (cat.criterionIds || []).filter(id => id !== criterionId);
         saveCategories(categories);
     }
     
@@ -479,15 +387,6 @@ export const deleteCriterion = (criterionId) => {
     return true;
 };
 
-// Legacy functions for backward compatibility
-export const loadCriteres = loadCriteria;
-export const saveCriteres = saveCriteria;
-export const getNextCritereId = getNextCriterionId;
-export const setNextCritereId = setNextCriterionId;
-export const addCritere = (categoryId, critere) => addCriterion(categoryId, { name: critere.nom || critere.name });
-export const updateCritere = (id, updates) => updateCriterion(id, { name: updates.nom || updates.name });
-export const deleteCritere = deleteCriterion;
-
 // ==================== CRITERION WEIGHTS (Weights specific to each profession) ====================
 
 /**
@@ -496,41 +395,11 @@ export const deleteCritere = deleteCriterion;
  */
 export const loadCriterionWeights = () => {
     try {
-        // Try new key first
-        let data = localStorage.getItem(CRITERION_WEIGHTS_STORAGE_KEY);
-        if (!data) {
-            // Try legacy key for migration
-            data = localStorage.getItem(CRITERE_WEIGHTS_STORAGE_KEY);
-            if (data) {
-                const oldWeights = JSON.parse(data);
-                // Migrate to new structure
-                const weights = oldWeights.map(w => ({
-                    professionId: w.metierId || w.professionId,
-                    categoryId: w.categoryId,
-                    criterionId: w.critereId || w.criterionId,
-                    weight: w.poids || w.weight
-                }));
-                saveCriterionWeights(weights);
-                localStorage.removeItem(CRITERE_WEIGHTS_STORAGE_KEY);
-                return weights;
-            }
-        }
+        const data = localStorage.getItem(CRITERION_WEIGHTS_STORAGE_KEY);
         if (!data) {
             return [];
         }
-        const weights = JSON.parse(data);
-        // Migrate old structure if needed
-        return weights.map(w => {
-            if (w.metierId || w.poids) {
-                return {
-                    professionId: w.metierId || w.professionId,
-                    categoryId: w.categoryId,
-                    criterionId: w.critereId || w.criterionId,
-                    weight: w.poids || w.weight
-                };
-            }
-            return w;
-        });
+        return JSON.parse(data);
     } catch (error) {
         console.error('Error loading weights:', error);
         return [];
@@ -605,118 +474,6 @@ export const initializeProfessionWeights = (newProfessionId, sourceProfessionId)
     return weights.filter(w => w.professionId === newProfessionId);
 };
 
-// Legacy functions
-export const loadCritereWeights = loadCriterionWeights;
-export const saveCritereWeights = saveCriterionWeights;
-export const getCritereWeight = (metierId, critereId) => getCriterionWeight(metierId, critereId);
-export const setCritereWeight = (metierId, categoryId, critereId, poids) => setCriterionWeight(metierId, categoryId, critereId, poids);
-export const initializeMetierWeights = initializeProfessionWeights;
-
-/**
- * Migrate old data structure to new structure
- */
-const migrateOldData = () => {
-    const categories = loadCategories();
-    let needsMigration = false;
-    
-    const migratedCategories = categories.map(category => {
-        // If category has old structure (criteres array), migrate it
-        const oldCriteres = category.criteres;
-        const oldCritereIds = category.critereIds;
-        const criterionIds = category.criterionIds || oldCritereIds || [];
-        
-        if (oldCriteres && Array.isArray(oldCriteres) && oldCriteres.length > 0 && criterionIds.length === 0) {
-            needsMigration = true;
-            
-            // Migrate criteria to separate storage
-            const criteria = loadCriteria();
-            const weights = loadCriterionWeights();
-            const professions = loadProfessions();
-            
-            oldCriteres.forEach(oldCritere => {
-                // Check if criterion already exists
-                const existingCriterion = criteria.find(c => c.id === oldCritere.id);
-                if (!existingCriterion) {
-                    criteria.push({
-                        id: oldCritere.id,
-                        name: oldCritere.nom || oldCritere.name,
-                        categoryId: category.id,
-                        created_at: oldCritere.created_at || new Date().toISOString(),
-                    });
-                }
-                
-                // Migrate weights for all professions
-                professions.forEach(profession => {
-                    const existingWeight = weights.find(
-                        w => w.professionId === profession.id && w.criterionId === oldCritere.id
-                    );
-                    if (!existingWeight) {
-                        weights.push({
-                            professionId: profession.id,
-                            categoryId: category.id,
-                            criterionId: oldCritere.id,
-                            weight: oldCritere.poids || oldCritere.weight || 15,
-                        });
-                    }
-                });
-            });
-            
-            saveCriteria(criteria);
-            saveCriterionWeights(weights);
-            
-            // Return migrated category
-            const migrated = {
-                ...category,
-                criterionIds: oldCriteres.map(c => c.id).filter(id => id),
-            };
-            delete migrated.criteres;
-            delete migrated.critereIds;
-            return migrated;
-        }
-        
-        // Ensure criterionIds exists and migrate critereIds if needed
-        if (oldCritereIds && !category.criterionIds) {
-            needsMigration = true;
-            return {
-                ...category,
-                criterionIds: oldCritereIds,
-            };
-        }
-        
-        if (!category.criterionIds) {
-            needsMigration = true;
-            return {
-                ...category,
-                criterionIds: []
-            };
-        }
-        
-        // Clean up legacy keys
-        const cleaned = { ...category };
-        if (cleaned.critereIds) delete cleaned.critereIds;
-        if (cleaned.criteres) delete cleaned.criteres;
-        if (cleaned.nom) {
-            cleaned.name = cleaned.nom;
-            delete cleaned.nom;
-        }
-        if (cleaned.couleur) {
-            cleaned.color = cleaned.couleur;
-            delete cleaned.couleur;
-        }
-        if (needsMigration || cleaned.nom || cleaned.couleur || cleaned.critereIds || cleaned.criteres) {
-            needsMigration = true;
-        }
-        
-        return cleaned;
-    });
-    
-    if (needsMigration) {
-        saveCategories(migratedCategories);
-    }
-    
-    return migratedCategories;
-};
-
 /**
  * Get all categories with their criteria and weights for a given profession
  */
@@ -725,8 +482,7 @@ export const getCategoriesForProfession = (professionId) => {
         return [];
     }
     
-    // Migrate old data if needed
-    const categories = migrateOldData();
+    const categories = loadCategories();
     const criteria = loadCriteria();
     const weights = loadCriterionWeights();
     
@@ -754,9 +510,6 @@ export const getCategoriesForProfession = (professionId) => {
         };
     });
 };
-
-// Legacy function
-export const getCategoriesForMetier = getCategoriesForProfession;
 
 /**
  * Calculate total weight of a category for a given profession
