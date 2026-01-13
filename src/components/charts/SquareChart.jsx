@@ -184,7 +184,7 @@ function SquareChart({ categories, professionId }) {
 
         const centerX = x + width / 2;
         const centerY = y + height / 2;
-        const fontSize = Math.max(12, Math.min(20, Math.min(width, height) / 3));
+        const fontSize = Math.max(10, Math.min(16, Math.min(width, height) / 4));
         const textInfo = formatTextForSquare(name || criterionData.name || '', width, height, fontSize);
         const totalTextHeight = textInfo.lines.length * textInfo.lineHeight;
         const startY = centerY - (totalTextHeight / 2) + (textInfo.lineHeight / 2);
@@ -211,7 +211,7 @@ function SquareChart({ categories, professionId }) {
                         dominantBaseline="hanging"
                         fill="#FFFFFF"
                         fontSize={textInfo.fontSize}
-                        fontWeight="normal"
+                        fontWeight="300"
                         style={{ 
                             pointerEvents: 'none', 
                             userSelect: 'none',
