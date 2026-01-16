@@ -16,9 +16,55 @@ const CATEGORIES_STORAGE_KEY = 'bulle_chart_categories';
 const CRITERIA_STORAGE_KEY = 'bulle_chart_criteria';
 const CRITERION_WEIGHTS_STORAGE_KEY = 'bulle_chart_criterion_weights';
 const CHART_COLOR_MODE_STORAGE_KEY = 'bulle_chart_color_mode'; // Per profession: 'category' or 'type'
+const RECOMMENDATION_PREFERENCES_KEY = 'bulle_chart_recommendation_preferences';
 const NEXT_PROFESSION_ID_KEY = 'bulle_chart_next_profession_id';
 const NEXT_CATEGORY_ID_KEY = 'bulle_chart_next_category_id';
 const NEXT_CRITERION_ID_KEY = 'bulle_chart_next_criterion_id';
+
+// ==================== CACHE FOR PERFORMANCE ====================
+// In-memory cache to avoid repeated localStorage reads when comparing multiple professions
+let categoriesCache = null;
+let criteriaCache = null;
+let weightsCache = null;
+
+/**
+ * Clear the cache (call after any add/update/delete operations)
+ */
+export const clearStorageCache = () => {
+    categoriesCache = null;
+    criteriaCache = null;
+    weightsCache = null;
+};
+
+/**
+ * Get categories with cache
+ */
+const getCachedCategories = () => {
+    if (categoriesCache === null) {
+        categoriesCache = loadCategories();
+    }
+    return categoriesCache;
+};
+
+/**
+ * Get criteria with cache
+ */
+const getCachedCriteria = () => {
+    if (criteriaCache === null) {
+        criteriaCache = loadCriteria();
+    }
+    return criteriaCache;
+};
+
+/**
+ * Get weights with cache
+ */
+const getCachedWeights = () => {
+    if (weightsCache === null) {
+        weightsCache = loadCriterionWeights();
+    }
+    return weightsCache;
+};
 
 // ==================== PROFESSIONS ====================
 
@@ -126,6 +172,9 @@ export const deleteProfession = (id) => {
     const filteredWeights = weights.filter(w => w.professionId !== id);
     saveCriterionWeights(filteredWeights);
     
+    // Clear cache
+    clearStorageCache();
+    
     return true;
 };
 
@@ -202,6 +251,9 @@ export const addCategory = (category) => {
     saveCategories(categories);
     setNextCategoryId(nextId + 1);
     
+    // Clear cache
+    clearStorageCache();
+    
     return newCategory;
 };
 
@@ -224,6 +276,10 @@ export const updateCategory = (id, updates) => {
     }
     
     saveCategories(categories);
+    
+    // Clear cache
+    clearStorageCache();
+    
     return categories[index];
 };
 
@@ -249,6 +305,9 @@ export const deleteCategory = (id) => {
     // Delete the category
     const filtered = categories.filter(c => c.id !== id);
     saveCategories(filtered);
+    
+    // Clear cache
+    clearStorageCache();
     
     return true;
 };
@@ -339,6 +398,9 @@ export const addCriterion = (categoryId, criterion) => {
     cat.criterionIds.push(nextId);
     saveCategories(categories);
     
+    // Clear cache
+    clearStorageCache();
+    
     return newCriterion;
 };
 
@@ -358,6 +420,10 @@ export const updateCriterion = (criterionId, updates) => {
     }
     
     saveCriteria(criteria);
+    
+    // Clear cache
+    clearStorageCache();
+    
     return criteria[index];
 };
 
@@ -389,6 +455,9 @@ export const deleteCriterion = (criterionId) => {
     // Delete the criterion
     const filtered = criteria.filter(c => c.id !== criterionId);
     saveCriteria(filtered);
+    
+    // Clear cache
+    clearStorageCache();
     
     return true;
 };
@@ -473,6 +542,10 @@ export const setCriterionWeight = (professionId, categoryId, criterionId, weight
     }
     
     saveCriterionWeights(weights);
+    
+    // Clear cache
+    clearStorageCache();
+    
     return weightData;
 };
 
@@ -503,6 +576,10 @@ export const setCriterionType = (professionId, categoryId, criterionId, type) =>
     }
     
     saveCriterionWeights(weights);
+    
+    // Clear cache
+    clearStorageCache();
+    
     return weightData;
 };
 
@@ -543,20 +620,25 @@ export const initializeProfessionWeights = (newProfessionId, sourceProfessionId)
     });
     
     saveCriterionWeights(weights);
+    
+    // Clear cache
+    clearStorageCache();
+    
     return weights.filter(w => w.professionId === newProfessionId);
 };
 
 /**
  * Get all categories with their criteria and weights for a given profession
+ * Uses cache for better performance
  */
 export const getCategoriesForProfession = (professionId) => {
     if (!professionId) {
         return [];
     }
     
-    const categories = loadCategories();
-    const criteria = loadCriteria();
-    const weights = loadCriterionWeights();
+    const categories = getCachedCategories();
+    const criteria = getCachedCriteria();
+    const weights = getCachedWeights();
     
     return categories.map(category => {
         const criterionIds = category.criterionIds || [];
@@ -585,6 +667,55 @@ export const getCategoriesForProfession = (professionId) => {
             criteria: categoryCriteria,
         };
     });
+};
+
+/**
+ * Get all categories with their criteria and weights for multiple professions
+ * Optimized version that loads data once and filters for all professions
+ * @param {number[]} professionIds - Array of profession IDs
+ * @returns {Object} Object with professionId as key and categories array as value
+ */
+export const getCategoriesForProfessions = (professionIds) => {
+    if (!professionIds || professionIds.length === 0) {
+        return {};
+    }
+    
+    // Load data once (using cache)
+    const categories = getCachedCategories();
+    const criteria = getCachedCriteria();
+    const weights = getCachedWeights();
+    
+    // Build result object
+    const result = {};
+    
+    professionIds.forEach(professionId => {
+        result[professionId] = categories.map(category => {
+            const criterionIds = category.criterionIds || [];
+            const categoryCriteria = criterionIds
+                .map(criterionId => {
+                    const criterion = criteria.find(c => c.id === criterionId);
+                    if (!criterion) return null;
+                    
+                    const weight = weights.find(
+                        w => w.professionId === professionId && w.criterionId === criterionId
+                    );
+                    
+                    return {
+                        ...criterion,
+                        weight: weight ? weight.weight : 15,
+                        type: weight ? (weight.type || 'neutral') : 'neutral',
+                    };
+                })
+                .filter(c => c !== null);
+            
+            return {
+                ...category,
+                criteria: categoryCriteria,
+            };
+        });
+    });
+    
+    return result;
 };
 
 /**
@@ -706,6 +837,7 @@ export const clearAllData = () => {
             CRITERIA_STORAGE_KEY,
             CRITERION_WEIGHTS_STORAGE_KEY,
             CHART_COLOR_MODE_STORAGE_KEY,
+            RECOMMENDATION_PREFERENCES_KEY,
             NEXT_PROFESSION_ID_KEY,
             NEXT_CATEGORY_ID_KEY,
             NEXT_CRITERION_ID_KEY,
@@ -722,6 +854,40 @@ export const clearAllData = () => {
         return true;
     } catch (error) {
         console.error('Error clearing data:', error);
+        return false;
+    }
+};
+
+// ==================== RECOMMENDATION PREFERENCES ====================
+
+/**
+ * Load recommendation preferences from localStorage
+ * @returns {Object} Preferences object or null if not found
+ */
+export const loadRecommendationPreferences = () => {
+    try {
+        const data = localStorage.getItem(RECOMMENDATION_PREFERENCES_KEY);
+        if (!data) {
+            return null;
+        }
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Error loading recommendation preferences:', error);
+        return null;
+    }
+};
+
+/**
+ * Save recommendation preferences to localStorage
+ * @param {Object} preferences - Preferences object to save
+ * @returns {boolean} True if successful, false otherwise
+ */
+export const saveRecommendationPreferences = (preferences) => {
+    try {
+        localStorage.setItem(RECOMMENDATION_PREFERENCES_KEY, JSON.stringify(preferences));
+        return true;
+    } catch (error) {
+        console.error('Error saving recommendation preferences:', error);
         return false;
     }
 };

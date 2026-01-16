@@ -46,6 +46,18 @@ const CriterionWeightAndType = ({
           namePrefix={namePrefix}
         />
       </div>
+      <div style={{
+        marginTop: '16px',
+        paddingTop: '12px',
+        borderTop: '1px solid #e8e8e8',
+        fontSize: '0.75rem',
+        color: '#7f8c8d',
+        textAlign: 'center',
+        fontStyle: 'italic',
+        opacity: 0.75
+      }}>
+        💾 Les modifications sont sauvegardées automatiquement
+      </div>
     </>
   );
 };

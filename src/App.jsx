@@ -3,6 +3,7 @@ import { useProfessions } from './hooks/useProfessions';
 import { useCategories } from './hooks/useCategories';
 import { useNotifications } from './hooks/useNotifications';
 import ProfessionTabs from './components/ProfessionTabs';
+import NavigationTabs from './components/NavigationTabs';
 import ProfessionForm from './components/forms/ProfessionForm';
 import ProfessionRenameForm from './components/forms/ProfessionRenameForm';
 import CategoryForm from './components/forms/CategoryForm';
@@ -13,6 +14,7 @@ import ConfirmModal from './components/modals/ConfirmModal';
 import DataMigrationModal from './components/modals/DataMigrationModal';
 import Onboarding, { isOnboardingCompleted, resetOnboarding } from './components/Onboarding';
 import ComparisonView from './components/comparison/ComparisonView';
+import { resetComparisonOnboarding } from './components/comparison/ComparisonOnboarding';
 import CookieConsentModal, { initializeGoogleAnalytics } from './components/modals/CookieConsentModal';
 import Card from './components/ui/Card';
 import Message from './components/ui/Message';
@@ -73,15 +75,23 @@ function App() {
   
   // Onboarding state
   const [runOnboarding, setRunOnboarding] = useState(false);
+  const [restartComparisonOnboarding, setRestartComparisonOnboarding] = useState(0);
 
-  // Function to restart onboarding
+  // Function to restart onboarding (for main view or comparison view)
   const handleRestartOnboarding = useCallback(() => {
-    resetOnboarding();
-    // Small delay to ensure DOM is ready and component remounts properly
-    setTimeout(() => {
-      setRunOnboarding(true);
-    }, 100);
-  }, []);
+    if (viewMode === 'comparison') {
+      // Reset comparison onboarding
+      resetComparisonOnboarding();
+      // Trigger restart by incrementing state to force remount
+      setRestartComparisonOnboarding(prev => prev + 1);
+    } else {
+      // Reset main onboarding
+      resetOnboarding();
+      setTimeout(() => {
+        setRunOnboarding(true);
+      }, 100);
+    }
+  }, [viewMode]);
   
   // Check data version on mount
   useEffect(() => {
@@ -526,18 +536,27 @@ function App() {
       {message && <Message type="success">{message}</Message>}
       {error && <Message type="error">{error}</Message>}
 
-      <ProfessionTabs
-        professions={professions}
-        currentProfessionId={currentProfessionId}
-        onSelectProfession={setCurrentProfessionId}
-        onAddProfession={onAddProfession}
-        onDeleteProfession={onDeleteProfession}
-        onRenameProfession={onRenameProfession}
-        onViewComparison={() => setViewMode('comparison')}
+      {/* Main Navigation Tabs */}
+      <NavigationTabs
+        activeTab={viewMode}
+        onTabChange={setViewMode}
+        professionCount={professions.length}
       />
 
+      {/* Profession Tabs (only in main view) */}
+      {viewMode === 'main' && (
+        <ProfessionTabs
+          professions={professions}
+          currentProfessionId={currentProfessionId}
+          onSelectProfession={setCurrentProfessionId}
+          onAddProfession={onAddProfession}
+          onDeleteProfession={onDeleteProfession}
+          onRenameProfession={onRenameProfession}
+        />
+      )}
+
       {viewMode === 'comparison' ? (
-        <ComparisonView onBack={() => setViewMode('main')} />
+        <ComparisonView key={restartComparisonOnboarding} />
       ) : currentProfession && (
         <>
           <div className="app-content-two-columns">

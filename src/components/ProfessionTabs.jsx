@@ -5,7 +5,7 @@ import { loadCategories, loadCriteria } from '../services/storage';
 /**
  * Component for displaying profession tabs
  */
-function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, onAddProfession, onDeleteProfession, onRenameProfession, onViewComparison }) {
+function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, onAddProfession, onDeleteProfession, onRenameProfession }) {
   if (professions.length === 0) {
     return null;
   }
@@ -68,28 +68,6 @@ function ProfessionTabs({ professions, currentProfessionId, onSelectProfession, 
           ➕ Nouveau métier
         </button>
       )}
-      <button
-        className="profession-tab-comparison"
-        onClick={onViewComparison}
-        disabled={professions.length < 2}
-        aria-label="Comparer les métiers"
-        title={professions.length < 2 ? "Au moins 2 métiers sont nécessaires pour la comparaison" : "Comparer les métiers"}
-        style={{
-          marginLeft: 'auto',
-          padding: '8px 16px',
-          backgroundColor: professions.length < 2 ? '#e0e0e0' : '#5568d3',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: professions.length < 2 ? 'not-allowed' : 'pointer',
-          fontSize: '0.9rem',
-          fontWeight: '600',
-          opacity: professions.length < 2 ? 0.6 : 1,
-          transition: 'all 0.2s ease'
-        }}
-      >
-        📊 Comparaison
-      </button>
     </div>
   );
 }
