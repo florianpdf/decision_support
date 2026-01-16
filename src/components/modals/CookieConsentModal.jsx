@@ -51,8 +51,8 @@ function CookieConsentModal() {
   const handleAccept = () => {
     saveCookieConsent(true);
     setIsOpen(false);
-    // Load Google Analytics
-    loadGoogleAnalytics();
+    // Activate Google Analytics
+    activateGoogleAnalytics();
   };
 
   const handleReject = () => {
@@ -181,28 +181,19 @@ function CookieConsentModal() {
 }
 
 /**
- * Load Google Analytics dynamically
+ * Activate Google Analytics after consent
  */
-function loadGoogleAnalytics() {
-  // Check if already loaded
-  if (window.gtag) {
+function activateGoogleAnalytics() {
+  // Check if gtag is available
+  if (typeof window.gtag !== 'function') {
+    console.warn('Google Analytics (gtag) not loaded yet');
     return;
   }
 
-  // Create script elements
-  const script1 = document.createElement('script');
-  script1.async = true;
-  script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-NKQNSKNPDB';
-  document.head.appendChild(script1);
-
-  const script2 = document.createElement('script');
-  script2.innerHTML = `
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-NKQNSKNPDB');
-  `;
-  document.head.appendChild(script2);
+  // Update consent to allow analytics
+  window.gtag('consent', 'update', {
+    'analytics_storage': 'granted'
+  });
 }
 
 /**
@@ -210,7 +201,10 @@ function loadGoogleAnalytics() {
  */
 export const initializeGoogleAnalytics = () => {
   if (hasCookieConsent()) {
-    loadGoogleAnalytics();
+    // Wait a bit for gtag to be available
+    setTimeout(() => {
+      activateGoogleAnalytics();
+    }, 100);
   }
 };
 
