@@ -12,6 +12,8 @@ import SquareChart from './components/charts/SquareChart';
 import ConfirmModal from './components/modals/ConfirmModal';
 import DataMigrationModal from './components/modals/DataMigrationModal';
 import Onboarding, { isOnboardingCompleted, resetOnboarding } from './components/Onboarding';
+import ComparisonView from './components/comparison/ComparisonView';
+import CookieConsentModal, { initializeGoogleAnalytics } from './components/modals/CookieConsentModal';
 import Card from './components/ui/Card';
 import Message from './components/ui/Message';
 import EmptyState from './components/ui/EmptyState';
@@ -66,6 +68,9 @@ function App() {
   // Selected category state
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   
+  // View mode state: 'main' or 'comparison'
+  const [viewMode, setViewMode] = useState('main');
+  
   // Onboarding state
   const [runOnboarding, setRunOnboarding] = useState(false);
 
@@ -94,6 +99,11 @@ function App() {
         saveDataVersion();
       }
     }
+  }, []);
+
+  // Initialize Google Analytics if consent was given
+  useEffect(() => {
+    initializeGoogleAnalytics();
   }, []);
   
   // Handle data reset
@@ -523,9 +533,12 @@ function App() {
         onAddProfession={onAddProfession}
         onDeleteProfession={onDeleteProfession}
         onRenameProfession={onRenameProfession}
+        onViewComparison={() => setViewMode('comparison')}
       />
 
-      {currentProfession && (
+      {viewMode === 'comparison' ? (
+        <ComparisonView onBack={() => setViewMode('main')} />
+      ) : currentProfession && (
         <>
           <div className="app-content-two-columns">
             <div className="app-content-left">
@@ -725,6 +738,9 @@ function App() {
         run={runOnboarding} 
         onComplete={() => setRunOnboarding(false)}
       />
+
+      {/* Cookie Consent Modal */}
+      <CookieConsentModal />
     </div>
   );
 }
