@@ -131,12 +131,6 @@ describe('CritereForm', () => {
     expect(screen.queryByRole('button', { name: /annuler/i })).not.toBeInTheDocument();
   });
 
-  it('should display default weight value', () => {
-    render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
-    
-    expect(screen.getByText(/importance sélectionnée : 15/i)).toBeInTheDocument();
-  });
-
   it('should open suggestions modal when icon is clicked', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     

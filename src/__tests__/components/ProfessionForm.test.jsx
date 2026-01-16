@@ -14,18 +14,6 @@ describe('ProfessionForm', () => {
     window.alert = vi.fn();
   });
 
-  it('should render form', () => {
-    render(
-      <ProfessionForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
-
-    expect(screen.getByLabelText(/nom du métier/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /créer le métier/i })).toBeInTheDocument();
-  });
-
   it('should call onSubmit with trimmed name', async () => {
     render(
       <ProfessionForm

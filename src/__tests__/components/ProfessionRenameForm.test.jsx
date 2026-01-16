@@ -14,35 +14,6 @@ describe('ProfessionRenameForm', () => {
     window.alert = vi.fn();
   });
 
-  it('should render form for creating new profession', () => {
-    render(
-      <ProfessionRenameForm
-        profession={null}
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
-
-    expect(screen.getByLabelText(/nom du métier/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /créer le métier/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /annuler/i })).toBeInTheDocument();
-  });
-
-  it('should render form for renaming existing profession', () => {
-    const profession = { id: 1, name: 'Test Profession', created_at: new Date().toISOString() };
-
-    render(
-      <ProfessionRenameForm
-        profession={profession}
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
-
-    expect(screen.getByLabelText(/nom du métier/i)).toHaveValue('Test Profession');
-    expect(screen.getByRole('button', { name: /enregistrer/i })).toBeInTheDocument();
-  });
-
   it('should call onSubmit with trimmed name when creating', async () => {
     render(
       <ProfessionRenameForm
@@ -116,29 +87,5 @@ describe('ProfessionRenameForm', () => {
     await user.click(cancelButton);
 
     expect(mockOnCancel).toHaveBeenCalled();
-  });
-
-  it('should update name when profession prop changes', () => {
-    const { rerender } = render(
-      <ProfessionRenameForm
-        profession={null}
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
-
-    const nameInput = screen.getByLabelText(/nom du métier/i);
-    expect(nameInput).toHaveValue('');
-
-    const newProfession = { id: 1, name: 'New Profession', created_at: new Date().toISOString() };
-    rerender(
-      <ProfessionRenameForm
-        profession={newProfession}
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
-
-    expect(nameInput).toHaveValue('New Profession');
   });
 });

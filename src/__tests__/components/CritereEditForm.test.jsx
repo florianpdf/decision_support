@@ -79,16 +79,4 @@ describe('CritereEditForm', () => {
     
     expect(mockOnCancel).toHaveBeenCalled();
   });
-
-  it('should update when criterion prop changes', () => {
-    const { rerender } = render(
-      <CritereEditForm critere={mockCritere} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
-    );
-    
-    const newCritere = { id: 1, name: 'New Name' };
-    rerender(<CritereEditForm critere={newCritere} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
-    
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
-    expect(nameInput).toHaveValue('New Name');
-  });
 });

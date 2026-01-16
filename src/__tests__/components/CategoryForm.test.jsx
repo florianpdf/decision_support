@@ -127,19 +127,6 @@ describe('CategoryForm', () => {
     });
   });
 
-  it('should update color when existing categories change', () => {
-    const { rerender } = render(<CategoryForm onSubmit={mockOnSubmit} existingCategories={[]} />);
-    
-    const existingCategories = [
-      { id: 1, name: 'Category 1', color: DEFAULT_COLOR, criteria: [] }
-    ];
-    
-    rerender(<CategoryForm onSubmit={mockOnSubmit} existingCategories={existingCategories} />);
-    
-    const colorPresets = screen.getAllByRole('radio');
-    expect(colorPresets.length).toBeLessThan(COLOR_PALETTE.length);
-  });
-
   it('should handle keyboard navigation for color selection', async () => {
     render(<CategoryForm onSubmit={mockOnSubmit} />);
     

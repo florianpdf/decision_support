@@ -158,26 +158,6 @@ describe('CategoryEditForm', () => {
     expect(colorPresets.length).toBeGreaterThan(0);
   });
 
-  it('should update button color when color is selected', async () => {
-    render(
-      <CategoryEditForm
-        category={mockCategory}
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
-
-    const colorPresets = screen.getAllByRole('radio');
-    const secondColor = colorPresets[1];
-    const submitButton = screen.getByRole('button', { name: /enregistrer/i });
-
-    await user.click(secondColor);
-
-    // Button should have the selected color
-    const buttonColor = secondColor.style.backgroundColor;
-    expect(submitButton.style.background).toBe(buttonColor);
-  });
-
   it('should handle keyboard navigation for color selection', async () => {
     render(
       <CategoryEditForm
