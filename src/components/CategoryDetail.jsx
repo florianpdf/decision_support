@@ -23,7 +23,8 @@ const CategoryDetail = ({
   onAddCriterion,
   onUpdateCriterion,
   onDeleteCriterion,
-  existingCategories
+  existingCategories,
+  professionCount = 1
 }) => {
   const [editing, setEditing] = useState(false);
   const [addingCriterion, setAddingCriterion] = useState(false);
@@ -59,7 +60,9 @@ const CategoryDetail = ({
     );
   }
   const hasCriteria = criteria.length > 0;
-  const canDelete = !hasCriteria;
+  // Si un seul métier, on peut toujours supprimer (même avec motivations)
+  // Si plusieurs métiers, on ne peut supprimer que sans motivations
+  const canDelete = professionCount === 1 || !hasCriteria;
   const totalWeight = getCategoryTotalWeight(category);
 
   const handleUpdate = (updates) => {
@@ -140,12 +143,16 @@ const CategoryDetail = ({
             onClick={() => onDeleteCategory(category.id)}
             tooltip={
               canDelete
-                ? 'Supprimer l\'intérêt professionnel'
+                ? hasCriteria && professionCount === 1
+                  ? 'Supprimer l\'intérêt professionnel et ses motivations clés'
+                  : 'Supprimer l\'intérêt professionnel'
                 : 'Impossible de supprimer : l\'intérêt professionnel contient des motivations clés. Supprimez d\'abord toutes les motivations clés.'
             }
             ariaLabel={
               canDelete
-                ? `Supprimer l'intérêt professionnel ${category.name}`
+                ? hasCriteria && professionCount === 1
+                  ? `Supprimer l'intérêt professionnel ${category.name} et ses ${criteria.length} motivation${criteria.length > 1 ? 's' : ''} clé${criteria.length > 1 ? 's' : ''}`
+                  : `Supprimer l'intérêt professionnel ${category.name}`
                 : `Impossible de supprimer ${category.name} : contient des motivations clés`
             }
             disabled={!canDelete}
@@ -228,7 +235,8 @@ CategoryDetail.propTypes = {
   onAddCriterion: PropTypes.func.isRequired,
   onUpdateCriterion: PropTypes.func.isRequired,
   onDeleteCriterion: PropTypes.func.isRequired,
-  existingCategories: PropTypes.array.isRequired
+  existingCategories: PropTypes.array.isRequired,
+  professionCount: PropTypes.number
 };
 
 export default React.memo(CategoryDetail);

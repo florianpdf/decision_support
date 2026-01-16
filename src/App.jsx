@@ -56,7 +56,7 @@ function App() {
   });
 
   // Modal states
-  const [deleteCategoryModal, setDeleteCategoryModal] = useState({ isOpen: false, categoryId: null, categoryName: '' });
+  const [deleteCategoryModal, setDeleteCategoryModal] = useState({ isOpen: false, categoryId: null, categoryName: '', hasCriteria: false, criteriaCount: 0 });
   const [deleteCriterionModal, setDeleteCriterionModal] = useState({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' });
   const [updateCategoryModal, setUpdateCategoryModal] = useState({ isOpen: false, categoryId: null });
   const [deleteProfessionModal, setDeleteProfessionModal] = useState({ isOpen: false, professionId: null, professionName: '' });
@@ -138,7 +138,10 @@ function App() {
   const onAddCategory = (categoryData) => {
     try {
       const newCategoryId = handleAddCategory(categoryData);
-      showSuccess('Intérêt professionnel ajouté avec succès pour tous les métiers');
+      const message = professions.length === 1
+        ? 'Intérêt professionnel ajouté avec succès'
+        : 'Intérêt professionnel ajouté avec succès pour tous les métiers';
+      showSuccess(message);
       // Select the newly created category
       if (newCategoryId) {
         setSelectedCategoryId(newCategoryId);
@@ -157,7 +160,10 @@ function App() {
     try {
       const { categoryId, updates } = updateCategoryModal;
       handleUpdateCategory(categoryId, updates);
-      showSuccess('Intérêt professionnel modifié avec succès pour tous les métiers');
+      const message = professions.length === 1
+        ? 'Intérêt professionnel modifié avec succès'
+        : 'Intérêt professionnel modifié avec succès pour tous les métiers';
+      showSuccess(message);
       setUpdateCategoryModal({ isOpen: false, categoryId: null });
     } catch (err) {
       showError(err.message);
@@ -174,31 +180,34 @@ function App() {
     // Check if category has criteria
     const allCriteria = loadCriteria();
     const categoryCriteria = allCriteria.filter(c => c.categoryId === id);
-    if (categoryCriteria.length > 0) {
-      showError('Un intérêt professionnel ne peut pas être supprimé s\'il contient des motivations clés');
+    const hasCriteria = categoryCriteria.length > 0;
+
+    // Si plusieurs métiers et l'intérêt a des motivations, bloquer
+    if (professions.length > 1 && hasCriteria) {
+      showError('Un intérêt professionnel ne peut pas être supprimé s\'il contient des motivations clés. Supprimez d\'abord toutes les motivations clés.');
       return;
     }
+    // Note: Avec un seul métier, on peut supprimer même avec motivations (avec confirmation)
 
-    // If only one profession, delete directly without confirmation
-    if (professions.length === 1) {
-      try {
-        handleDeleteCategory(id);
-        showSuccess('Intérêt professionnel supprimé avec succès');
-      } catch (err) {
-        showError(err.message);
-      }
-      return;
-    }
-
-    // If two or more professions, show confirmation
-    setDeleteCategoryModal({ isOpen: true, categoryId: id, categoryName: category.name });
+    // Si un seul métier, toujours demander confirmation (même avec motivations)
+    // Si plusieurs métiers sans motivations, demander confirmation
+    setDeleteCategoryModal({ 
+      isOpen: true, 
+      categoryId: id, 
+      categoryName: category.name,
+      hasCriteria: hasCriteria,
+      criteriaCount: categoryCriteria.length
+    });
   };
 
   const confirmDeleteCategory = () => {
     try {
       handleDeleteCategory(deleteCategoryModal.categoryId);
-      showSuccess('Intérêt professionnel supprimé avec succès pour tous les métiers');
-      setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' });
+      const message = professions.length === 1
+        ? 'Intérêt professionnel supprimé avec succès'
+        : 'Intérêt professionnel supprimé avec succès pour tous les métiers';
+      showSuccess(message);
+      setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '', hasCriteria: false, criteriaCount: 0 });
     } catch (err) {
       showError(err.message);
     }
@@ -207,7 +216,10 @@ function App() {
   const onAddCriterion = (categoryId, criterionData) => {
     try {
       handleAddCriterion(categoryId, criterionData);
-      showSuccess('Motivation clé ajoutée avec succès pour tous les métiers');
+      const message = professions.length === 1
+        ? 'Motivation clé ajoutée avec succès'
+        : 'Motivation clé ajoutée avec succès pour tous les métiers';
+      showSuccess(message);
     } catch (err) {
       showError(err.message);
     }
@@ -220,7 +232,10 @@ function App() {
         // For name updates, we need confirmation
         // For now, we'll show a notification
         handleUpdateCriterion(categoryId, criterionId, updates, silent);
-        showSuccess('Nom de la motivation clé modifié pour tous les métiers. Le poids reste spécifique à ce métier.');
+        const message = professions.length === 1
+          ? 'Nom de la motivation clé modifié avec succès'
+          : 'Nom de la motivation clé modifié pour tous les métiers. Le poids reste spécifique à ce métier.';
+        showSuccess(message);
       } else {
         // Weight updates are silent and specific to current profession
         handleUpdateCriterion(categoryId, criterionId, updates, true);
@@ -241,7 +256,10 @@ function App() {
   const confirmDeleteCriterion = () => {
     try {
       handleDeleteCriterion(deleteCriterionModal.categoryId, deleteCriterionModal.criterionId);
-      showSuccess('Motivation clé supprimée avec succès pour tous les métiers');
+      const message = professions.length === 1
+        ? 'Motivation clé supprimée avec succès'
+        : 'Motivation clé supprimée avec succès pour tous les métiers';
+      showSuccess(message);
       setDeleteCriterionModal({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' });
     } catch (err) {
       showError(err.message);
@@ -535,6 +553,7 @@ function App() {
                   onUpdateCriterion={onUpdateCriterion}
                   onDeleteCriterion={onDeleteCriterion}
                   existingCategories={allCategories}
+                  professionCount={professions.length}
                 />
               </Card>
             </div>
@@ -591,14 +610,20 @@ function App() {
 
       <ConfirmModal
         isOpen={deleteCategoryModal.isOpen}
-        onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '' })}
+        onClose={() => setDeleteCategoryModal({ isOpen: false, categoryId: null, categoryName: '', hasCriteria: false, criteriaCount: 0 })}
         onConfirm={confirmDeleteCategory}
         title="Supprimer l'intérêt professionnel"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera cet intérêt professionnel pour TOUS les métiers.`}
+        message={
+          deleteCategoryModal.hasCriteria && professions.length === 1
+            ? `Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera également les ${deleteCategoryModal.criteriaCount} motivation${deleteCategoryModal.criteriaCount > 1 ? 's' : ''} clé${deleteCategoryModal.criteriaCount > 1 ? 's' : ''} associée${deleteCategoryModal.criteriaCount > 1 ? 's' : ''}.`
+            : professions.length > 1
+            ? `Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ? Cette action supprimera cet intérêt professionnel pour TOUS les métiers.`
+            : `Êtes-vous sûr de vouloir supprimer "${deleteCategoryModal.categoryName}" ?`
+        }
         confirmText="Supprimer"
         cancelText="Annuler"
-        requireCheckbox={true}
-        checkboxLabel={`Je comprends que cela supprimera "${deleteCategoryModal.categoryName}" dans tous les métiers`}
+        requireCheckbox={professions.length > 1}
+        checkboxLabel={professions.length > 1 ? `Je comprends que cela supprimera "${deleteCategoryModal.categoryName}" dans tous les métiers` : ''}
         type="danger"
       />
 
@@ -607,11 +632,15 @@ function App() {
         onClose={() => setDeleteCriterionModal({ isOpen: false, categoryId: null, criterionId: null, criterionName: '' })}
         onConfirm={confirmDeleteCriterion}
         title="Supprimer la motivation clé"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteCriterionModal.criterionName}" ? Cette action supprimera cette motivation clé pour TOUS les métiers.`}
+        message={
+          professions.length > 1
+            ? `Êtes-vous sûr de vouloir supprimer "${deleteCriterionModal.criterionName}" ? Cette action supprimera cette motivation clé pour TOUS les métiers.`
+            : `Êtes-vous sûr de vouloir supprimer "${deleteCriterionModal.criterionName}" ?`
+        }
         confirmText="Supprimer"
         cancelText="Annuler"
-        requireCheckbox={true}
-        checkboxLabel={`Je comprends que cela supprimera "${deleteCriterionModal.criterionName}" dans tous les métiers`}
+        requireCheckbox={professions.length > 1}
+        checkboxLabel={professions.length > 1 ? `Je comprends que cela supprimera "${deleteCriterionModal.criterionName}" dans tous les métiers` : ''}
         type="danger"
       />
 
@@ -620,9 +649,15 @@ function App() {
         onClose={() => setUpdateCategoryModal({ isOpen: false, categoryId: null })}
         onConfirm={confirmUpdateCategory}
         title="Modifier l'intérêt professionnel"
-        message="Cette modification s'appliquera à TOUS les métiers. Êtes-vous sûr de vouloir continuer ?"
+        message={
+          professions.length > 1
+            ? "Cette modification s'appliquera à TOUS les métiers. Êtes-vous sûr de vouloir continuer ?"
+            : "Êtes-vous sûr de vouloir modifier cet intérêt professionnel ?"
+        }
         confirmText="Modifier"
         cancelText="Annuler"
+        requireCheckbox={professions.length > 1}
+        checkboxLabel={professions.length > 1 ? "Je comprends que cette modification s'appliquera à tous les métiers" : ''}
         type="warning"
       />
 
@@ -636,8 +671,8 @@ function App() {
           : `Êtes-vous sûr de vouloir supprimer "${deleteProfessionModal.professionName}" ?`}
         confirmText="Supprimer"
         cancelText="Annuler"
-        requireCheckbox={deleteProfessionModal.isLast}
-        checkboxLabel={deleteProfessionModal.isLast ? "Je comprends que je supprime le dernier métier" : ""}
+        requireCheckbox={false}
+        checkboxLabel=""
         type="danger"
       />
 

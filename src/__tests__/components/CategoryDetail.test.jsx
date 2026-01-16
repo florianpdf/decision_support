@@ -55,6 +55,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -71,6 +72,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -88,6 +90,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -114,6 +117,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -123,7 +127,7 @@ describe('CategoryDetail', () => {
     expect(mockOnDeleteCategory).toHaveBeenCalledWith(1);
   });
 
-  it('should disable delete button when category has criteria', () => {
+  it('should disable delete button when category has criteria and multiple professions', () => {
     render(
       <CategoryDetail
         category={mockCategory}
@@ -133,11 +137,30 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={2}
       />
     );
 
     const deleteButton = screen.getByLabelText(/impossible de supprimer/i);
     expect(deleteButton).toBeDisabled();
+  });
+
+  it('should enable delete button when category has criteria but only one profession', () => {
+    render(
+      <CategoryDetail
+        category={mockCategory}
+        onUpdateCategory={mockOnUpdateCategory}
+        onDeleteCategory={mockOnDeleteCategory}
+        onAddCriterion={mockOnAddCriterion}
+        onUpdateCriterion={mockOnUpdateCriterion}
+        onDeleteCriterion={mockOnDeleteCriterion}
+        existingCategories={[]}
+        professionCount={1}
+      />
+    );
+
+    const deleteButton = screen.getByLabelText(/supprimer l'intérêt professionnel/i);
+    expect(deleteButton).not.toBeDisabled();
   });
 
   it('should show add criterion form when button is clicked', async () => {
@@ -150,6 +173,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -169,6 +193,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -196,6 +221,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -219,6 +245,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
@@ -235,6 +262,7 @@ describe('CategoryDetail', () => {
         onUpdateCriterion={mockOnUpdateCriterion}
         onDeleteCriterion={mockOnDeleteCriterion}
         existingCategories={[]}
+        professionCount={1}
       />
     );
 
