@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useProfessions } from './hooks/useProfessions';
 import { useCategories } from './hooks/useCategories';
 import { useNotifications } from './hooks/useNotifications';
@@ -11,6 +11,7 @@ import CategoryDetail from './components/CategoryDetail';
 import SquareChart from './components/charts/SquareChart';
 import ConfirmModal from './components/modals/ConfirmModal';
 import DataMigrationModal from './components/modals/DataMigrationModal';
+import Onboarding, { isOnboardingCompleted, resetOnboarding } from './components/Onboarding';
 import Card from './components/ui/Card';
 import Message from './components/ui/Message';
 import EmptyState from './components/ui/EmptyState';
@@ -64,6 +65,18 @@ function App() {
   
   // Selected category state
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  
+  // Onboarding state
+  const [runOnboarding, setRunOnboarding] = useState(false);
+
+  // Function to restart onboarding
+  const handleRestartOnboarding = useCallback(() => {
+    resetOnboarding();
+    // Small delay to ensure DOM is ready and component remounts properly
+    setTimeout(() => {
+      setRunOnboarding(true);
+    }, 100);
+  }, []);
   
   // Check data version on mount
   useEffect(() => {
@@ -242,6 +255,7 @@ function App() {
 
   const handleCreateProfession = (professionData) => {
     try {
+      const wasFirstProfession = professions.length === 0;
       const newProfession = handleAddProfession(professionData);
       
       // If template is requested, create template data
@@ -271,6 +285,14 @@ function App() {
       }
       
       setRenameProfessionModal({ isOpen: false, professionId: null });
+      
+      // Start onboarding if this was the first profession and onboarding hasn't been completed
+      if (wasFirstProfession && !isOnboardingCompleted()) {
+        // Wait a bit for the UI to render before starting onboarding
+        setTimeout(() => {
+          setRunOnboarding(true);
+        }, 500);
+      }
     } catch (err) {
       if (err.message.includes('CANT_DELETE_LAST_PROFESSION')) {
         showError('Impossible de supprimer le dernier métier');
@@ -376,6 +398,47 @@ function App() {
         </header>
         {message && <Message type="success">{message}</Message>}
         {error && <Message type="error">{error}</Message>}
+        
+        <div style={{
+          maxWidth: '1000px',
+          margin: '30px auto 40px auto',
+          padding: '28px 36px',
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          border: '2px solid #3498db',
+          boxShadow: '0 4px 12px rgba(52, 152, 219, 0.15)',
+          lineHeight: '1.5',
+        }}>
+          <p style={{
+            margin: '0 0 12px 0',
+            fontSize: '1.2rem',
+            color: '#2c3e50',
+            fontWeight: '600',
+          }}>
+            🎯 <strong>Bienvenue dans votre outil d'aide à la décision professionnelle !</strong>
+          </p>
+          <p style={{
+            margin: '0 0 12px 0',
+            fontSize: '1.05rem',
+            color: '#34495e',
+          }}>
+            Cet outil vous permet de <strong>visualiser et comparer</strong> vos motivations pour différents métiers.
+            <br />
+            Vous pourrez identifier vos <strong>intérêts professionnels</strong> et leurs <strong>motivations clés</strong>, 
+            puis les visualiser dans un graphique interactif.
+          </p>
+          <p style={{
+            margin: '0',
+            fontSize: '1.05rem',
+            color: '#34495e',
+          }}>
+            ✨ <strong>Première étape</strong> : créez votre premier métier ci-dessous.
+            <br />
+            Vous pourrez ensuite ajouter des intérêts professionnels et leurs motivations, 
+            et voir apparaître une visualisation claire de vos priorités ! 🚀
+          </p>
+        </div>
+        
         <Card title="➕ Créer votre premier métier">
           <ProfessionForm onSubmit={handleCreateProfession} isFirstProfession={true} />
         </Card>
@@ -387,9 +450,49 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header" role="banner">
+      <header className="app-header" role="banner" style={{ position: 'relative' }}>
         <h1>📊 Aide à la Décision</h1>
         <p>Identifiez vos intérêts professionnels et vos motivations clés pour visualiser vos priorités</p>
+        <button
+          onClick={handleRestartOnboarding}
+          className="restart-onboarding-button"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: '#ffffff',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '10px',
+            padding: '10px 16px',
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            color: '#5568d3',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s ease',
+            fontWeight: '600',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            zIndex: 10,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f8f9fa';
+            e.currentTarget.style.borderColor = '#ffffff';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+          aria-label="Relancer l'onboarding"
+          title="Relancer l'onboarding"
+        >
+          <span style={{ fontSize: '1.2rem' }}>🎓</span>
+          <span style={{ fontSize: '0.95rem', fontWeight: '600' }}>Aide</span>
+        </button>
       </header>
 
       {message && <Message type="success">{message}</Message>}
@@ -581,6 +684,12 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Onboarding */}
+      <Onboarding 
+        run={runOnboarding} 
+        onComplete={() => setRunOnboarding(false)}
+      />
     </div>
   );
 }

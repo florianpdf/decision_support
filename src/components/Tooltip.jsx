@@ -25,7 +25,7 @@ function Tooltip({ children, content, position = 'top' }) {
             // Calculate position relative to viewport
             if (position === 'top') {
                 const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
-                const top = rect.top - tooltipRect.height - 8;
+                const top = rect.top - tooltipRect.height - 4;
                 
                 tooltip.style.left = `${Math.max(10, Math.min(left, viewportWidth - tooltipRect.width - 10))}px`;
                 tooltip.style.top = `${Math.max(10, top)}px`;

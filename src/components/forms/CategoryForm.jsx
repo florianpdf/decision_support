@@ -20,13 +20,6 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
         [usedColors]
     );
     
-    // If no color is available, use first from default palette
-    // Otherwise, use first available color
-    const defaultAvailableColor = useMemo(() => 
-        availableColors.length > 0 ? availableColors[0] : DEFAULT_COLOR,
-        [availableColors]
-    );
-    
     // Initialize with available color if current color is no longer available
     const [name, setName] = useState('');
     const [color, setColor] = useState(() => {
@@ -74,9 +67,20 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
         <>
         <form onSubmit={handleSubmit}>
             <div className="form-group">
-                <label htmlFor="category-name">
-                    📝 Nom de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
-                </label>
+                <Tooltip 
+                    content="Voir les suggestions d'intérêts professionnels"
+                    position="top"
+                >
+                    <label htmlFor="category-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'help' }}>
+                        <span>📝 Nom de l'intérêt professionnel <span style={{ color: '#e74c3c' }} aria-label="requis">*</span></span>
+                        <IconButton
+                            icon="💡"
+                            onClick={() => setShowSuggestionsModal(true)}
+                            ariaLabel="Voir les suggestions"
+                            style={{ flexShrink: 0 }}
+                        />
+                    </label>
+                </Tooltip>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input
                         type="text"
@@ -88,14 +92,6 @@ function CategoryForm({ onSubmit, existingCategories = [] }) {
                         aria-required="true"
                         aria-describedby="category-name-help"
                         style={{ flex: 1 }}
-                    />
-                    <IconButton
-                        icon="💡"
-                        onClick={() => setShowSuggestionsModal(true)}
-                        tooltip="Voir les suggestions d'intérêts professionnels"
-                        tooltipPosition="top"
-                        ariaLabel="Voir les suggestions"
-                        style={{ flexShrink: 0 }}
                     />
                 </div>
                 <small id="category-name-help" style={{ color: '#7f8c8d', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>

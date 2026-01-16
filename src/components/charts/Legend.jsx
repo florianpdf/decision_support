@@ -54,7 +54,7 @@ function Legend({ categories, colorMode = 'category', professionId, compact = fa
         }
 
         return (
-            <div className={`legend-integrated ${compact ? 'legend-compact' : ''}`}>
+            <div className={`legend-integrated legend-container ${compact ? 'legend-compact' : ''}`}>
                 {typesWithData.map((type) => {
                     const stats = typeStats[type];
                     return (
@@ -78,7 +78,7 @@ function Legend({ categories, colorMode = 'category', professionId, compact = fa
 
     // Display by category (default)
     return (
-        <div className={`legend-integrated ${compact ? 'legend-compact' : ''}`}>
+        <div className={`legend-integrated legend-container ${compact ? 'legend-compact' : ''}`}>
             {categoriesWithCriteria.map((category) => {
                 const totalWeight = getCategoryTotalWeight(category, professionId);
                 const criteriaCount = category.criteria ? category.criteria.length : 0;

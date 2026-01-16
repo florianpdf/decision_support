@@ -5,7 +5,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import IconButton from './ui/IconButton';
 import CriterionWeightAndType from './ui/CriterionWeightAndType';
 import CritereEditForm from './forms/CritereEditForm';
-import { CRITERION_TYPE_LABELS } from '../utils/constants';
+import { CRITERION_TYPE_LABELS, CRITERION_TYPE_COLORS, CRITERION_TYPES } from '../utils/constants';
 
 /**
  * List of criteria for a category
@@ -138,7 +138,7 @@ const CritereList = forwardRef(({ category, onUpdate, onDelete, onToggleStateCha
                   >
                     <div
                       className="critere-color"
-                      style={{ backgroundColor: categoryColor }}
+                      style={{ backgroundColor: CRITERION_TYPE_COLORS[displayType] || CRITERION_TYPE_COLORS[CRITERION_TYPES.NEUTRAL] }}
                     />
                     <div className="critere-info">
                       <div className="critere-nom">

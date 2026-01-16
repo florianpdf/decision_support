@@ -404,7 +404,7 @@ function SquareChart({ categories, professionId }) {
 
     return (
         <>
-            <div className="chart-wrapper" role="region" aria-label="Graphique de visualisation des intérêts professionnels">
+            <div className="chart-wrapper square-chart-container" role="region" aria-label="Graphique de visualisation des intérêts professionnels">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600' }}>
@@ -416,6 +416,7 @@ function SquareChart({ categories, professionId }) {
                             tooltip="Voir en plein écran"
                             tooltipPosition="top"
                             ariaLabel="Voir en plein écran"
+                            className="fullscreen-chart-button"
                         />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -438,6 +439,8 @@ function SquareChart({ categories, professionId }) {
                             checked={colorMode === 'type'}
                             onChange={handleColorModeChange}
                             color="primary"
+                            className="color-mode-switch"
+                            data-testid="color-mode-switch"
                         />
                         <span 
                             style={{ 

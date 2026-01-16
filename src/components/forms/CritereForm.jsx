@@ -44,9 +44,20 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
             </div>
             
             <div className="form-group">
-                <label htmlFor={`criterion-name-${categoryId}`}>
-                    📝 Nom de la motivation clé <span style={{ color: '#e74c3c' }} aria-label="requis">*</span>
-                </label>
+                <Tooltip 
+                    content="Voir les suggestions de motivations clés"
+                    position="top"
+                >
+                    <label htmlFor={`criterion-name-${categoryId}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'help' }}>
+                        <span>📝 Nom de la motivation clé <span style={{ color: '#e74c3c' }} aria-label="requis">*</span></span>
+                        <IconButton
+                            icon="💡"
+                            onClick={() => setShowSuggestionsModal(true)}
+                            ariaLabel="Voir les suggestions"
+                            style={{ flexShrink: 0 }}
+                        />
+                    </label>
+                </Tooltip>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input
                         type="text"
@@ -58,14 +69,6 @@ function CritereForm({ categoryId, onSubmit, onCancel }) {
                         aria-required="true"
                         aria-describedby={`criterion-name-help-${categoryId}`}
                         style={{ flex: 1 }}
-                    />
-                    <IconButton
-                        icon="💡"
-                        onClick={() => setShowSuggestionsModal(true)}
-                        tooltip="Voir les suggestions de motivations clés"
-                        tooltipPosition="top"
-                        ariaLabel="Voir les suggestions"
-                        style={{ flexShrink: 0 }}
                     />
                 </div>
                 <small id={`criterion-name-help-${categoryId}`} style={{ display: 'none' }}>
