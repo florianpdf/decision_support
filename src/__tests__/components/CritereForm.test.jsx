@@ -18,7 +18,7 @@ describe('CritereForm', () => {
   it('should render form with all fields', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    expect(screen.getByLabelText(/nom de la motivation clé/i)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /nom de la motivation clé/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/importance de la motivation clé/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ajouter la motivation clé/i })).toBeInTheDocument();
   });
@@ -26,7 +26,7 @@ describe('CritereForm', () => {
   it('should call onSubmit with correct data', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
     
     await user.type(nameInput, 'Test Motivation');
@@ -42,7 +42,7 @@ describe('CritereForm', () => {
   it('should trim criterion name', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
     
     await user.type(nameInput, '  Test Motivation  ');
@@ -58,7 +58,7 @@ describe('CritereForm', () => {
   it('should show alert when name is empty', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
     
     // Clear the input and try to submit
@@ -76,7 +76,7 @@ describe('CritereForm', () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
     const slider = screen.getByLabelText(/importance de la motivation clé/i);
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
     
     await user.type(nameInput, 'Test');
@@ -95,7 +95,7 @@ describe('CritereForm', () => {
   it('should reset form after submission', async () => {
     render(<CritereForm categoryId={categoryId} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
     
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
     
     await user.type(nameInput, 'Test Motivation');
@@ -165,7 +165,7 @@ describe('CritereForm', () => {
     // Modal should close and input should be filled
     await waitFor(() => {
       expect(screen.queryByRole('heading', { name: /💡 suggestions de motivations clés/i })).not.toBeInTheDocument();
-      expect(screen.getByLabelText(/nom de la motivation clé/i)).toHaveValue('Autonomie');
+      expect(screen.getByRole('textbox', { name: /nom de la motivation clé/i })).toHaveValue('Autonomie');
     });
   });
 });

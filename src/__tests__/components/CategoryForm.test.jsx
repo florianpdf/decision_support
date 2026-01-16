@@ -17,7 +17,7 @@ describe('CategoryForm', () => {
   it('should render form with all fields', () => {
     render(<CategoryForm onSubmit={mockOnSubmit} />);
     
-    expect(screen.getByLabelText(/nom de l'intérêt professionnel/i)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i })).toBeInTheDocument();
     expect(screen.getByText(/couleur de l'intérêt professionnel/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /créer l'intérêt professionnel/i })).toBeInTheDocument();
   });
@@ -58,7 +58,7 @@ describe('CategoryForm', () => {
   it('should call onSubmit with correct data', async () => {
     render(<CategoryForm onSubmit={mockOnSubmit} />);
     
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
     
     await user.type(nameInput, 'Test Category');
@@ -73,7 +73,7 @@ describe('CategoryForm', () => {
   it('should trim category name', async () => {
     render(<CategoryForm onSubmit={mockOnSubmit} />);
     
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
     
     await user.type(nameInput, '  Test Category  ');
@@ -88,7 +88,7 @@ describe('CategoryForm', () => {
   it('should show alert when name is empty', async () => {
     render(<CategoryForm onSubmit={mockOnSubmit} />);
     
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
     
     // Clear the input and try to submit
@@ -116,7 +116,7 @@ describe('CategoryForm', () => {
   it('should reset form after submission', async () => {
     render(<CategoryForm onSubmit={mockOnSubmit} />);
     
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
     
     await user.type(nameInput, 'Test Category');
@@ -182,7 +182,7 @@ describe('CategoryForm', () => {
     // Modal should close and input should be filled
     await waitFor(() => {
       expect(screen.queryByRole('heading', { name: /💡 suggestions d'intérêts professionnels/i })).not.toBeInTheDocument();
-      expect(screen.getByLabelText(/nom de l'intérêt professionnel/i)).toHaveValue('Management');
+      expect(screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i })).toHaveValue('Management');
     });
   });
 });

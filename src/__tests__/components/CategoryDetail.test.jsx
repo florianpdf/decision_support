@@ -156,7 +156,7 @@ describe('CategoryDetail', () => {
     const addButton = screen.getByRole('button', { name: /ajouter une motivation clé/i });
     await user.click(addButton);
 
-    expect(screen.getByLabelText(/nom de la motivation clé/i)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /nom de la motivation clé/i })).toBeInTheDocument();
   });
 
   it('should toggle all criteria when toggle button is clicked', async () => {
@@ -241,7 +241,7 @@ describe('CategoryDetail', () => {
     const addButton = screen.getByRole('button', { name: /ajouter une motivation clé/i });
     await user.click(addButton);
 
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
 
     await user.type(nameInput, 'New Criterion');

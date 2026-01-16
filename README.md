@@ -132,18 +132,41 @@ npm test
 # Lancer les tests avec couverture
 npm test:coverage
 
+# Lancer les tests en mode CI (optimisé pour CI/CD)
+npm test:ci
+
 # Interface graphique pour les tests
 npm test:ui
 
 # Mode watch (développement)
 npm test:watch
+
+# Vérifier package-lock.json est synchronisé
+npm run verify-lock
+
+# Vérifier tout avant push (lock + tests)
+npm run check
 ```
 
 **Important** : Toute nouvelle fonctionnalité ou modification doit inclure les tests correspondants. Voir [TESTING.md](./TESTING.md) pour les guidelines de tests.
 
+### Vérifications avant push
+
+Avant de pousser du code, il est recommandé d'exécuter :
+
+```bash
+npm run check
+```
+
+Ce script vérifie :
+- ✅ Que `package-lock.json` est synchronisé avec `package.json`
+- ✅ Que tous les tests passent
+
+Ces vérifications sont également exécutées automatiquement dans le workflow GitHub Actions.
+
 ### Couverture actuelle
 
-- **110 tests** passent avec succès
+- **285 tests** passent avec succès
 - Couverture globale : ~65%
 - Services : ~97% de couverture
 - Composants UI : ~100% de couverture

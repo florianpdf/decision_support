@@ -98,7 +98,13 @@ describe('App', () => {
   it('should render main header', () => {
     render(<App />);
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByText(/aide à la décision/i)).toBeInTheDocument();
+    // The header contains "Aide à la Décision" in h1
+    const headers = screen.getAllByText(/aide à la décision/i);
+    expect(headers.length).toBeGreaterThan(0);
+    // Check that at least one is in the banner
+    const banner = screen.getByRole('banner');
+    const headerInBanner = Array.from(headers).find(h => banner.contains(h));
+    expect(headerInBanner).toBeInTheDocument();
   });
 
   it('should display empty state when no professions', () => {
@@ -201,10 +207,10 @@ describe('App', () => {
     await user.click(createButtons[0]);
     
     await waitFor(() => {
-      expect(screen.getByLabelText(/nom de l'intérêt professionnel/i)).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i })).toBeInTheDocument();
     });
     
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
     
     await user.type(nameInput, 'New Category');
@@ -304,12 +310,12 @@ describe('App', () => {
     await user.click(addCriterionButtons[0]);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/nom de la motivation clé/i)).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /nom de la motivation clé/i })).toBeInTheDocument();
     });
-
-    const nameInput = screen.getByLabelText(/nom de la motivation clé/i);
+    
+    const nameInput = screen.getByRole('textbox', { name: /nom de la motivation clé/i });
     const submitButton = screen.getByRole('button', { name: /ajouter la motivation clé/i });
-
+    
     await user.type(nameInput, 'New Criterion');
     await user.click(submitButton);
 
@@ -501,7 +507,7 @@ describe('App', () => {
     const createButton = screen.getByRole('button', { name: /créer un nouvel intérêt professionnel/i });
     await user.click(createButton);
 
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
 
     await user.type(nameInput, 'New Category');
@@ -529,7 +535,7 @@ describe('App', () => {
     const createButton = screen.getByRole('button', { name: /créer un nouvel intérêt professionnel/i });
     await user.click(createButton);
 
-    const nameInput = screen.getByLabelText(/nom de l'intérêt professionnel/i);
+    const nameInput = screen.getByRole('textbox', { name: /nom de l'intérêt professionnel/i });
     const submitButton = screen.getByRole('button', { name: /créer l'intérêt professionnel/i });
 
     await user.type(nameInput, 'New Category');

@@ -13,7 +13,9 @@
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --reporter=dot",
     "test:watch": "vitest --watch",
-    "verify-lock": "bash scripts/verify-lock.sh"
+    "verify-lock": "bash scripts/verify-lock.sh",
+    "pre-push": "bash scripts/pre-push.sh",
+    "check": "npm run verify-lock && npm run test:ci"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
