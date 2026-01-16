@@ -29,6 +29,21 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Verify package-lock.json is in sync
+        run: |
+          # Use the verification script if available, otherwise use npm ci --dry-run
+          if [ -f scripts/verify-lock.sh ]; then
+            bash scripts/verify-lock.sh
+          else
+            # Fallback: try npm ci in dry-run mode
+            if ! npm ci --dry-run > /dev/null 2>&1; then
+              echo "::error::package-lock.json is out of sync with package.json"
+              echo "Please run 'npm install' locally and commit the updated package-lock.json"
+              exit 1
+            fi
+            echo "✓ package-lock.json is in sync with package.json"
+          fi
+
       - name: Install dependencies
         run: npm ci
 
@@ -57,6 +72,21 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+
+      - name: Verify package-lock.json is in sync
+        run: |
+          # Use the verification script if available, otherwise use npm ci --dry-run
+          if [ -f scripts/verify-lock.sh ]; then
+            bash scripts/verify-lock.sh
+          else
+            # Fallback: try npm ci in dry-run mode
+            if ! npm ci --dry-run > /dev/null 2>&1; then
+              echo "::error::package-lock.json is out of sync with package.json"
+              echo "Please run 'npm install' locally and commit the updated package-lock.json"
+              exit 1
+            fi
+            echo "✓ package-lock.json is in sync with package.json"
+          fi
 
       - name: Install dependencies
         run: npm ci
